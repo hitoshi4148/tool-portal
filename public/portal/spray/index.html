@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQMFESTFGQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NQMFESTFGQ');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ピンポイント天気で芝しごと</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <p class="portal-back"><a href="/portal/">← ツールポータルに戻る</a></p>
+        <div class="banner-pr">
+            <a href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+                <img src="banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="320" height="120">
+            </a>
+        </div>
+        <div class="banner-row">
+            <a href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+                <img src="bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="300" height="100">
+            </a>
+            <a href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+                <img src="youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="300" height="100">
+            </a>
+        </div>
+        <header>
+            <h1>ピンポイント天気で芝しごと</h1>
+            <p class="subtitle">気象予測から農薬・肥料散布タイミングをアドバイス</p>
+        </header>
+
+        <div class="location-input">
+            <h2>場所を設定</h2>
+            <div class="input-group">
+                <label for="lat">緯度 (Latitude):</label>
+                <input type="number" id="lat" step="0.0001" value="35.5" placeholder="例: 35.5">
+
+                <label for="lon">経度 (Longitude):</label>
+                <input type="number" id="lon" step="0.0001" value="139.6" placeholder="例: 139.6">
+            </div>
+            <p class="help-text">※緯度・経度はGoogleマップなどで確認できます。<br>地図上で右クリック → 「座標をコピー」で取得できます。</p>
+            <div class="button-group">
+                <button id="current-location-btn" onclick="getCurrentLocation()" class="secondary">現在地を取得</button>
+                <button id="save-btn" onclick="saveAndReload()" class="secondary">設定を保存</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>気象データを取得中...</p>
+        </div>
+
+        <div id="error" class="error hidden"></div>
+
+        <div id="results" class="results hidden">
+            <h2>散布可能タイミング</h2>
+            <div id="forecast-table" class="forecast-table-container"></div>
+        </div>
+
+        <div class="legend">
+            <h3>凡例</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="status-badge green">GREEN</span>
+                    <span>散布推奨 - 条件良好</span>
+                </div>
+                <div class="legend-item">
+                    <span class="status-badge yellow">YELLOW</span>
+                    <span>注意 - 条件に注意が必要</span>
+                </div>
+                <div class="legend-item">
+                    <span class="status-badge red">RED</span>
+                    <span>非推奨 - 散布を避ける</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>気象データ提供: <a href="https://www.met.no/" target="_blank">MET Norway</a></p>
+            <p>推奨散布時間帯: 早朝 4-7時、夕方 16-19時</p>
+            <p><a href="https://www.turf-tools.jp/" target="_blank">グロウアンドプログレス</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = '/portal/spray/api/forecast';
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + date.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function saveLocation(lat, lon) {
+            setCookie('forecast_lat', lat, 30);
+            setCookie('forecast_lon', lon, 30);
+        }
+
+        function loadLocation() {
+            const lat = getCookie('forecast_lat');
+            const lon = getCookie('forecast_lon');
+            if (lat && lon) {
+                document.getElementById('lat').value = lat;
+                document.getElementById('lon').value = lon;
+                return { lat: parseFloat(lat), lon: parseFloat(lon) };
+            }
+            return null;
+        }
+
+        async function fetchForecast() {
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
+
+            if (!lat || !lon) {
+                showError('緯度と経度を入力してください');
+                return;
+            }
+
+            saveLocation(lat, lon);
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('error').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE}?lat=${lat}&lon=${lon}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.results);
+                } else {
+                    showError(data.error || '予報の取得に失敗しました');
+                }
+            } catch (error) {
+                showError('エラーが発生しました: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('forecast-table');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<p class="no-results">該当するタイミングが見つかりませんでした。</p>';
+                document.getElementById('results').classList.remove('hidden');
+                return;
+            }
+
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const timeSlots = [];
+            for (let h = 4; h <= 7; h++) {
+                timeSlots.push({ hour: h, label: `${h}:00` });
+            }
+            for (let h = 8; h <= 15; h++) {
+                timeSlots.push({ hour: h, label: `${h}:00` });
+            }
+            for (let h = 16; h <= 19; h++) {
+                timeSlots.push({ hour: h, label: `${h}:00` });
+            }
+            for (let h = 20; h <= 23; h++) {
+                timeSlots.push({ hour: h, label: `${h}:00` });
+            }
+
+            const dates = [];
+            const dayLabels = ['今日', '明日', '明後日'];
+            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+            for (let i = 0; i < 3; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                const weekday = weekdays[date.getDay()];
+                dates.push({
+                    date: date,
+                    label: dayLabels[i],
+                    dateStr: date.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' }) + `(${weekday})`
+                });
+            }
+
+            const resultMap = new Map();
+            results.forEach(result => {
+                const dt = new Date(result.time);
+                const year = dt.getFullYear();
+                const month = dt.getMonth();
+                const date = dt.getDate();
+                const hour = dt.getHours();
+                const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                const mapKey = `${dateKey}_${hour}`;
+                resultMap.set(mapKey, result);
+            });
+
+            let tableHTML = '<table class="forecast-table"><thead><tr><th class="time-header">時間</th>';
+            dates.forEach(d => {
+                tableHTML += `<th class="date-header">${d.label}<br><span class="date-sub">${d.dateStr}</span></th>`;
+            });
+            tableHTML += '</tr></thead><tbody>';
+
+            timeSlots.forEach(timeSlot => {
+                tableHTML += '<tr>';
+                tableHTML += `<td class="time-cell">${timeSlot.label}</td>`;
+
+                dates.forEach(dateInfo => {
+                    const slotDate = new Date(dateInfo.date);
+                    slotDate.setHours(timeSlot.hour, 0, 0, 0);
+                    const isPast = slotDate < now;
+
+                    const year = slotDate.getFullYear();
+                    const month = slotDate.getMonth();
+                    const date = slotDate.getDate();
+                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+                    const mapKey = `${dateKey}_${timeSlot.hour}`;
+                    const result = resultMap.get(mapKey);
+                    const isSprayTime = result ? (result.is_spray_time !== false) : ((timeSlot.hour >= 4 && timeSlot.hour < 7) || (timeSlot.hour >= 16 && timeSlot.hour < 19));
+
+                    if (isPast) {
+                        tableHTML += `<td class="forecast-cell past-cell">-</td>`;
+                    } else if (result) {
+                        const statusClass = result.status.toLowerCase();
+                        const hasWarnings = result.warnings && result.warnings.length > 0;
+                        const hasRecommendations = result.recommendations && result.recommendations.length > 0;
+                        const hasReasons = result.reason && result.reason.length > 0;
+
+                        const weatherIcons = {
+                            "晴れ": "☀️",
+                            "くもり": "☁️",
+                            "弱い雨": "🌦️",
+                            "雨強め": "🌧️"
+                        };
+                        const weatherIcon = weatherIcons[result.condition] || "☁️";
+
+                        let cellContent = `
+                            <div class="cell-content status-${statusClass} ${!isSprayTime ? 'not-spray-time-content' : ''}">
+                                ${!isSprayTime ? '<div class="spray-time-label">散布時間帯外</div>' : ''}
+                                <div class="cell-weather-icon">
+                                    <span class="weather-icon">${weatherIcon}</span>
+                                    <span class="weather-condition">${result.condition}</span>
+                                </div>
+                                <div class="cell-weather">
+                                    <div class="weather-item">風: ${result.wind.toFixed(1)}m/s</div>
+                                    <div class="weather-item">気温: ${result.temp.toFixed(1)}°C</div>
+                                    <div class="weather-item">降水: ${result.precip.toFixed(2)}mm</div>
+                                </div>
+                        `;
+
+                        if (hasReasons) {
+                            cellContent += `<div class="cell-reason">${result.reason.join(', ')}</div>`;
+                        }
+
+                        if (hasWarnings) {
+                            result.warnings.forEach(warning => {
+                                cellContent += `<div class="cell-warning">⚠️ ${warning}</div>`;
+                            });
+                        }
+
+                        if (hasRecommendations) {
+                            result.recommendations.forEach(recommendation => {
+                                cellContent += `<div class="cell-recommendation">💡 ${recommendation}</div>`;
+                            });
+                        }
+
+                        if (!hasReasons && !hasWarnings && !hasRecommendations && isSprayTime) {
+                            cellContent += `<div class="cell-ok">✓ 条件良好</div>`;
+                        }
+
+                        cellContent += `</div>`;
+                        tableHTML += `<td class="forecast-cell" data-status="${statusClass}">${cellContent}</td>`;
+                    } else if (isSprayTime) {
+                        tableHTML += `<td class="forecast-cell empty-cell">-</td>`;
+                    } else {
+                        tableHTML += `<td class="forecast-cell not-spray-time">散布時間帯外</td>`;
+                    }
+                });
+
+                tableHTML += '</tr>';
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.remove('hidden');
+        }
+
+        function getCurrentLocation() {
+            if (!navigator.geolocation) {
+                showError('このブラウザは位置情報をサポートしていません');
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    document.getElementById('lat').value = position.coords.latitude.toFixed(4);
+                    document.getElementById('lon').value = position.coords.longitude.toFixed(4);
+                    document.getElementById('loading').classList.add('hidden');
+                },
+                (error) => {
+                    document.getElementById('loading').classList.add('hidden');
+                    showError('位置情報の取得に失敗しました: ' + error.message);
+                }
+            );
+        }
+
+        function saveAndReload() {
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
+
+            if (!lat || !lon) {
+                showError('緯度と経度を入力してください');
+                return;
+            }
+
+            saveLocation(lat, lon);
+            location.reload();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLocation = loadLocation();
+            if (savedLocation) {
+                fetchForecast();
+            }
+        });
+    </script>
+</body>
+</html>
