@@ -107,20 +107,11 @@ function prepareWeatherAtTarget(
   return { daily, hourly };
 }
 
-export async function fetchDiseaseRiskForecast(
-  latitude: number,
-  longitude: number
-): Promise<MultiDayDiseaseRiskForecast> {
-  const today = jstTodayString();
-  const endDate = addDaysToDateString(today, -1);
-  const startDate = addDaysToDateString(today, -7);
-
-  const [nasaDaily, nasaHourly, forecastHourly] = await Promise.all([
-    fetchNasaPowerDaily(latitude, longitude, startDate, endDate),
-    fetchNasaPowerHourly(latitude, longitude, startDate, endDate),
-    fetchMetNorwayFromToday(latitude, longitude, 72),
-  ]);
-
+export function computeDiseaseRiskForecast(
+  nasaDaily: DailyWeatherRecord[],
+  nasaHourly: HourlyWeatherRecord[],
+  forecastHourly: HourlyWeatherRecord[]
+): MultiDayDiseaseRiskForecast {
   const tomorrowTarget = buildTargetDateTimeJst(1, 6);
   const dayAfterTomorrowTarget = buildTargetDateTimeJst(2, 6);
 
@@ -141,4 +132,21 @@ export async function fetchDiseaseRiskForecast(
     tomorrow: calculateAllDiseaseRisks(tomorrowWeather),
     dayAfterTomorrow: calculateAllDiseaseRisks(dayAfterTomorrowWeather),
   };
+}
+
+export async function fetchDiseaseRiskForecast(
+  latitude: number,
+  longitude: number
+): Promise<MultiDayDiseaseRiskForecast> {
+  const today = jstTodayString();
+  const endDate = addDaysToDateString(today, -1);
+  const startDate = addDaysToDateString(today, -7);
+
+  const [nasaDaily, nasaHourly, forecastHourly] = await Promise.all([
+    fetchNasaPowerDaily(latitude, longitude, startDate, endDate),
+    fetchNasaPowerHourly(latitude, longitude, startDate, endDate),
+    fetchMetNorwayFromToday(latitude, longitude, 72),
+  ]);
+
+  return computeDiseaseRiskForecast(nasaDaily, nasaHourly, forecastHourly);
 }

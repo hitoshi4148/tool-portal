@@ -58,6 +58,13 @@ export async function fetchLastYearMonthlyAverageTemperatures(
     endDate
   );
 
+  return buildMonthlyAverageTemperatures(daily, year);
+}
+
+export function buildMonthlyAverageTemperatures(
+  daily: DailyWeatherRecord[],
+  year: number
+): { year: number; monthlyTemperatures: Array<number | null> } {
   return {
     year,
     monthlyTemperatures: aggregateMonthlyAverageTemperatures(daily, year),

@@ -83,6 +83,14 @@ function normalizeHourly(rawData: {
     });
 }
 
+export function filterDailyByDateRange(
+  daily: DailyWeatherRecord[],
+  startDate: string,
+  endDate: string
+): DailyWeatherRecord[] {
+  return daily.filter((row) => row.date >= startDate && row.date <= endDate);
+}
+
 async function fetchRaw(url: string) {
   const response = await fetch(url);
   if (!response.ok) {

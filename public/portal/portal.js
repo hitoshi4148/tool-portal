@@ -1,8 +1,6 @@
 const COOKIE_NAME = "portalSettings";
-const WEATHER_API = "/portal/api/weather";
+const DASHBOARD_API = "/portal/api/dashboard";
 const GEOCODE_API = "/portal/api/geocode";
-const DISEASE_RISK_API = "/portal/api/disease-risk";
-const GROWTH_POTENTIAL_API = "/portal/api/growth-potential";
 
 const WEATHER_ICONS = {
   晴れ: "☀️",
@@ -294,40 +292,73 @@ async function ensureLocationName(settings) {
   return settings;
 }
 
-async function loadWeatherForecast() {
+async function loadPortalData() {
   let settings = loadSettings();
 
   if (!hasLocation(settings)) {
     renderWeatherPlaceholder("緯度・経度未設定");
     renderDiseaseRiskPlaceholder("緯度・経度未設定");
+    renderGpPlaceholder("緯度・経度未設定");
     return;
   }
 
   settings = await ensureLocationName(settings);
 
-  const loading = document.getElementById("weather-loading");
-  const error = document.getElementById("weather-error");
-  loading.classList.remove("hidden");
-  error.classList.add("hidden");
+  const weatherLoading = document.getElementById("weather-loading");
+  const insightsLoading = document.getElementById("disease-risk-loading");
+  const weatherError = document.getElementById("weather-error");
+  const diseaseError = document.getElementById("disease-risk-error");
+  const gpError = document.getElementById("gp-chart-error");
+
+  weatherLoading.classList.remove("hidden");
+  insightsLoading.classList.remove("hidden");
+  weatherError.classList.add("hidden");
+  diseaseError.classList.add("hidden");
+  gpError.classList.add("hidden");
   renderWeatherPlaceholder("");
+  renderDiseaseRiskPlaceholder("");
+  renderGpPlaceholder("");
 
   try {
-    const response = await fetch(
-      `${WEATHER_API}?lat=${encodeURIComponent(settings.lat)}&lon=${encodeURIComponent(settings.lon)}`
-    );
+    const params = new URLSearchParams({
+      lat: settings.lat,
+      lon: settings.lon,
+      warmGrass: settings.warmGrass,
+      coolGrass: settings.coolGrass,
+    });
+    const response = await fetch(`${DASHBOARD_API}?${params.toString()}`);
     const data = await response.json();
 
     if (!data.success) {
-      throw new Error(data.error || "天気予報の取得に失敗しました");
+      throw new Error(data.error || "データの取得に失敗しました");
     }
 
-    renderWeatherWidget(data.hourly, data.days, settings.locationName || "");
+    renderWeatherWidget(
+      data.weather.hourly,
+      data.weather.days,
+      settings.locationName || ""
+    );
+    renderDiseaseRiskPanels(
+      {
+        tomorrow: data.diseaseRisk.tomorrow,
+        dayAfterTomorrow: data.diseaseRisk.dayAfterTomorrow,
+      },
+      settings.locationName || ""
+    );
+    renderGpChart(data.growthPotential);
   } catch (err) {
-    error.textContent = err.message;
-    error.classList.remove("hidden");
+    weatherError.textContent = err.message;
+    diseaseError.textContent = err.message;
+    gpError.textContent = err.message;
+    weatherError.classList.remove("hidden");
+    diseaseError.classList.remove("hidden");
+    gpError.classList.remove("hidden");
     renderWeatherPlaceholder("天気予報を表示できませんでした。");
+    renderDiseaseRiskPlaceholder("病害リスクを表示できませんでした。");
+    renderGpPlaceholder("GPを表示できませんでした。");
   } finally {
-    loading.classList.add("hidden");
+    weatherLoading.classList.add("hidden");
+    insightsLoading.classList.add("hidden");
   }
 }
 
@@ -694,101 +725,6 @@ function renderGpChart(data) {
     </details>
     <p class="gp-chart-footer">${footerText}</p>
   </div>`;
-}
-
-async function loadGrowthPotential() {
-  const settings = loadSettings();
-
-  if (!hasLocation(settings)) {
-    renderGpPlaceholder("緯度・経度未設定");
-    return;
-  }
-
-  const error = document.getElementById("gp-chart-error");
-  error.classList.add("hidden");
-  renderGpPlaceholder("");
-
-  try {
-    const params = new URLSearchParams({
-      lat: settings.lat,
-      lon: settings.lon,
-      warmGrass: settings.warmGrass,
-      coolGrass: settings.coolGrass,
-    });
-    const response = await fetch(`${GROWTH_POTENTIAL_API}?${params.toString()}`);
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || "GPの取得に失敗しました");
-    }
-
-    renderGpChart(data);
-  } catch (err) {
-    error.textContent = err.message;
-    error.classList.remove("hidden");
-    renderGpPlaceholder("GPを表示できませんでした。");
-  }
-}
-
-async function loadInsights() {
-  const settings = loadSettings();
-  const loading = document.getElementById("disease-risk-loading");
-  const diseaseError = document.getElementById("disease-risk-error");
-  const gpError = document.getElementById("gp-chart-error");
-
-  if (!hasLocation(settings)) {
-    renderDiseaseRiskPlaceholder("緯度・経度未設定");
-    renderGpPlaceholder("緯度・経度未設定");
-    return;
-  }
-
-  loading.classList.remove("hidden");
-  diseaseError.classList.add("hidden");
-  gpError.classList.add("hidden");
-  renderDiseaseRiskPlaceholder("");
-  renderGpPlaceholder("");
-
-  await Promise.all([loadDiseaseRisk(), loadGrowthPotential()]);
-  loading.classList.add("hidden");
-}
-
-async function loadDiseaseRisk() {
-  const settings = loadSettings();
-
-  if (!hasLocation(settings)) {
-    renderDiseaseRiskPlaceholder("緯度・経度未設定");
-    return;
-  }
-
-  const error = document.getElementById("disease-risk-error");
-
-  try {
-    const response = await fetch(
-      `${DISEASE_RISK_API}?lat=${encodeURIComponent(settings.lat)}&lon=${encodeURIComponent(settings.lon)}`
-    );
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.error || "病害リスクの取得に失敗しました");
-    }
-
-    renderDiseaseRiskPanels(
-      {
-        tomorrow: data.tomorrow,
-        dayAfterTomorrow: data.dayAfterTomorrow,
-      },
-      settings.locationName || ""
-    );
-  } catch (err) {
-    error.textContent = err.message;
-    error.classList.remove("hidden");
-    renderDiseaseRiskPlaceholder("病害リスクを表示できませんでした。");
-  }
-}
-
-async function loadPortalData() {
-  await loadWeatherForecast();
-  await loadInsights();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

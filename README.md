@@ -6,8 +6,13 @@
 
 | パス | 内容 |
 |------|------|
-| `/portal/` | ポータル TOP |
+| `/portal/` | 芝しごとポータル TOP |
 | `/portal/spray/` | ピンポイント天気で芝しごと |
+| `/portal/api/dashboard` | ポータル TOP 用まとめ取得 API |
+| `/portal/api/weather` | 天気予報 API（単体） |
+| `/portal/api/disease-risk` | 病害リスク API（単体） |
+| `/portal/api/growth-potential` | Growth Potential API（単体） |
+| `/portal/api/geocode` | 逆ジオコーディング API |
 | `/portal/spray/api/forecast` | 散布予報 API |
 
 ## ローカル開発
@@ -17,7 +22,7 @@ npm install
 npm run dev
 ```
 
-ブラウザで以下を開く:
+ブラウザで以下を開いてください:
 
 - http://localhost:8788/portal/
 - http://localhost:8788/portal/spray/
@@ -59,13 +64,69 @@ git push -u origin main
 
 `*.pages.dev` で動作確認後、`turf-tools.jp` を Cloudflare に追加し DNS を移行します。
 
+## 外部 API の利用方針
+
+ポータル TOP は **1 回の `/portal/api/dashboard` 呼び出し** で天気・病害リスク・GP をまとめて取得します。  
+Met Norway / NASA POWER への重複アクセスを避けるため、サーバー側でデータを共有しています。
+
+### MET Norway（Locationforecast 2.0）
+
+| 利用箇所 | 呼び出し回数（1リクエストあたり） | 用途 |
+|----------|-----------------------------------|------|
+| ポータル TOP（`/portal/api/dashboard`） | **1 回** | 48h 天気ウィジェット + 72h 病害リスク予測 |
+| 散布予報（`/portal/spray/`） | 1 回 | 散布タイミング判定（別ページ・独立） |
+
+**以前の問題**: 天気 API と病害リスク API を別々に呼んでいたため、ポータル TOP 表示のたびに MET Norway へ **2 回** アクセスしていました。  
+**現状**: `fetchMet` は dashboard 内で **1 回だけ** 実行し、返却データから天気（48h）と病害用 forecast（72h）を切り出します。
+
+単体 API（`/portal/api/weather`, `/portal/api/disease-risk`）は開発・デバッグ用に残していますが、フロントエンドからは dashboard のみを利用します。
+
+### NASA POWER
+
+| 利用箇所 | 呼び出し回数（dashboard 1 回あたり） | 期間 | 用途 |
+|----------|----------------------------------------|------|------|
+| Daily（統合） | **1 回** | 昨年 1/1 〜 昨日 | GP 用の昨年月平均気温 + 病害用の過去日次 |
+| Hourly | **1 回** | 過去 7 日 〜 昨日 | 病害リスク計算用の時間別気温・湿度 |
+
+**以前の問題**: 病害用 daily（7 日分）と GP 用 daily（昨年 1 年分）を **別リクエスト** で取得していました。  
+**現状**: daily は **1 リクエスト**（昨年 1/1 〜 昨日）に統合し、サーバー側で期間を切り分けます。hourly は病害計算に必要なため従来どおり 1 回です。
+
+GP と病害リスクで期間・粒度が異なるため NASA hourly の統合は行っていません（hourly API は日次とは別エンドポイント）。
+
+### その他
+
+| サービス | 利用箇所 | 備考 |
+|----------|----------|------|
+| Nominatim (OSM) | `/portal/api/geocode` | 設定保存時・現在地取得時のみ。気象 API とは独立 |
+
+### データフロー（ポータル TOP）
+
+```
+ブラウザ
+  └─ GET /portal/api/dashboard?lat=&lon=&warmGrass=&coolGrass=
+       ├─ MET Norway ............... 1 回 → 天気 + 病害 forecast
+       ├─ NASA POWER daily ......... 1 回 → GP + 病害 daily
+       └─ NASA POWER hourly ........ 1 回 → 病害 hourly
+```
+
 ## プロジェクト構成
 
 ```
 tool-portal/
-├── public/portal/           # 静的ファイル
-├── functions/               # Pages Functions（API）
-├── src/spray/               # 散布判定ロジック（TypeScript）
+├── public/portal/              # ポータル TOP・散布予報 UI
+├── functions/portal/api/       # Pages Functions（API）
+│   ├── dashboard.ts            # まとめ取得（ポータル TOP 用）
+│   ├── weather.ts
+│   ├── disease-risk.ts
+│   ├── growth-potential.ts
+│   └── geocode.ts
+├── src/
+│   ├── portal/fetch-dashboard.ts
+│   ├── weather/                  # 天気ウィジェット
+│   ├── disease/                  # 病害リスク
+│   ├── growth-potential/         # GP
+│   ├── geocode/
+│   └── spray/                    # 散布判定ロジック
 └── wrangler.toml
 ```
 
