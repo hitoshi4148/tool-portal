@@ -6,6 +6,7 @@ export interface MetTimeseriesEntry {
         wind_speed?: number;
         air_temperature?: number;
         cloud_area_fraction?: number;
+        relative_humidity?: number;
       };
     };
     next_1_hours?: {

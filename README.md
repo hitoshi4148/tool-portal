@@ -44,7 +44,16 @@ git push -u origin main
    - **Build output directory**: `public`
 4. **Deploy**
 
-デプロイ後、`https://tool-portal.pages.dev/portal/` で確認できます。
+デプロイ後、Cloudflare ダッシュボードに表示される **あなた専用の URL** で確認します。
+
+> **注意**: `tool-portal.pages.dev` は別のサイト（名前の衝突）です。  
+> ダッシュボードの **Visit site** に表示された URL を使ってください。  
+> 例: `https://turf-tools-portal.pages.dev/` や `https://tool-portal-xxxxx.pages.dev/`
+
+確認 URL:
+
+- `（あなたのURL）/portal/`
+- `（あなたのURL）/portal/spray/`
 
 ### 3. 本番ドメイン接続（後日）
 

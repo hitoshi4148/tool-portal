@@ -3,25 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>芝管理ツールポータル | グロウアンドプログレス</title>
+    <title>芝しごとポータル</title>
     <link rel="stylesheet" href="/portal/portal.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>芝管理ツールポータル</h1>
-            <p class="subtitle">グロウアンドプログレス — 現場で使える芝管理ツール集</p>
-        </header>
+        <div class="portal-header">
+            <div class="portal-header-text">
+                <h1 id="portal-title">芝しごとポータル</h1>
+            </div>
+            <button type="button" id="settings-open-btn" class="settings-btn" aria-label="設定">
+                ⚙ 設定
+            </button>
+        </div>
 
-        <section class="apps">
-            <h2>アプリ一覧</h2>
-            <ul class="app-list">
-                <li class="app-card">
-                    <h3>ピンポイント天気で芝しごと</h3>
-                    <p>気象予測から農薬・肥料散布タイミングをアドバイス</p>
-                    <a class="app-link" href="/portal/spray/">アプリを開く</a>
-                </li>
-            </ul>
+        <section class="weather-section">
+            <a href="/portal/spray/" class="weather-more-link" title="ピンポイント天気で芝しごと">もっと詳しく</a>
+            <div id="weather-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>気象データを取得中...</p>
+            </div>
+            <div id="weather-error" class="error hidden"></div>
+            <div id="weather-area">
+                <p class="weather-placeholder">読み込み中...</p>
+            </div>
+        </section>
+
+        <section class="disease-risk-section" id="disease-risk-section">
+            <div id="disease-risk-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>病害リスク・GPを取得中...</p>
+            </div>
+            <div id="disease-risk-error" class="error hidden"></div>
+            <div id="gp-chart-error" class="error hidden"></div>
+            <div id="portal-insights-row" class="portal-insights-row">
+                <div id="disease-risk-area" class="portal-insights-col"></div>
+                <div id="gp-chart-area" class="portal-insights-col"></div>
+            </div>
         </section>
 
         <section class="external">
@@ -33,8 +51,94 @@
         </section>
 
         <footer>
+            <p>気象データ提供: <a href="https://www.met.no/" target="_blank">MET Norway</a></p>
             <p><a href="https://www.turf-tools.jp/" target="_blank">グロウアンドプログレス</a></p>
         </footer>
     </div>
+
+    <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div id="settings-backdrop" class="modal-backdrop"></div>
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h2 id="settings-title">設定</h2>
+                <button type="button" id="settings-close-btn" class="modal-close" aria-label="閉じる">×</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="settings-facility-name">施設名</label>
+                    <input type="text" id="settings-facility-name" placeholder="例: ○○ゴルフクラブ">
+                </div>
+
+                <div class="setting-group">
+                    <h3>場所</h3>
+                    <label for="settings-lat">緯度 (Latitude)</label>
+                    <input type="number" id="settings-lat" step="0.0001" placeholder="例: 35.5">
+
+                    <label for="settings-lon">経度 (Longitude)</label>
+                    <input type="number" id="settings-lon" step="0.0001" placeholder="例: 139.6">
+
+                    <p class="help-text">※Googleマップ等で右クリック → 「座標をコピー」で取得できます。</p>
+                    <button type="button" id="get-current-location-btn" class="btn-secondary">現在地を取得</button>
+                    <div id="location-status" class="location-status"></div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>場所タイプ</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="locationType" value="未指定" checked> 未指定</label>
+                        <label><input type="radio" name="locationType" value="ゴルフコース"> ゴルフコース</label>
+                        <label><input type="radio" name="locationType" value="グラウンド"> グラウンド</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>グリーンタイプ</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="greenType" value="未指定" checked> 未指定</label>
+                        <label><input type="radio" name="greenType" value="暖地型"> 暖地型</label>
+                        <label><input type="radio" name="greenType" value="寒地型"> 寒地型</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <h3>オーバーシード</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="overseed" value="無" checked> 無</label>
+                        <label><input type="radio" name="overseed" value="有"> 有</label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <label for="warmGrass">暖地型芝種</label>
+                    <select id="warmGrass">
+                        <option value="未指定(C4)">未指定(C4)</option>
+                        <option value="ノシバ">ノシバ</option>
+                        <option value="高麗芝">高麗芝</option>
+                        <option value="バミューダ">バミューダ</option>
+                        <option value="パスパラム">パスパラム</option>
+                    </select>
+                </div>
+
+                <div class="setting-group">
+                    <label for="coolGrass">寒地型芝種</label>
+                    <select id="coolGrass">
+                        <option value="未指定(C3)">未指定(C3)</option>
+                        <option value="ベントグラス">ベントグラス</option>
+                        <option value="クリーピングベントグラス">クリーピングベントグラス</option>
+                        <option value="ペレニアルライグラス">ペレニアルライグラス</option>
+                        <option value="ケンタッキーブルーグラス">ケンタッキーブルーグラス</option>
+                        <option value="トールフェスク">トールフェスク</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="save-settings-btn" class="btn-primary">設定を保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/portal/portal.js"></script>
 </body>
 </html>
