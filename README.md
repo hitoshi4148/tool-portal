@@ -15,6 +15,27 @@
 | `/portal/api/geocode` | 逆ジオコーディング API |
 | `/portal/spray/api/forecast` | 散布予報 API |
 
+## ポータル TOP 機能
+
+`/portal/` では以下を表示します。
+
+| 機能 | 説明 |
+|------|------|
+| 設定 | 施設名・緯度経度・芝種など（Cookie 保存） |
+| 天気予報 | 48h 横スクロールウィジェット。「もっと詳しく」から `/portal/spray/` へ |
+| 病害リスク | 翌日・明後日 朝6:00 時点の5病害リスク（%） |
+| Growth Potential | 昨年の月平均気温から算出した GP 曲線（暖地型・寒地型・未指定） |
+
+### 病害リスク「判定ロジック」
+
+各病害名の右に **判定ロジック** ボタンがあります。クリックするとモーダルで計算方法を表示します。
+
+- 対象: ダラースポット / ブラウンパッチ / ピシウム / 炭疽病 / ラージパッチ
+- 内容: [ai_forecast](https://github.com/hitoshi4148/ai_forecast) の「芝しごと・病害リスク予報」と同じ判定ロジック説明（条件・計算式）
+- 閉じ方: ×ボタン、背景クリック、Esc キー
+
+判定ロジックの文言は `public/portal/portal.js` の `DISEASE_LOGIC` に定義しています（`ai_forecast/components/DiseaseRiskExplanation.jsx` と同等）。
+
 ## ローカル開発
 
 ```powershell
@@ -133,6 +154,7 @@ tool-portal/
 ## 元アプリとの関係
 
 - 元の [spray-forecast](https://github.com/hitoshi4148/spray-forecast) は変更していません
+- 病害リスク計算・判定ロジック説明は [ai_forecast](https://github.com/hitoshi4148/ai_forecast) から移植済み
 - ロジックは Python 版から TypeScript に移植済み
 
 ## ライセンス

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
-    <link rel="stylesheet" href="/portal/portal.css">
+    <link rel="stylesheet" href="/portal/portal.css?v=20250625">
 </head>
 <body>
     <div class="container">
@@ -136,6 +136,17 @@
             <div class="modal-footer">
                 <button type="button" id="save-settings-btn" class="btn-primary">設定を保存</button>
             </div>
+        </div>
+    </div>
+
+    <div id="disease-logic-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="disease-logic-title">
+        <div id="disease-logic-backdrop" class="modal-backdrop"></div>
+        <div class="modal-panel disease-logic-panel">
+            <div class="modal-header">
+                <h2 id="disease-logic-title">判定ロジック</h2>
+                <button type="button" id="disease-logic-close-btn" class="modal-close" aria-label="閉じる">×</button>
+            </div>
+            <div class="modal-body" id="disease-logic-body"></div>
         </div>
     </div>
 
