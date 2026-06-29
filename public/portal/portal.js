@@ -93,9 +93,18 @@ function formatPortalTitle(facilityName, locationName = "") {
 }
 
 function updatePortalTitle(settings = loadSettings()) {
-  const title = formatPortalTitle(settings.facilityName ?? "", settings.locationName ?? "");
-  document.getElementById("portal-title").textContent = title;
-  document.title = title;
+  const prefixEl = document.getElementById("portal-title-prefix");
+  const name = (settings.facilityName ?? "").trim();
+  const place = (settings.locationName ?? "").trim();
+  const placePart = place ? `(${place})` : "";
+  const prefix = name ? `${name}${placePart}` : placePart;
+
+  if (prefixEl) {
+    prefixEl.textContent = prefix;
+    prefixEl.classList.toggle("hidden", !prefix);
+  }
+
+  document.title = prefix ? `${prefix}芝しごとポータル` : "芝しごとポータル";
 }
 
 const WARM_GRASS_LEGACY = {
