@@ -1180,6 +1180,49 @@ section h2 {
     opacity: 1;
 }
 
+.portal-banners {
+    margin-bottom: 24px;
+}
+
+.banner-pr {
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.banner-pr a {
+    display: inline-block;
+    line-height: 0;
+}
+
+.banner-pr img {
+    width: 320px;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 320 / 120;
+    vertical-align: bottom;
+}
+
+.banner-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.banner-row a {
+    display: inline-block;
+    line-height: 0;
+}
+
+.banner-row img {
+    width: 300px;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 300 / 100;
+    vertical-align: bottom;
+}
+
 footer {
     margin-top: 24px;
     padding-top: 16px;
