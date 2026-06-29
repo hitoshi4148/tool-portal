@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
-    <link rel="stylesheet" href="/portal/portal.css?v=20250625">
+    <link rel="stylesheet" href="/portal/portal.css?v=20250629series2">
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -16,6 +18,31 @@
                 ⚙ 設定
             </button>
         </div>
+
+        <section class="ai-advisor-section" id="ai-advisor-section" aria-label="AI質問">
+            <div class="ai-advisor-chat" id="ai-advisor-chat">
+                <div class="ai-advisor-messages collapsed" id="ai-advisor-messages" aria-live="polite"></div>
+                <div class="ai-advisor-input-row">
+                    <div class="ai-advisor-input-wrap">
+                        <textarea id="ai-advisor-input" rows="1" placeholder="芝管理に関する質問を入力..." aria-label="AIへの質問"></textarea>
+                    </div>
+                    <button type="button" id="ai-advisor-send" class="btn-primary ai-advisor-send-btn">AIに質問</button>
+                </div>
+                <p class="ai-advisor-notice-line">
+                    <span class="ai-advisor-notice-anchor">
+                        <button type="button" class="ai-advisor-notice-btn" aria-label="AI利用時の注意4カ条を表示">ℹ 注意</button>
+                        <span class="ai-advisor-notice-popover" role="tooltip">
+                            <strong>AI利用時の注意4カ条</strong>
+                            ① 個人の名前や連絡先は入力しない<br>
+                            ② お客様の情報は入力しない<br>
+                            ③ 施設の管理計画や記録は入力しない<br>
+                            ④ 入力した内容は外部に送信されます
+                        </span>
+                    </span>
+                    <span class="ai-advisor-notice-brief">個人情報・顧客情報・管理記録は入力しないでください</span>
+                </p>
+            </div>
+        </section>
 
         <section class="weather-section">
             <a href="/portal/spray/" class="weather-more-link" title="ピンポイント天気で芝しごと">もっと詳しく</a>
@@ -32,27 +59,79 @@
         <section class="disease-risk-section" id="disease-risk-section">
             <div id="disease-risk-loading" class="loading hidden">
                 <div class="spinner"></div>
-                <p>病害リスク・GPを取得中...</p>
+                <p>病害リスク・積算温度・GPを取得中...</p>
             </div>
             <div id="disease-risk-error" class="error hidden"></div>
-            <div id="gp-chart-error" class="error hidden"></div>
+            <div id="gdd-error" class="error hidden"></div>
             <div id="portal-insights-row" class="portal-insights-row">
                 <div id="disease-risk-area" class="portal-insights-col"></div>
-                <div id="gp-chart-area" class="portal-insights-col"></div>
+                <div id="gdd-area" class="portal-insights-col"></div>
+            </div>
+            <div id="portal-gp-row" class="portal-gp-row">
+                <div id="gp-chart-error" class="error hidden"></div>
+                <div id="gp-chart-area"></div>
             </div>
         </section>
 
-        <section class="external">
-            <h2>外部リンク</h2>
-            <ul class="link-list">
-                <li><a href="https://spray-forecast.onrender.com/" target="_blank" rel="noopener noreferrer">散布予報（Render 版・従来）</a></li>
-                <li><a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer">グロウアンドプログレス ホームページ</a></li>
-            </ul>
+        <section class="series-section" id="series-section">
+            <h2 class="series-section-title">芝しごとシリーズ</h2>
+            <div class="series-grid">
+                <a class="series-card" href="https://turfpool.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">データ</span>
+                    <span class="series-card-name">ターフプール</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://shigoto-raku-rac-rotate.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">管理</span>
+                    <span class="series-card-name">楽RAC農薬ローテ</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://fertilization-design.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">管理</span>
+                    <span class="series-card-name">施肥設計ナビ</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://ai-forecast-cm4k.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">予報</span>
+                    <span class="series-card-name">病害リスク予報</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://turf-advisor.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">AI</span>
+                    <span class="series-card-name">AI質問箱</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://turf-disease-app.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">AI</span>
+                    <span class="series-card-name">病害画像診断AI</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://spray-forecast.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">予報</span>
+                    <span class="series-card-name">ピンポイント天気で芝しごと</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://turfmap.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">マップ</span>
+                    <span class="series-card-name">積算温度追跡マップ</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://climate-map-x30t.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">マップ</span>
+                    <span class="series-card-name">温量指数気候区分マップ</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+                <a class="series-card" href="https://claim-survival.onrender.com/" target="_blank" rel="noopener noreferrer">
+                    <span class="series-card-category">その他</span>
+                    <span class="series-card-name">クレームサバイバル</span>
+                    <span class="series-card-external" aria-hidden="true">↗</span>
+                </a>
+            </div>
         </section>
 
         <footer>
-            <p>気象データ提供: <a href="https://www.met.no/" target="_blank">MET Norway</a></p>
-            <p><a href="https://www.turf-tools.jp/" target="_blank">グロウアンドプログレス</a></p>
+            <p>気象データ提供: <a href="https://www.met.no/" target="_blank" rel="noopener noreferrer">MET Norway</a> / <a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA POWER</a></p>
+            <p><a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer">グロウアンドプログレス</a></p>
         </footer>
     </div>
 
@@ -130,6 +209,14 @@
                         <option value="ケンタッキーブルーグラス">ケンタッキーブルーグラス</option>
                         <option value="トールフェスク">トールフェスク</option>
                     </select>
+                </div>
+
+                <div class="setting-group">
+                    <h3>AI 回答モード</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="responseMode" value="未指定"> 未指定</label>
+                        <label><input type="radio" name="responseMode" value="慎重に回答" checked> 慎重に回答</label>
+                    </div>
                 </div>
             </div>
 

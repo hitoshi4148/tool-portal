@@ -1,6 +1,34 @@
 const COOKIE_NAME = "portalSettings";
 const DASHBOARD_API = "/portal/api/dashboard";
+const GDD_API = "/portal/api/gdd";
+const CHAT_API = "/portal/api/chat";
 const GEOCODE_API = "/portal/api/geocode";
+const GDD_MAX = 400;
+const AGROMAP_COOKIE_DAYS = 365;
+
+const GERMINATION_GDD_CONFIG = {
+  "未指定(C4)": { baseTemp: 15, targetGdd: 100 },
+  ノシバ: { baseTemp: 15, targetGdd: 100 },
+  高麗芝: { baseTemp: 15, targetGdd: 100 },
+  バミューダ: { baseTemp: 15, targetGdd: 60 },
+  パスパラム: { baseTemp: 15, targetGdd: 60 },
+  "未指定(C3)": { baseTemp: 10, targetGdd: 100 },
+  ベントグラス: { baseTemp: 10, targetGdd: 50 },
+  クリーピングベントグラス: { baseTemp: 10, targetGdd: 50 },
+  ペレニアルライグラス: { baseTemp: 10, targetGdd: 45 },
+  ケンタッキーブルーグラス: { baseTemp: 10, targetGdd: 100 },
+  トールフェスク: { baseTemp: 10, targetGdd: 70 },
+};
+
+function getGerminationGddConfig(grassName) {
+  if (GERMINATION_GDD_CONFIG[grassName]) {
+    return GERMINATION_GDD_CONFIG[grassName];
+  }
+  return {
+    baseTemp: grassName.includes("C3") ? 10 : 15,
+    targetGdd: 100,
+  };
+}
 
 const WEATHER_ICONS = {
   晴れ: "☀️",
@@ -14,6 +42,18 @@ function setCookie(name, value, days = 30) {
   date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
   document.cookie =
     name + "=" + encodeURIComponent(value) + ";expires=" + date.toUTCString() + ";path=/";
+}
+
+function setAgromapCookie(name, value) {
+  const date = new Date();
+  date.setTime(date.getTime() + AGROMAP_COOKIE_DAYS * 24 * 60 * 60 * 1000);
+  document.cookie =
+    name +
+    "=" +
+    encodeURIComponent(value) +
+    ";expires=" +
+    date.toUTCString() +
+    ";path=/;SameSite=Lax";
 }
 
 function getCookie(name) {
@@ -40,16 +80,20 @@ function getDefaultSettings() {
     warmGrass: "未指定(C4)",
     coolGrass: "未指定(C3)",
     locationName: "",
+    responseMode: "慎重に回答",
   };
 }
 
-function formatPortalTitle(facilityName) {
+function formatPortalTitle(facilityName, locationName = "") {
   const name = facilityName.trim();
-  return name ? `${name}　芝しごとポータル` : "芝しごとポータル";
+  const place = locationName.trim();
+  const placePart = place ? `(${place})` : "";
+  const prefix = name ? `${name}${placePart}` : placePart;
+  return prefix ? `${prefix}芝しごとポータル` : "芝しごとポータル";
 }
 
-function updatePortalTitle(facilityName) {
-  const title = formatPortalTitle(facilityName);
+function updatePortalTitle(settings = loadSettings()) {
+  const title = formatPortalTitle(settings.facilityName ?? "", settings.locationName ?? "");
   document.getElementById("portal-title").textContent = title;
   document.title = title;
 }
@@ -91,7 +135,11 @@ function loadSettings() {
   }
 
   try {
-    return normalizeGrassSettings({ ...defaults, ...JSON.parse(raw) });
+    const parsed = normalizeGrassSettings({ ...defaults, ...JSON.parse(raw) });
+    if (!parsed.responseMode) {
+      parsed.responseMode = "慎重に回答";
+    }
+    return parsed;
   } catch {
     return defaults;
   }
@@ -122,6 +170,9 @@ function applySettingsToForm(settings) {
 
   document.getElementById("warmGrass").value = settings.warmGrass;
   document.getElementById("coolGrass").value = settings.coolGrass;
+  document
+    .querySelector(`input[name="responseMode"][value="${settings.responseMode ?? "慎重に回答"}"]`)
+    ?.click();
 }
 
 function readSettingsFromForm() {
@@ -135,6 +186,7 @@ function readSettingsFromForm() {
     overseed: document.querySelector('input[name="overseed"]:checked').value,
     warmGrass: document.getElementById("warmGrass").value,
     coolGrass: document.getElementById("coolGrass").value,
+    responseMode: document.querySelector('input[name="responseMode"]:checked').value,
     locationName: previous.locationName,
   };
 }
@@ -196,7 +248,7 @@ function formatDiseaseTargetLabel(daysFromToday, hour = 6) {
   return `${m}/${d} ${hour}:00`;
 }
 
-function renderWeatherWidget(hourly, days, locationName) {
+function renderWeatherWidget(hourly, days) {
   const area = document.getElementById("weather-area");
 
   if (hourly.length === 0) {
@@ -223,16 +275,11 @@ function renderWeatherWidget(hourly, days, locationName) {
     }
 
     const icon = WEATHER_ICONS[day.condition] || "☁️";
-    const placeHtml =
-      day.index === 0 && locationName
-        ? `<div class="weather-day-place">${locationName}</div>`
-        : "";
 
     html += `<div class="weather-day-block">
       <div class="weather-day-summary">
         <div class="weather-day-main">
           <div class="weather-day-date">${formatDayTitle(dateKey, day.index)}</div>
-          ${placeHtml}
           <div class="weather-day-icon">${icon}</div>
         </div>
         <div class="weather-day-stats">
@@ -296,36 +343,45 @@ async function loadPortalData() {
   let settings = loadSettings();
 
   if (!hasLocation(settings)) {
+    updatePortalTitle(settings);
     renderWeatherPlaceholder("緯度・経度未設定");
     renderDiseaseRiskPlaceholder("緯度・経度未設定");
+    renderGddPlaceholder("緯度・経度未設定");
     renderGpPlaceholder("緯度・経度未設定");
     return;
   }
 
   settings = await ensureLocationName(settings);
+  updatePortalTitle(settings);
 
   const weatherLoading = document.getElementById("weather-loading");
   const insightsLoading = document.getElementById("disease-risk-loading");
   const weatherError = document.getElementById("weather-error");
   const diseaseError = document.getElementById("disease-risk-error");
+  const gddError = document.getElementById("gdd-error");
   const gpError = document.getElementById("gp-chart-error");
 
   weatherLoading.classList.remove("hidden");
   insightsLoading.classList.remove("hidden");
   weatherError.classList.add("hidden");
   diseaseError.classList.add("hidden");
+  gddError.classList.add("hidden");
   gpError.classList.add("hidden");
   renderWeatherPlaceholder("");
   renderDiseaseRiskPlaceholder("");
+  renderGddPlaceholder("");
   renderGpPlaceholder("");
 
+  const params = new URLSearchParams({
+    lat: settings.lat,
+    lon: settings.lon,
+    warmGrass: settings.warmGrass,
+    coolGrass: settings.coolGrass,
+  });
+
+  const gddPromise = refreshAllGdd(settings);
+
   try {
-    const params = new URLSearchParams({
-      lat: settings.lat,
-      lon: settings.lon,
-      warmGrass: settings.warmGrass,
-      coolGrass: settings.coolGrass,
-    });
     const response = await fetch(`${DASHBOARD_API}?${params.toString()}`);
     const data = await response.json();
 
@@ -333,18 +389,11 @@ async function loadPortalData() {
       throw new Error(data.error || "データの取得に失敗しました");
     }
 
-    renderWeatherWidget(
-      data.weather.hourly,
-      data.weather.days,
-      settings.locationName || ""
-    );
-    renderDiseaseRiskPanels(
-      {
-        tomorrow: data.diseaseRisk.tomorrow,
-        dayAfterTomorrow: data.diseaseRisk.dayAfterTomorrow,
-      },
-      settings.locationName || ""
-    );
+    renderWeatherWidget(data.weather.hourly, data.weather.days);
+    renderDiseaseRiskPanels({
+      tomorrow: data.diseaseRisk.tomorrow,
+      dayAfterTomorrow: data.diseaseRisk.dayAfterTomorrow,
+    });
     renderGpChart(data.growthPotential);
   } catch (err) {
     weatherError.textContent = err.message;
@@ -357,6 +406,7 @@ async function loadPortalData() {
     renderDiseaseRiskPlaceholder("病害リスクを表示できませんでした。");
     renderGpPlaceholder("GPを表示できませんでした。");
   } finally {
+    await gddPromise;
     weatherLoading.classList.add("hidden");
     insightsLoading.classList.add("hidden");
   }
@@ -408,7 +458,7 @@ async function handleSaveSettings() {
   }
 
   saveSettings(settings);
-  updatePortalTitle(settings.facilityName);
+  updatePortalTitle(settings);
   showLocationStatus(
     settings.locationName
       ? `設定を保存しました（${settings.locationName}）`
@@ -653,14 +703,13 @@ function buildCombinedDiseaseRiskPanelHtml(
   return html;
 }
 
-function renderDiseaseRiskPanels(forecast, locationName) {
+function renderDiseaseRiskPanels(forecast) {
   const area = document.getElementById("disease-risk-area");
-  const titleSuffix = locationName ? ` — ${locationName}` : "";
   const tomorrowLabel = formatDiseaseTargetLabel(1);
   const dayAfterTomorrowLabel = formatDiseaseTargetLabel(2);
 
   area.innerHTML = buildCombinedDiseaseRiskPanelHtml(
-    `病害リスク${titleSuffix}`,
+    "病害リスク",
     `予測時刻: ${tomorrowLabel} / ${dayAfterTomorrowLabel} 時点`,
     tomorrowLabel,
     dayAfterTomorrowLabel,
@@ -881,6 +930,401 @@ function renderGpChart(data) {
   </div>`;
 }
 
+function pctOfGddMax(gdd) {
+  return Math.min(100, Math.max(0, (gdd / GDD_MAX) * 100));
+}
+
+function renderGddGaugeScale(scaleEl, mode) {
+  if (!scaleEl) {
+    return;
+  }
+
+  const ticks =
+    mode === "primomax"
+      ? [
+          { value: 0, label: "0", edge: "start" },
+          { value: 200, label: "200" },
+          { value: 400, label: "400", edge: "end" },
+        ]
+      : [
+          { value: 0, label: "0", edge: "start" },
+          { value: 300, label: "300" },
+          { value: 350, label: "350" },
+          { value: 400, label: "400", edge: "end" },
+        ];
+
+  scaleEl.innerHTML = "";
+  ticks.forEach((tick) => {
+    const span = document.createElement("span");
+    span.textContent = tick.label;
+    span.style.left = `${pctOfGddMax(tick.value)}%`;
+    if (tick.edge === "start") {
+      span.className = "scale-start";
+    } else if (tick.edge === "end") {
+      span.className = "scale-end";
+    }
+    scaleEl.appendChild(span);
+  });
+}
+
+function renderGddGauge(trackEl, gdd, mode) {
+  trackEl.innerHTML = "";
+  const scaleEl = trackEl.parentElement.querySelector(".gdd-gauge-scale");
+  renderGddGaugeScale(scaleEl, mode);
+  const totalPct = pctOfGddMax(gdd);
+
+  function addSeg(cls, leftPct, widthPct) {
+    if (widthPct <= 0) {
+      return;
+    }
+    const el = document.createElement("div");
+    el.className = `gdd-gauge-seg ${cls}`;
+    el.style.left = `${leftPct}%`;
+    el.style.width = `${widthPct}%`;
+    trackEl.appendChild(el);
+  }
+
+  function addMark(value) {
+    const mark = document.createElement("div");
+    mark.className = "gdd-gauge-mark";
+    mark.style.left = `${pctOfGddMax(value)}%`;
+    trackEl.appendChild(mark);
+  }
+
+  if (mode === "primomax") {
+    addMark(200);
+    const end = totalPct;
+    const t200 = pctOfGddMax(200);
+    if (gdd <= 200) {
+      addSeg("gdd-seg-normal", 0, end);
+    } else {
+      addSeg("gdd-seg-normal", 0, t200);
+      addSeg("gdd-seg-over", t200, end - t200);
+    }
+  } else {
+    addMark(300);
+    addMark(350);
+    const p300 = pctOfGddMax(300);
+    const p350 = pctOfGddMax(350);
+    const end = totalPct;
+    if (gdd <= 300) {
+      addSeg("gdd-seg-normal", 0, end);
+    } else if (gdd <= 350) {
+      addSeg("gdd-seg-normal", 0, p300);
+      addSeg("gdd-seg-window", p300, end - p300);
+    } else {
+      addSeg("gdd-seg-normal", 0, p300);
+      addSeg("gdd-seg-window", p300, p350 - p300);
+      addSeg("gdd-seg-over", p350, end - p350);
+    }
+  }
+}
+
+function buildGddPanelHtml() {
+  return `<div class="gdd-panel">
+    <h3 class="gdd-title">積算温度（GDD）</h3>
+    <p class="gdd-subtitle">散布日から昨日まで（基準温度 0℃）</p>
+    <div class="gdd-block" id="gdd-block-primomax">
+      <div class="gdd-name">プリモマックス（トリネキサパックエチル）</div>
+      <div class="gdd-controls">
+        <label for="date-primomax" class="gdd-date-label">散布日</label>
+        <input type="date" id="date-primomax" aria-label="プリモマックスの散布日">
+        <div class="gdd-gauge-wrap">
+          <div class="gdd-gauge-track" id="gauge-primomax"></div>
+          <div class="gdd-gauge-scale" id="scale-primomax"></div>
+        </div>
+      </div>
+    </div>
+    <div class="gdd-block" id="gdd-block-greenfield">
+      <div class="gdd-name">グリーンフィールド（フルルプリミドール）</div>
+      <div class="gdd-controls">
+        <label for="date-greenfield" class="gdd-date-label">散布日</label>
+        <input type="date" id="date-greenfield" aria-label="グリーンフィールドの散布日">
+        <div class="gdd-gauge-wrap">
+          <div class="gdd-gauge-track" id="gauge-greenfield"></div>
+          <div class="gdd-gauge-scale" id="scale-greenfield"></div>
+        </div>
+      </div>
+    </div>
+    <div class="gdd-section-divider"></div>
+    <h4 class="gdd-section-title">発芽積算温度</h4>
+    <p class="gdd-subtitle gdd-subtitle--germination">播種日から昨日まで</p>
+    <div class="gdd-block" id="gdd-block-germ-warm">
+      <div class="gdd-name" id="germ-warm-name"></div>
+      <div class="gdd-controls">
+        <label for="date-germ-warm" class="gdd-date-label">播種日</label>
+        <input type="date" id="date-germ-warm" aria-label="暖地型芝種の播種日">
+        <div class="gdd-gauge-wrap">
+          <div class="gdd-gauge-track" id="gauge-germ-warm"></div>
+          <div class="gdd-gauge-scale" id="scale-germ-warm"></div>
+        </div>
+      </div>
+    </div>
+    <div class="gdd-block" id="gdd-block-germ-cool">
+      <div class="gdd-name" id="germ-cool-name"></div>
+      <div class="gdd-controls">
+        <label for="date-germ-cool" class="gdd-date-label">播種日</label>
+        <input type="date" id="date-germ-cool" aria-label="寒地型芝種の播種日">
+        <div class="gdd-gauge-wrap">
+          <div class="gdd-gauge-track" id="gauge-germ-cool"></div>
+          <div class="gdd-gauge-scale" id="scale-germ-cool"></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function formatGerminationGrassLabel(grassName, config) {
+  return `${grassName}（基準 ${config.baseTemp}℃ / 目標 ${config.targetGdd}℃日）`;
+}
+
+function updateGerminationGrassLabels(settings) {
+  const warmConfig = getGerminationGddConfig(settings.warmGrass);
+  const coolConfig = getGerminationGddConfig(settings.coolGrass);
+  const warmNameEl = document.getElementById("germ-warm-name");
+  const coolNameEl = document.getElementById("germ-cool-name");
+
+  if (warmNameEl) {
+    warmNameEl.textContent = formatGerminationGrassLabel(settings.warmGrass, warmConfig);
+  }
+  if (coolNameEl) {
+    coolNameEl.textContent = formatGerminationGrassLabel(settings.coolGrass, coolConfig);
+  }
+}
+
+function pctOfGerminationTarget(gdd, targetGdd) {
+  if (!targetGdd) {
+    return 0;
+  }
+  return Math.min(100, Math.max(0, (gdd / targetGdd) * 100));
+}
+
+function renderGerminationGaugeScale(scaleEl, targetGdd) {
+  if (!scaleEl) {
+    return;
+  }
+
+  scaleEl.innerHTML = "";
+  [
+    { value: 0, label: "0", edge: "start" },
+    { value: targetGdd, label: String(targetGdd), edge: "end" },
+  ].forEach((tick) => {
+    const span = document.createElement("span");
+    span.textContent = tick.label;
+    span.style.left = `${pctOfGerminationTarget(tick.value, targetGdd)}%`;
+    if (tick.edge === "start") {
+      span.className = "scale-start";
+    } else if (tick.edge === "end") {
+      span.className = "scale-end";
+    }
+    scaleEl.appendChild(span);
+  });
+}
+
+function renderGerminationGauge(trackEl, gdd, targetGdd) {
+  trackEl.innerHTML = "";
+  const scaleEl = trackEl.parentElement.querySelector(".gdd-gauge-scale");
+  renderGerminationGaugeScale(scaleEl, targetGdd);
+
+  const widthPct = pctOfGerminationTarget(gdd, targetGdd);
+  if (widthPct > 0) {
+    const el = document.createElement("div");
+    el.className = "gdd-gauge-seg gdd-seg-normal";
+    el.style.left = "0%";
+    el.style.width = `${widthPct}%`;
+    trackEl.appendChild(el);
+  }
+
+  const mark = document.createElement("div");
+  mark.className = "gdd-gauge-mark";
+  mark.style.left = "100%";
+  trackEl.appendChild(mark);
+}
+
+function renderGddPlaceholder(message) {
+  const area = document.getElementById("gdd-area");
+  if (message) {
+    area.innerHTML = `<p class="weather-placeholder">${message}</p>`;
+    return;
+  }
+
+  if (!area.querySelector(".gdd-panel") || !area.querySelector("#gdd-block-germ-warm")) {
+    area.innerHTML = buildGddPanelHtml();
+    initGddPanelEvents();
+  }
+
+  updateGerminationGrassLabels(loadSettings());
+}
+
+function initGddPanelEvents() {
+  const primoDate = getCookie("agromap_primomax_date");
+  const greenDate = getCookie("agromap_greenfield_date");
+  const warmSeedDate = getCookie("agromap_warm_seeding_date");
+  const coolSeedDate = getCookie("agromap_cool_seeding_date");
+  const primoInput = document.getElementById("date-primomax");
+  const greenInput = document.getElementById("date-greenfield");
+  const warmSeedInput = document.getElementById("date-germ-warm");
+  const coolSeedInput = document.getElementById("date-germ-cool");
+  const settings = loadSettings();
+
+  if (primoDate) {
+    primoInput.value = primoDate;
+  }
+  if (greenDate) {
+    greenInput.value = greenDate;
+  }
+  if (warmSeedDate) {
+    warmSeedInput.value = warmSeedDate;
+  }
+  if (coolSeedDate) {
+    coolSeedInput.value = coolSeedDate;
+  }
+
+  renderGddGaugeScale(document.getElementById("scale-primomax"), "primomax");
+  renderGddGaugeScale(document.getElementById("scale-greenfield"), "greenfield");
+  renderGerminationGaugeScale(
+    document.getElementById("scale-germ-warm"),
+    getGerminationGddConfig(settings.warmGrass).targetGdd
+  );
+  renderGerminationGaugeScale(
+    document.getElementById("scale-germ-cool"),
+    getGerminationGddConfig(settings.coolGrass).targetGdd
+  );
+
+  primoInput.addEventListener("change", () => {
+    if (primoInput.value) {
+      setAgromapCookie("agromap_primomax_date", primoInput.value);
+    }
+    updateProductGdd("primomax", loadSettings());
+  });
+
+  greenInput.addEventListener("change", () => {
+    if (greenInput.value) {
+      setAgromapCookie("agromap_greenfield_date", greenInput.value);
+    }
+    updateProductGdd("greenfield", loadSettings());
+  });
+
+  warmSeedInput.addEventListener("change", () => {
+    if (warmSeedInput.value) {
+      setAgromapCookie("agromap_warm_seeding_date", warmSeedInput.value);
+    }
+    updateGerminationGdd("warm", loadSettings());
+  });
+
+  coolSeedInput.addEventListener("change", () => {
+    if (coolSeedInput.value) {
+      setAgromapCookie("agromap_cool_seeding_date", coolSeedInput.value);
+    }
+    updateGerminationGdd("cool", loadSettings());
+  });
+}
+
+async function fetchProductGdd(lat, lon, startDate, baseTemp = 0) {
+  const params = new URLSearchParams({
+    lat,
+    lon,
+    start_date: startDate,
+    base_temp: String(baseTemp),
+  });
+  const response = await fetch(`${GDD_API}?${params.toString()}`);
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || "GDD取得に失敗しました");
+  }
+  return data.gdd;
+}
+
+async function updateProductGdd(product, settings) {
+  const dateEl = document.getElementById(`date-${product}`);
+  const gaugeEl = document.getElementById(`gauge-${product}`);
+  const scaleEl = document.getElementById(`scale-${product}`);
+  const gddError = document.getElementById("gdd-error");
+  const startDate = dateEl?.value;
+
+  if (!dateEl || !gaugeEl) {
+    return;
+  }
+
+  if (!startDate) {
+    gaugeEl.innerHTML = "";
+    renderGddGaugeScale(scaleEl, product === "primomax" ? "primomax" : "greenfield");
+    return;
+  }
+
+  if (!hasLocation(settings)) {
+    return;
+  }
+
+  try {
+    const gdd = await fetchProductGdd(settings.lat, settings.lon, startDate);
+    renderGddGauge(gaugeEl, gdd, product === "primomax" ? "primomax" : "greenfield");
+    gddError.classList.add("hidden");
+  } catch (err) {
+    gaugeEl.innerHTML = "";
+    renderGddGaugeScale(scaleEl, product === "primomax" ? "primomax" : "greenfield");
+    gddError.textContent = err.message;
+    gddError.classList.remove("hidden");
+  }
+}
+
+async function updateGerminationGdd(type, settings) {
+  const dateEl = document.getElementById(`date-germ-${type}`);
+  const gaugeEl = document.getElementById(`gauge-germ-${type}`);
+  const scaleEl = document.getElementById(`scale-germ-${type}`);
+  const gddError = document.getElementById("gdd-error");
+  const startDate = dateEl?.value;
+  const grassName = type === "warm" ? settings.warmGrass : settings.coolGrass;
+  const config = getGerminationGddConfig(grassName);
+
+  if (!dateEl || !gaugeEl) {
+    return;
+  }
+
+  if (!startDate) {
+    gaugeEl.innerHTML = "";
+    renderGerminationGaugeScale(scaleEl, config.targetGdd);
+    return;
+  }
+
+  if (!hasLocation(settings)) {
+    return;
+  }
+
+  try {
+    const gdd = await fetchProductGdd(
+      settings.lat,
+      settings.lon,
+      startDate,
+      config.baseTemp
+    );
+    renderGerminationGauge(gaugeEl, gdd, config.targetGdd);
+    gddError.classList.add("hidden");
+  } catch (err) {
+    gaugeEl.innerHTML = "";
+    renderGerminationGaugeScale(scaleEl, config.targetGdd);
+    gddError.textContent = err.message;
+    gddError.classList.remove("hidden");
+  }
+}
+
+async function refreshAllGdd(settings = loadSettings()) {
+  renderGddPlaceholder("");
+
+  if (!hasLocation(settings)) {
+    return;
+  }
+
+  updateGerminationGrassLabels(settings);
+
+  await Promise.all([
+    updateProductGdd("primomax", settings),
+    updateProductGdd("greenfield", settings),
+    updateGerminationGdd("warm", settings),
+    updateGerminationGdd("cool", settings),
+  ]);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("settings-open-btn").addEventListener("click", openSettingsModal);
   document.getElementById("settings-close-btn").addEventListener("click", closeSettingsModal);
@@ -906,5 +1350,118 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   loadPortalData();
-  updatePortalTitle(loadSettings().facilityName);
+  updatePortalTitle(loadSettings());
+  initAdvisorChat();
 });
+
+function getAdvisorSettingsPayload() {
+  const settings = loadSettings();
+  return {
+    facilityName: settings.facilityName,
+    lat: settings.lat,
+    lon: settings.lon,
+    locationType: settings.locationType,
+    greenType: settings.greenType,
+    overseed: settings.overseed,
+    warmGrass: settings.warmGrass,
+    coolGrass: settings.coolGrass,
+    responseMode: settings.responseMode ?? "慎重に回答",
+  };
+}
+
+function expandAdvisorChat() {
+  const messagesEl = document.getElementById("ai-advisor-messages");
+  if (!messagesEl || messagesEl.classList.contains("expanded")) {
+    return;
+  }
+  messagesEl.classList.remove("collapsed");
+  messagesEl.classList.add("expanded");
+}
+
+function addAdvisorMessage(content, isUser = false) {
+  const messagesEl = document.getElementById("ai-advisor-messages");
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `ai-advisor-message ${isUser ? "ai-advisor-user" : "ai-advisor-bot"}`;
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "ai-advisor-message-content";
+
+  if (isUser) {
+    contentDiv.textContent = content;
+  } else if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
+    contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(content));
+  } else {
+    contentDiv.textContent = content;
+  }
+
+  messageDiv.appendChild(contentDiv);
+  messagesEl.appendChild(messageDiv);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+async function sendAdvisorMessage() {
+  const input = document.getElementById("ai-advisor-input");
+  const sendButton = document.getElementById("ai-advisor-send");
+  const message = input.value.trim();
+
+  if (!message) {
+    return;
+  }
+
+  expandAdvisorChat();
+  addAdvisorMessage(message, true);
+  input.value = "";
+
+  sendButton.disabled = true;
+    sendButton.innerHTML = '<span class="ai-advisor-loading"></span> 処理中...';
+
+  try {
+    const response = await fetch(CHAT_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        settings: getAdvisorSettingsPayload(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      let errorMessage = data.error || "エラーが発生しました";
+      if (data.details) {
+        errorMessage += `\n\n詳細: ${data.details}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    addAdvisorMessage(data.response, false);
+  } catch (error) {
+    let errorMsg = "申し訳ございません。エラーが発生しました。";
+    if (error.message) {
+      errorMsg += `\n\n${error.message}`;
+    }
+    addAdvisorMessage(errorMsg, false);
+  } finally {
+    sendButton.disabled = false;
+    sendButton.textContent = "AIに質問";
+    input.focus();
+  }
+}
+
+function initAdvisorChat() {
+  const sendButton = document.getElementById("ai-advisor-send");
+  const input = document.getElementById("ai-advisor-input");
+
+  if (!sendButton || !input) {
+    return;
+  }
+
+  sendButton.addEventListener("click", sendAdvisorMessage);
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendAdvisorMessage();
+    }
+  });
+}
