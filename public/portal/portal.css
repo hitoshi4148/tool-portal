@@ -1155,6 +1155,31 @@ section h2 {
     color: #667eea;
 }
 
+.series-card-desc {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #667eea;
+    box-shadow: 0 4px 14px rgba(102, 126, 234, 0.2);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: #374151;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+}
+
+.series-card:hover .series-card-desc,
+.series-card:focus-visible .series-card-desc {
+    opacity: 1;
+}
+
 footer {
     margin-top: 24px;
     padding-top: 16px;
