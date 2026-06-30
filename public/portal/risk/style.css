@@ -1,0 +1,414 @@
+body {
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding: 10px;
+  color: #333;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.risk-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.portal-back {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.portal-back a {
+  color: #336699;
+  text-decoration: none;
+}
+
+.portal-back a:hover {
+  text-decoration: underline;
+}
+
+.portal-banners {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto 16px;
+}
+
+.portal-banner-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.portal-banner-link:hover {
+  opacity: 0.88;
+}
+
+.portal-banner-link img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.risk-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.risk-header h1 {
+  color: #1e40af;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+.risk-lead {
+  color: #374151;
+  font-size: 0.95rem;
+  margin: 0 0 6px;
+}
+
+.risk-sublead {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin: 0 0 16px;
+}
+
+.risk-settings-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: #1e40af;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.risk-settings-btn:hover {
+  background: #1d4ed8;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#facility-settings-panel {
+  margin-bottom: 20px;
+}
+
+.settings-portal-note {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.settings-panel {
+  background: #fff;
+  border: 2px solid #1e40af;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-title {
+  color: #1e40af;
+  font-size: 1.15rem;
+  margin: 0 0 16px;
+}
+
+.settings-section,
+.settings-box {
+  margin-bottom: 20px;
+}
+
+.settings-box {
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.settings-section h3,
+.settings-box h3 {
+  font-size: 0.95rem;
+  color: #374151;
+  margin: 0 0 12px;
+}
+
+.settings-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.settings-required {
+  color: #ef4444;
+}
+
+.settings-select,
+.settings-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.9rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.settings-primary-btn,
+.settings-save-btn,
+.settings-danger-btn,
+.settings-outline-btn,
+.settings-cancel-btn {
+  width: 100%;
+  padding: 12px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.settings-primary-btn {
+  color: #fff;
+  background: #1e40af;
+}
+
+.settings-save-btn {
+  color: #fff;
+  background: #10b981;
+}
+
+.settings-danger-btn {
+  color: #fff;
+  background: #ef4444;
+}
+
+.settings-outline-btn {
+  color: #1e40af;
+  background: none;
+  border: 1px dashed #93c5fd;
+}
+
+.settings-muted {
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+.settings-facility-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-facility-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.settings-remove-btn {
+  font-size: 0.75rem;
+  color: #dc2626;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+
+.settings-latlon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.settings-error {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+.settings-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.settings-modal-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.settings-replace-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.settings-replace-btn,
+.settings-cancel-btn {
+  text-align: left;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  color: #111;
+}
+
+.map-status {
+  margin-bottom: 12px;
+  padding: 12px 16px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  color: #3730a3;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.map-status--error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.risk-map-wrap {
+  width: 100%;
+  height: 600px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #1e40af;
+  background: #e5e7eb;
+  position: relative;
+  z-index: 1;
+}
+
+.risk-map {
+  width: 100%;
+  height: 100%;
+}
+
+.risk-map.leaflet-container {
+  font-family: inherit;
+}
+
+.leaflet-tile-pane img {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.risk-footer {
+  margin-top: 20px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-align: center;
+}
+
+.risk-footer a {
+  color: #1e40af;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.risk-footer a:hover {
+  text-decoration: underline;
+}
+
+.risk-version {
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+.facility-name-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(30, 64, 175, 0.3) !important;
+  border-radius: 4px !important;
+  padding: 2px 6px !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: #1e40af !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+.disease-label {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #1e40af;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  margin-left: 8px;
+}
+
+.risk-popup-title {
+  margin: 0 0 8px;
+  color: #1e40af;
+  font-size: 1rem;
+  font-weight: bold;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 6px;
+}
+
+.risk-map-popup .leaflet-popup-content {
+  margin: 10px 12px;
+}
+
+.risk-popup .disease-risk-panel {
+  box-shadow: none;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .portal-banners {
+    grid-template-columns: 1fr;
+    max-width: 280px;
+  }
+
+  .risk-map-wrap {
+    height: 480px;
+  }
+
+  .settings-latlon-grid {
+    grid-template-columns: 1fr;
+  }
+}

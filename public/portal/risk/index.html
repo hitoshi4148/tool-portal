@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-68DQJX02K5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-68DQJX02K5');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="気象条件から芝生の病害リスクを予測し、日本地図上に最大4施設分を表示します。">
+  <title>芝しごと・病害リスク予報</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="../portal.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="risk-page">
+    <p class="portal-back"><a href="/portal/">← ツールポータルに戻る</a></p>
+
+    <section class="portal-banners" aria-label="関連リンク">
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="240" height="90">
+      </a>
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="220" height="73">
+      </a>
+      <a class="portal-banner-link" href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="220" height="73">
+      </a>
+    </section>
+
+    <header class="risk-header">
+      <h1>芝しごと・病害リスク予報</h1>
+      <p class="risk-lead">明日の作業判断に使える、気象条件ベースの病害リスク指標です</p>
+      <p class="risk-sublead">各地点の円アイコンをクリックすると、病害ごとの詳細リスク（翌日・明後日 朝6:00）が表示されます</p>
+      <button type="button" id="settings-toggle-btn" class="risk-settings-btn">施設を設定</button>
+    </header>
+
+    <div id="facility-settings-panel" class="hidden"></div>
+
+    <div id="map-status" class="map-status hidden"></div>
+    <div class="risk-map-wrap">
+      <div id="risk-map" class="risk-map" aria-label="病害リスク地図"></div>
+    </div>
+
+    <footer class="risk-footer">
+      <p>表示施設: <span id="facility-summary">なし</span></p>
+      <p>データ取得: NASA POWER API（過去データ）、MET Norway API（予報データ）</p>
+      <p><a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer">グロウアンドプログレス</a></p>
+      <p class="risk-version">Version 2.2.0 ｜ 2026.07</p>
+    </footer>
+  </div>
+
+  <div id="disease-logic-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="disease-logic-title">
+    <div id="disease-logic-backdrop" class="modal-backdrop"></div>
+    <div class="modal-panel disease-logic-panel">
+      <div class="modal-header">
+        <h2 id="disease-logic-title">判定ロジック</h2>
+        <button type="button" id="disease-logic-close-btn" class="modal-close" aria-label="閉じる">×</button>
+      </div>
+      <div class="modal-body" id="disease-logic-body"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="../disease-risk-ui.js"></script>
+  <script src="facilities.js"></script>
+  <script src="golf-course-csv.js"></script>
+  <script src="facility-settings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
