@@ -7,6 +7,8 @@ const CHAT_API = "/portal/api/chat";
 const GEOCODE_API = "/portal/api/geocode";
 const GDD_MAX = 400;
 const AGROMAP_COOKIE_DAYS = 365;
+const LOCATION_NOT_SET_MESSAGE =
+  "施設の場所が未設定です。右上の「⚙ 設定」から緯度・経度を入力してください";
 
 const GERMINATION_GDD_CONFIG = {
   "未指定(C4)": { baseTemp: 15, targetGdd: 100 },
@@ -369,10 +371,10 @@ async function loadPortalData() {
 
   if (!hasLocation(settings)) {
     updatePortalTitle(settings);
-    renderWeatherPlaceholder("緯度・経度未設定");
-    renderDiseaseRiskPlaceholder("緯度・経度未設定");
-    renderGddPlaceholder("緯度・経度未設定");
-    renderGpPlaceholder("緯度・経度未設定");
+    renderWeatherPlaceholder(LOCATION_NOT_SET_MESSAGE);
+    renderDiseaseRiskPlaceholder(LOCATION_NOT_SET_MESSAGE);
+    renderGddPlaceholder(LOCATION_NOT_SET_MESSAGE);
+    renderGpPlaceholder(LOCATION_NOT_SET_MESSAGE);
     return;
   }
 
