@@ -27,6 +27,7 @@ export const onRequestGet: PagesFunction = async (context) => {
       weather: dashboard.weather,
       diseaseRisk: dashboard.diseaseRisk,
       growthPotential: dashboard.growthPotential,
+      sprayForecast: dashboard.sprayForecast,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

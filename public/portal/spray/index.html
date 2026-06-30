@@ -91,12 +91,15 @@
 
     <script>
         const API_BASE = '/portal/spray/api/forecast';
+        const PORTAL_SETTINGS_COOKIE = 'portalSettings';
+        const SPRAY_CACHE_KEY = 'portalSprayForecastCache';
+        const SPRAY_CACHE_TTL_MS = 60 * 60 * 1000;
 
         function setCookie(name, value, days) {
             const date = new Date();
             date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
             const expires = "expires=" + date.toUTCString();
-            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+            document.cookie = name + "=" + encodeURIComponent(value) + ";" + expires + ";path=/";
         }
 
         function getCookie(name) {
@@ -105,9 +108,15 @@
             for (let i = 0; i < ca.length; i++) {
                 let c = ca[i];
                 while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+                if (c.indexOf(nameEQ) === 0) {
+                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                }
             }
             return null;
+        }
+
+        function formatLocationKey(lat, lon) {
+            return `${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}`;
         }
 
         function saveLocation(lat, lon) {
@@ -115,7 +124,32 @@
             setCookie('forecast_lon', lon, 30);
         }
 
+        function loadPortalSettingsLocation() {
+            const raw = getCookie(PORTAL_SETTINGS_COOKIE);
+            if (!raw) return null;
+
+            try {
+                const settings = JSON.parse(raw);
+                if (settings.lat && settings.lon) {
+                    return {
+                        lat: parseFloat(settings.lat),
+                        lon: parseFloat(settings.lon),
+                    };
+                }
+            } catch {
+                return null;
+            }
+            return null;
+        }
+
         function loadLocation() {
+            const portalLocation = loadPortalSettingsLocation();
+            if (portalLocation) {
+                document.getElementById('lat').value = portalLocation.lat;
+                document.getElementById('lon').value = portalLocation.lon;
+                return portalLocation;
+            }
+
             const lat = getCookie('forecast_lat');
             const lon = getCookie('forecast_lon');
             if (lat && lon) {
@@ -124,6 +158,35 @@
                 return { lat: parseFloat(lat), lon: parseFloat(lon) };
             }
             return null;
+        }
+
+        function readSprayForecastCache(lat, lon) {
+            try {
+                const raw = sessionStorage.getItem(SPRAY_CACHE_KEY);
+                if (!raw) return null;
+
+                const cache = JSON.parse(raw);
+                if (cache.locationKey !== formatLocationKey(lat, lon)) return null;
+                if (Date.now() - cache.fetchedAt > SPRAY_CACHE_TTL_MS) return null;
+                return cache.results;
+            } catch {
+                return null;
+            }
+        }
+
+        function cacheSprayForecast(lat, lon, results) {
+            try {
+                sessionStorage.setItem(
+                    SPRAY_CACHE_KEY,
+                    JSON.stringify({
+                        locationKey: formatLocationKey(lat, lon),
+                        fetchedAt: Date.now(),
+                        results,
+                    }),
+                );
+            } catch {
+                /* sessionStorage unavailable */
+            }
         }
 
         async function fetchForecast() {
@@ -146,6 +209,7 @@
                 const data = await response.json();
 
                 if (data.success) {
+                    cacheSprayForecast(lat, lon, data.results);
                     displayResults(data.results);
                 } else {
                     showError(data.error || '予報の取得に失敗しました');
@@ -155,6 +219,23 @@
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
+        }
+
+        function loadForecastData() {
+            const lat = document.getElementById('lat').value;
+            const lon = document.getElementById('lon').value;
+
+            if (!lat || !lon) {
+                return;
+            }
+
+            const cached = readSprayForecastCache(lat, lon);
+            if (cached) {
+                displayResults(cached);
+                return;
+            }
+
+            fetchForecast();
         }
 
         function displayResults(results) {
@@ -340,9 +421,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedLocation = loadLocation();
-            if (savedLocation) {
-                fetchForecast();
+            if (loadLocation()) {
+                loadForecastData();
             }
         });
     </script>

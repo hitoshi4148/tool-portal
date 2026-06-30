@@ -1,4 +1,6 @@
 const COOKIE_NAME = "portalSettings";
+const SPRAY_CACHE_KEY = "portalSprayForecastCache";
+const SPRAY_CACHE_TTL_MS = 60 * 60 * 1000;
 const DASHBOARD_API = "/portal/api/dashboard";
 const GDD_API = "/portal/api/gdd";
 const CHAT_API = "/portal/api/chat";
@@ -156,6 +158,25 @@ function loadSettings() {
 
 function saveSettings(settings) {
   setCookie(COOKIE_NAME, JSON.stringify(settings));
+}
+
+function formatLocationKey(lat, lon) {
+  return `${parseFloat(lat).toFixed(4)},${parseFloat(lon).toFixed(4)}`;
+}
+
+function cacheSprayForecast(lat, lon, results) {
+  try {
+    sessionStorage.setItem(
+      SPRAY_CACHE_KEY,
+      JSON.stringify({
+        locationKey: formatLocationKey(lat, lon),
+        fetchedAt: Date.now(),
+        results,
+      }),
+    );
+  } catch {
+    /* sessionStorage unavailable */
+  }
 }
 
 function hasLocation(settings) {
@@ -404,6 +425,9 @@ async function loadPortalData() {
       dayAfterTomorrow: data.diseaseRisk.dayAfterTomorrow,
     });
     renderGpChart(data.growthPotential);
+    if (data.sprayForecast) {
+      cacheSprayForecast(settings.lat, settings.lon, data.sprayForecast);
+    }
   } catch (err) {
     weatherError.textContent = err.message;
     diseaseError.textContent = err.message;

@@ -16,6 +16,7 @@ import {
   getLastCalendarYearJst,
 } from "../growth-potential/monthly-temperature";
 import { fetchMet } from "../spray/met";
+import { judge } from "../spray/judge";
 import { extractHourlyWeather } from "../weather/hourly";
 
 export interface PortalDashboardData {
@@ -26,6 +27,7 @@ export interface PortalDashboardData {
     monthlyTemperatures: Array<number | null>;
     series: ReturnType<typeof buildGpSeriesList>;
   };
+  sprayForecast: ReturnType<typeof judge>;
 }
 
 export async function fetchPortalDashboard(
@@ -79,5 +81,6 @@ export async function fetchPortalDashboard(
       monthlyTemperatures,
       series: buildGpSeriesList(warmGrass, coolGrass, monthlyTemperatures),
     },
+    sprayForecast: judge(metData.properties.timeseries),
   };
 }

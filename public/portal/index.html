@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
-    <link rel="stylesheet" href="/portal/portal.css?v=20250629title7">
+    <link rel="stylesheet" href="/portal/portal.css?v=20250629v100">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -25,7 +25,7 @@
                     <span id="portal-title-prefix" class="portal-title-prefix hidden"></span>
                     <span class="portal-title-logo-track">
                         <img
-                            src="/portal/portal-title-logo.png?v=20250629title7"
+                            src="/portal/portal-title-logo.png?v=20250629v100"
                             alt="芝しごとポータル"
                             class="portal-title-logo"
                             width="360"
@@ -132,7 +132,7 @@
                     <span class="series-card-external" aria-hidden="true">↗</span>
                     <span class="series-card-desc" role="tooltip">病斑写真から芝生の5大病害をAI診断。（起動に30秒必要）</span>
                 </a>
-                <a class="series-card" href="https://spray-forecast.onrender.com/" target="_blank" rel="noopener noreferrer">
+                <a class="series-card" href="/portal/spray/">
                     <span class="series-card-category">予報</span>
                     <span class="series-card-name">ピンポイント天気で芝しごと</span>
                     <span class="series-card-external" aria-hidden="true">↗</span>
@@ -160,24 +160,21 @@
         </section>
 
         <section class="portal-banners" aria-label="関連リンク">
-            <div class="banner-pr">
-                <a href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
-                    <img src="/portal/banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="320" height="120">
-                </a>
-            </div>
-            <div class="banner-row">
-                <a href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
-                    <img src="/portal/bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="300" height="100">
-                </a>
-                <a href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
-                    <img src="/portal/youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="300" height="100">
-                </a>
-            </div>
+            <a class="portal-banner-link" href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+                <img src="/portal/banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="240" height="90">
+            </a>
+            <a class="portal-banner-link" href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+                <img src="/portal/bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="220" height="73">
+            </a>
+            <a class="portal-banner-link" href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+                <img src="/portal/youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="220" height="73">
+            </a>
         </section>
 
         <footer>
             <p>気象データ提供: <a href="https://www.met.no/" target="_blank" rel="noopener noreferrer">MET Norway</a> / <a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA POWER</a></p>
             <p><a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer">グロウアンドプログレス</a></p>
+            <p class="footer-version">v1.0.0</p>
         </footer>
     </div>
 
@@ -283,6 +280,6 @@
         </div>
     </div>
 
-    <script src="/portal/portal.js?v=20250629title7"></script>
+    <script src="/portal/portal.js?v=20250629v100"></script>
 </body>
 </html>
