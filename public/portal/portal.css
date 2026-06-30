@@ -433,9 +433,10 @@ section h2 {
 
 .weather-placeholder {
     text-align: center;
-    padding: 32px 16px;
+    padding: 24px 16px;
     color: #6c757d;
-    font-size: 1.05em;
+    font-size: 0.9em;
+    line-height: 1.5;
     background: white;
     border-radius: 10px;
 }
