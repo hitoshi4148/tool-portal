@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-68DQJX02K5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-68DQJX02K5');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="芝管理者向けRACコード検索ツール。農薬名・メーカー名・適用対象から検索し、同一グループの確認やローテーション設計を支援します。FAMIC公開情報を基に再構成。">
+  <title>芝しごと・楽RAC農薬ローテ</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container my-4">
+    <p class="portal-back"><a href="/portal/">← ツールポータルに戻る</a></p>
+
+    <h1 class="text-center mb-2">芝しごと・楽RAC農薬ローテ</h1>
+    <p class="text-center brand-line mb-2">
+      グロウアンドプログレス ｜ <a href="https://www.turf-tools.jp" target="_blank" rel="noopener noreferrer">www.turf-tools.jp</a>
+      <span class="version-tag">v1.1.1</span>
+    </p>
+
+    <section class="portal-banners" aria-label="関連リンク">
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="240" height="90">
+      </a>
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="220" height="73">
+      </a>
+      <a class="portal-banner-link" href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="220" height="73">
+      </a>
+    </section>
+
+    <p class="text-center text-muted mb-4 subtitle-lead">
+      農薬名や病害虫・雑草名の一部から必要な芝生用農薬を探し、
+      RACコードをもとに耐性を避けたローテーション候補を確認できます。
+    </p>
+
+    <div id="loadingStatus" class="alert alert-secondary text-center">農薬データを読み込んでいます…</div>
+
+    <div class="row g-2 mb-4 justify-content-center">
+      <div class="col-12 col-md-4">
+        <input type="text" id="pesticideKeyword" class="form-control" placeholder="農薬名・メーカー名">
+      </div>
+      <div class="col-auto d-flex align-items-center">
+        <small class="text-muted and-label">かつ(AND)</small>
+      </div>
+      <div class="col-12 col-md-4">
+        <input type="text" id="targetKeyword" class="form-control" placeholder="病害名・害虫名・雑草名">
+      </div>
+      <div class="col-auto">
+        <button id="searchBtn" class="btn btn-primary">検索</button>
+      </div>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <h2 class="footer-title">【ご利用にあたっての注意】</h2>
+      <p>
+        本サービスの農薬情報は、農林水産消費安全技術センター（FAMIC）公開情報を基に、
+        グリーンキーパー向けに再編集した参考情報です。
+      </p>
+      <p>
+        実際の施薬にあたっては、必ず各製品の最新ラベル表示・登録内容・使用方法をご確認のうえ、
+        メーカーが指定する使用量・使用回数・使用方法を厳守してください。
+      </p>
+      <p>
+        本サービスの情報利用によって生じたいかなる損害についても、
+        グロウアンドプログレスは責任を負いかねます。
+        施薬判断および実施は、使用者ご自身の責任にて行ってください。
+      </p>
+      <p class="mb-0">
+        最新かつ正確な登録情報は、
+        <a href="https://www.famic.go.jp/" target="_blank" rel="noopener noreferrer">FAMIC公式サイト</a>
+        をご確認ください。
+      </p>
+      <p class="footer-version mb-0">Version 1.1.1 ｜ 2026.07</p>
+    </div>
+  </footer>
+
+  <script src="rac-engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,237 @@
+body {
+  background-color: #f8f9fa;
+}
+
+.portal-back {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.portal-back a {
+  color: #336699;
+  text-decoration: none;
+}
+
+.portal-back a:hover {
+  text-decoration: underline;
+}
+
+#results table {
+  font-size: 0.9rem;
+}
+
+.brand-line {
+  font-size: 0.92rem;
+  color: #6c757d;
+}
+
+.brand-line a {
+  color: #5d6f82;
+  text-decoration: none;
+}
+
+.brand-line a:hover {
+  text-decoration: underline;
+}
+
+.version-tag {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: #8a939c;
+  vertical-align: middle;
+}
+
+.portal-banners {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto 16px;
+}
+
+.portal-banner-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.portal-banner-link:hover {
+  opacity: 0.88;
+}
+
+.portal-banner-link img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: 76px;
+  object-fit: contain;
+  vertical-align: bottom;
+}
+
+.and-label {
+  font-size: 0.75rem;
+}
+
+.subtitle-lead {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 60rem;
+  line-height: 1.55;
+}
+
+.rac-group-card {
+  border-left: 4px solid #0d6efd;
+  margin-bottom: 0.75rem;
+}
+
+.rac-group-card.frac { border-left-color: #198754; }
+.rac-group-card.irac { border-left-color: #dc3545; }
+.rac-group-card.hrac { border-left-color: #fd7e14; }
+
+.detail-expand {
+  cursor: pointer;
+}
+
+.detail-expand:hover {
+  background-color: #e9ecef;
+}
+
+.rotation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.rotation-list {
+  font-size: 0.85rem;
+}
+
+.rac-badge {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  margin-right: 0.25rem;
+  margin-bottom: 0.2rem;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.78rem;
+  line-height: 1.1;
+}
+
+.rac-frac {
+  background-color: #1e88e5;
+}
+
+.rac-irac {
+  background-color: #e53935;
+}
+
+.rac-hrac {
+  background-color: #43a047;
+}
+
+.rac-match {
+  box-shadow: 0 0 0 2px #ffca28 inset;
+  transform: translateY(-1px);
+}
+
+.btn-analysis {
+  background-color: #fb8c00;
+  border-color: #fb8c00;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-analysis:hover {
+  background-color: #ef6c00;
+  border-color: #ef6c00;
+  color: #fff;
+}
+
+.site-footer {
+  margin-top: 2rem;
+  background: #eef1f4;
+  border-top: 1px solid #dde2e8;
+}
+
+.footer-inner {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  color: #4f5b66;
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.footer-title {
+  margin: 0 0 0.6rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #44515c;
+}
+
+.footer-inner a {
+  color: #336699;
+}
+
+.footer-version {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #7a8591;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.rac-dup-count {
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.remarks-high {
+  color: #dc3545;
+}
+
+.remarks-medium {
+  color: #fd7e14;
+}
+
+.remarks-low {
+  color: #198754;
+}
+
+.remarks-mihassei {
+  color: #0d6efd;
+}
+
+@media (max-width: 768px) {
+  .portal-banners {
+    grid-template-columns: 1fr;
+    max-width: 280px;
+  }
+
+  .rotation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-inner {
+    font-size: 0.84rem;
+    line-height: 1.75;
+  }
+
+  .subtitle-lead {
+    max-width: 26rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+}
