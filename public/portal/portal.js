@@ -10,6 +10,26 @@ const AGROMAP_COOKIE_DAYS = 365;
 const LOCATION_NOT_SET_MESSAGE =
   "施設の場所が未設定です。右上の「⚙ 設定」から緯度・経度を入力してください";
 
+async function parseApiJson(response) {
+  const text = await response.text();
+  const trimmed = text.trimStart();
+  if (trimmed.startsWith("<") || trimmed.startsWith("<!")) {
+    const isLocalDevHost =
+      location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    const hint = isLocalDevHost
+      ? "開発時は tool-portal で npm run dev を実行し、http://127.0.0.1:8788/portal/ から開いてください（Live Server 等の静的サーバーでは API が動きません）。"
+      : "サーバーが HTML を返しました。https://www.turf-tools.jp/portal/ から開き直すか、しばらく待って再読み込みしてください。";
+    throw new Error(`API 応答が JSON ではありません。${hint}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(
+      `API 応答の解析に失敗しました（${response.status}）: ${text.slice(0, 120)}`
+    );
+  }
+}
+
 const GERMINATION_GDD_CONFIG = {
   "未指定(C4)": { baseTemp: 15, targetGdd: 100 },
   ノシバ: { baseTemp: 15, targetGdd: 100 },
@@ -340,7 +360,7 @@ async function fetchLocationName(lat, lon) {
   const response = await fetch(
     `${GEOCODE_API}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`
   );
-  const data = await response.json();
+  const data = await parseApiJson(response);
 
   if (!data.success) {
     throw new Error(data.error || "地名の取得に失敗しました");
@@ -410,7 +430,7 @@ async function loadPortalData() {
 
   try {
     const response = await fetch(`${DASHBOARD_API}?${params.toString()}`);
-    const data = await response.json();
+    const data = await parseApiJson(response);
 
     if (!data.success) {
       throw new Error(data.error || "データの取得に失敗しました");
@@ -1026,7 +1046,7 @@ async function fetchProductGdd(lat, lon, startDate, baseTemp = 0) {
     base_temp: String(baseTemp),
   });
   const response = await fetch(`${GDD_API}?${params.toString()}`);
-  const data = await response.json();
+  const data = await parseApiJson(response);
   if (!data.success) {
     throw new Error(data.error || "GDD取得に失敗しました");
   }
@@ -1295,7 +1315,7 @@ async function sendAdvisorMessage() {
       }),
     });
 
-    const data = await response.json();
+    const data = await parseApiJson(response);
 
     if (!data.success) {
       let errorMessage = data.error || "エラーが発生しました";
