@@ -843,7 +843,31 @@ function buildGddPanelHtml() {
     <h3 class="gdd-title">PGR適時・発芽予測</h3>
     <p class="gdd-subtitle">散布日から昨日まで（基準温度 0℃）</p>
     <div class="gdd-block" id="gdd-block-primomax">
-      <div class="gdd-name">プリモマックス（トリネキサパックエチル）</div>
+      <div class="gdd-name">
+        <span class="gdd-name-text">プリモマックス（トリネキサパックエチル　200℃リバウンド）</span>
+        <span class="gdd-info-anchor">
+          <button type="button" class="gdd-info-btn" aria-label="プリモマックスのリバウンドについて">i</button>
+          <span class="gdd-info-popover" role="tooltip">
+            <p class="gdd-info-lead">薬効が切れると今まで抑えられていた生長が一気に戻るリバウンド現象が起こります。<br>海外のグリーン管理では概ね下記の様相を呈します。</p>
+            <table class="gdd-info-table">
+              <thead>
+                <tr>
+                  <th scope="col">積算温度(GDD)</th>
+                  <th scope="col">状態</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>0〜50</td><td>効き始め</td></tr>
+                <tr><td>50〜180</td><td>安定して抑制</td></tr>
+                <tr><td>180〜220</td><td>徐々に弱くなる</td></tr>
+                <tr><td>220〜250前後</td><td>リバウンド開始</td></tr>
+                <tr><td>250〜300</td><td>ほぼ効果終了</td></tr>
+              </tbody>
+            </table>
+            <p class="gdd-info-foot">そのため海外では一般にリバウンド前に散布を行います。</p>
+          </span>
+        </span>
+      </div>
       <div class="gdd-controls">
         <label for="date-primomax" class="gdd-date-label">散布日</label>
         <input type="date" id="date-primomax" aria-label="プリモマックスの散布日">
@@ -854,7 +878,29 @@ function buildGddPanelHtml() {
       </div>
     </div>
     <div class="gdd-block" id="gdd-block-greenfield">
-      <div class="gdd-name">グリーンフィールド（フルルプリミドール）</div>
+      <div class="gdd-name">
+        <span class="gdd-name-text">グリーンフィールド（フルルプリミドール　300℃リバウンド）</span>
+        <span class="gdd-info-anchor">
+          <button type="button" class="gdd-info-btn" aria-label="グリーンフィールドのリバウンドについて">i</button>
+          <span class="gdd-info-popover" role="tooltip">
+            <p class="gdd-info-lead">薬効が切れると今まで抑えられていた生長が戻るリバウンド現象が起こります。<br>プリモと比べ作用やリバウンドは緩やか。海外のグリーン管理では概ね下記の様相を呈します。</p>
+            <table class="gdd-info-table">
+              <thead>
+                <tr>
+                  <th scope="col">積算温度(GDD)</th>
+                  <th scope="col">状態</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>0〜80</td><td>徐々に効く</td></tr>
+                <tr><td>80〜300</td><td>安定</td></tr>
+                <tr><td>300〜450</td><td>ゆっくり低下</td></tr>
+                <tr><td>450〜550</td><td>効果終了</td></tr>
+              </tbody>
+            </table>
+          </span>
+        </span>
+      </div>
       <div class="gdd-controls">
         <label for="date-greenfield" class="gdd-date-label">散布日</label>
         <input type="date" id="date-greenfield" aria-label="グリーンフィールドの散布日">
@@ -893,7 +939,7 @@ function buildGddPanelHtml() {
 }
 
 function formatGerminationGrassLabel(grassName, config) {
-  return `${grassName}（基準 ${config.baseTemp}℃ / 目標 ${config.targetGdd}℃日）`;
+  return `${grassName}（基準 ${config.baseTemp}℃ / 発芽積算 ${config.targetGdd}℃日）`;
 }
 
 function updateGerminationGrassLabels(settings) {
@@ -1196,6 +1242,50 @@ function initPortalRacSearch() {
   });
 }
 
+function initGddInfoPopovers() {
+  if (window.__gddInfoPopoversInit) {
+    return;
+  }
+  window.__gddInfoPopoversInit = true;
+
+  const infoBtnSelector = ".gdd-info-btn, .series-info-btn";
+  const infoAnchorSelector = ".gdd-info-anchor, .series-info-anchor";
+
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest(infoBtnSelector);
+    if (btn) {
+      event.preventDefault();
+      event.stopPropagation();
+      const anchor = btn.closest(infoAnchorSelector);
+      if (!anchor) {
+        return;
+      }
+      const isOpen = anchor.classList.contains("is-open");
+      document.querySelectorAll(`${infoAnchorSelector}.is-open`).forEach((openAnchor) => {
+        openAnchor.classList.remove("is-open");
+      });
+      if (!isOpen) {
+        anchor.classList.add("is-open");
+      }
+      return;
+    }
+
+    if (!event.target.closest(infoAnchorSelector)) {
+      document.querySelectorAll(`${infoAnchorSelector}.is-open`).forEach((anchor) => {
+        anchor.classList.remove("is-open");
+      });
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      document.querySelectorAll(`${infoAnchorSelector}.is-open`).forEach((anchor) => {
+        anchor.classList.remove("is-open");
+      });
+    }
+  });
+}
+
 function initPortalBrandInfo() {
   const anchor = document.querySelector(".portal-brand-info-anchor");
   const btn = anchor?.querySelector(".portal-brand-info-btn");
@@ -1241,6 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePortalTitle(loadSettings());
   initPortalRacSearch();
   initPortalBrandInfo();
+  initGddInfoPopovers();
   initAdvisorChat();
 });
 
