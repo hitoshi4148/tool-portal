@@ -1176,6 +1176,31 @@ function initPortalRacSearch() {
   });
 }
 
+function initPortalBrandInfo() {
+  const anchor = document.querySelector(".portal-brand-info-anchor");
+  const btn = anchor?.querySelector(".portal-brand-info-btn");
+  if (!anchor || !btn) {
+    return;
+  }
+
+  btn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    anchor.classList.toggle("is-open");
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!anchor.contains(event.target)) {
+      anchor.classList.remove("is-open");
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      anchor.classList.remove("is-open");
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("settings-open-btn").addEventListener("click", openSettingsModal);
   document.getElementById("settings-close-btn").addEventListener("click", closeSettingsModal);
@@ -1195,6 +1220,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPortalData();
   updatePortalTitle(loadSettings());
   initPortalRacSearch();
+  initPortalBrandInfo();
   initAdvisorChat();
 });
 
