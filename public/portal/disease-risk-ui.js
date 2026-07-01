@@ -232,7 +232,7 @@ const DiseaseRiskUI = (() => {
   }
 
   function buildForecastPanelHtml(forecast, options = {}) {
-    const title = options.title ?? "病害リスク";
+    const title = options.title ?? "病害リスク予測";
     const tomorrowLabel = formatDiseaseTargetLabel(1);
     const dayAfterTomorrowLabel = formatDiseaseTargetLabel(2);
     const footerLabel =

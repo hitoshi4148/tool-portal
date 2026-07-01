@@ -566,12 +566,15 @@ function buildTodayAnnotationSvg(padLeft, padTop, chartWidth, chartHeight) {
   const x = getTodayChartX(padLeft, chartWidth);
   const label = formatTodayChartLabel();
   const lineBottom = padTop + chartHeight;
-  const labelY = padTop - 4;
+  const labelBoxHeight = 13;
+  const labelGap = 4;
+  const labelBoxTop = Math.max(2, padTop - labelGap - labelBoxHeight);
+  const labelTextY = labelBoxTop + labelBoxHeight - 3;
 
   return `<g class="gp-today-annotation" aria-label="今日 ${label}">
     <line x1="${x.toFixed(1)}" y1="${padTop.toFixed(1)}" x2="${x.toFixed(1)}" y2="${lineBottom.toFixed(1)}" class="gp-today-line"></line>
-    <rect x="${(x - 17).toFixed(1)}" y="${(labelY - 11).toFixed(1)}" width="34" height="13" rx="3" class="gp-today-label-bg"></rect>
-    <text x="${x.toFixed(1)}" y="${(labelY - 1).toFixed(1)}" class="gp-today-label" text-anchor="middle">${label}</text>
+    <rect x="${(x - 17).toFixed(1)}" y="${labelBoxTop.toFixed(1)}" width="34" height="${labelBoxHeight}" rx="3" class="gp-today-label-bg"></rect>
+    <text x="${x.toFixed(1)}" y="${labelTextY.toFixed(1)}" class="gp-today-label" text-anchor="middle">${label}</text>
   </g>`;
 }
 
@@ -603,12 +606,12 @@ const GP_SERIES_STYLES = {
 };
 
 function buildGpChartSvg(data) {
-  const width = 340;
-  const height = 228;
-  const padLeft = 34;
-  const padRight = 10;
-  const padTop = 20;
-  const padBottom = 28;
+  const width = 420;
+  const height = 148;
+  const padLeft = 32;
+  const padRight = 8;
+  const padTop = 14;
+  const padBottom = 22;
   const chartWidth = width - padLeft - padRight;
   const chartHeight = height - padTop - padBottom;
   const monthLabels = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"];
@@ -659,7 +662,7 @@ function buildGpChartSvg(data) {
 
   const todayAnnotation = buildTodayAnnotationSvg(padLeft, padTop, chartWidth, chartHeight);
 
-  return `<svg class="gp-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Growth Potential グラフ">
+  return `<svg class="gp-chart-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="成長能(Growth Potential) グラフ">
     ${gridLines}
     ${seriesPaths}
     ${todayAnnotation}
@@ -706,7 +709,7 @@ function renderGpChart(data) {
     .join(" — ");
 
   area.innerHTML = `<div class="gp-chart-panel">
-    <h3 class="gp-chart-title">Growth Potential (GP)</h3>
+    <h3 class="gp-chart-title">成長能(Growth Potential)</h3>
     <p class="gp-chart-subtitle">${data.year}年 月平均気温</p>
     <div class="gp-chart-legend">${legendHtml}</div>
     <div class="gp-chart-body">
@@ -817,7 +820,7 @@ function renderGddGauge(trackEl, gdd, mode) {
 
 function buildGddPanelHtml() {
   return `<div class="gdd-panel">
-    <h3 class="gdd-title">積算温度（GDD）</h3>
+    <h3 class="gdd-title">PGR適時・発芽予測</h3>
     <p class="gdd-subtitle">散布日から昨日まで（基準温度 0℃）</p>
     <div class="gdd-block" id="gdd-block-primomax">
       <div class="gdd-name">プリモマックス（トリネキサパックエチル）</div>
@@ -1120,6 +1123,59 @@ async function refreshAllGdd(settings = loadSettings()) {
   ]);
 }
 
+function validatePortalRacSearch(pesticideKeyword, targetKeyword) {
+  const pesticide = pesticideKeyword.trim();
+  const target = targetKeyword.trim();
+  const hasOneCharKeyword =
+    (pesticide.length > 0 && pesticide.length < 2) ||
+    (target.length > 0 && target.length < 2);
+
+  if ((!pesticide && !target) || hasOneCharKeyword) {
+    return { ok: false, message: "2文字以上で検索してください" };
+  }
+
+  return { ok: true, pesticide, target };
+}
+
+function initPortalRacSearch() {
+  const form = document.getElementById("portal-rac-search-form");
+  const errorEl = document.getElementById("portal-rac-search-error");
+  if (!form || !errorEl) {
+    return;
+  }
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const pesticideInput = document.getElementById("portal-rac-pesticide");
+    const targetInput = document.getElementById("portal-rac-target");
+    const result = validatePortalRacSearch(
+      pesticideInput?.value ?? "",
+      targetInput?.value ?? ""
+    );
+
+    if (!result.ok) {
+      errorEl.textContent = result.message;
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
+    errorEl.classList.add("hidden");
+    errorEl.textContent = "";
+
+    const params = new URLSearchParams();
+    if (result.pesticide) {
+      params.set("pesticide", result.pesticide);
+    }
+    if (result.target) {
+      params.set("target", result.target);
+    }
+
+    const query = params.toString();
+    window.location.href = query ? `/portal/rac/?${query}` : "/portal/rac/";
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("settings-open-btn").addEventListener("click", openSettingsModal);
   document.getElementById("settings-close-btn").addEventListener("click", closeSettingsModal);
@@ -1138,6 +1194,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadPortalData();
   updatePortalTitle(loadSettings());
+  initPortalRacSearch();
   initAdvisorChat();
 });
 

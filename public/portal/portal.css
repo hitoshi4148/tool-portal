@@ -591,6 +591,86 @@ section h2 {
     margin-top: 16px;
 }
 
+.portal-gp-rac-row {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.portal-gp-col,
+.portal-rac-search-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.portal-gp-col > #gp-chart-area,
+.portal-rac-search-col > .portal-rac-search-panel {
+    flex: 1;
+}
+
+.portal-rac-search-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 12px;
+    height: 100%;
+}
+
+.portal-rac-search-title {
+    margin: 0 0 4px 0;
+    color: #1E40AF;
+    font-size: 1.05em;
+    font-weight: bold;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 6px;
+}
+
+.portal-rac-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 0.92em;
+    font-family: inherit;
+}
+
+.portal-rac-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.portal-rac-and-label {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.portal-rac-search-desc {
+    margin: 8px 0 0 0;
+    font-size: 10px;
+    color: #6B7280;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.portal-rac-search-error {
+    margin: 0;
+    padding: 8px 10px;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+    border-radius: 6px;
+    font-size: 0.85em;
+    text-align: center;
+}
+
 .gdd-panel {
     background: white;
     border-radius: 10px;
@@ -754,6 +834,8 @@ section h2 {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     padding: 12px;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .gp-chart-title {
@@ -766,7 +848,7 @@ section h2 {
 }
 
 .gp-chart-subtitle {
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     font-size: 11px;
     color: #6B7280;
 }
@@ -774,9 +856,9 @@ section h2 {
 .gp-chart-legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 12px;
-    margin-bottom: 8px;
-    font-size: 11px;
+    gap: 6px 10px;
+    margin-bottom: 4px;
+    font-size: 10px;
 }
 
 .gp-legend-item {
@@ -822,14 +904,14 @@ section h2 {
 
 .gp-chart-body {
     width: 100%;
-    overflow-x: auto;
+    flex: 0 0 auto;
 }
 
 .gp-chart-svg {
     display: block;
     width: 100%;
-    max-width: 340px;
-    margin: 0 auto;
+    max-width: none;
+    height: auto;
 }
 
 .gp-grid-line {
@@ -901,7 +983,7 @@ section h2 {
 }
 
 .gp-chart-details {
-    margin-top: 8px;
+    margin-top: 4px;
     font-size: 11px;
     color: #374151;
 }
@@ -932,10 +1014,21 @@ section h2 {
 }
 
 .gp-chart-footer {
-    margin: 8px 0 0 0;
+    margin: 4px 0 0 0;
     font-size: 10px;
     color: #6B7280;
     text-align: center;
+}
+
+#gp-chart-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+#gp-chart-area .gp-chart-panel {
+    flex: 1;
 }
 
 .disease-risk-title {
@@ -1513,6 +1606,14 @@ footer p {
     font-size: 13px;
 }
 
+.portal-rac-search-panel .btn-primary.portal-rac-search-btn {
+    align-self: center;
+    width: 25%;
+    max-width: none;
+    padding: 6px 8px;
+    font-size: 0.85em;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 16px;
@@ -1538,6 +1639,10 @@ footer p {
     }
 
     .portal-insights-row {
+        flex-direction: column;
+    }
+
+    .portal-gp-rac-row {
         flex-direction: column;
     }
 

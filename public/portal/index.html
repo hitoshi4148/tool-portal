@@ -13,7 +13,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
-    <link rel="stylesheet" href="/portal/portal.css?v=20250629v100">
+    <link rel="stylesheet" href="/portal/portal.css?v=20250629v103">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -87,9 +87,22 @@
                 <div id="disease-risk-area" class="portal-insights-col"></div>
                 <div id="gdd-area" class="portal-insights-col"></div>
             </div>
-            <div id="portal-gp-row" class="portal-gp-row">
-                <div id="gp-chart-error" class="error hidden"></div>
-                <div id="gp-chart-area"></div>
+            <div id="portal-gp-row" class="portal-gp-row portal-gp-rac-row">
+                <div class="portal-gp-col">
+                    <div id="gp-chart-error" class="error hidden"></div>
+                    <div id="gp-chart-area"></div>
+                </div>
+                <div class="portal-rac-search-col">
+                    <form id="portal-rac-search-form" class="portal-rac-search-panel" action="/portal/rac/" method="get" novalidate>
+                        <h3 class="portal-rac-search-title">農薬検索</h3>
+                        <input type="text" id="portal-rac-pesticide" name="pesticide" class="portal-rac-input" placeholder="農薬名・メーカー名" autocomplete="off">
+                        <p class="portal-rac-and-label">かつ(AND)</p>
+                        <input type="text" id="portal-rac-target" name="target" class="portal-rac-input" placeholder="病害名・害虫名・雑草名" autocomplete="off">
+                        <button type="submit" class="btn-primary portal-rac-search-btn">検索</button>
+                        <p class="portal-rac-search-desc">農薬名や病害虫・雑草名の一部から必要な芝生用農薬を探し、 RACコードをもとに耐性を避けたローテーション候補を確認できます。</p>
+                        <p id="portal-rac-search-error" class="portal-rac-search-error hidden" role="alert"></p>
+                    </form>
+                </div>
             </div>
         </section>
 
@@ -280,7 +293,7 @@
         </div>
     </div>
 
-    <script src="/portal/disease-risk-ui.js?v=20250701"></script>
-    <script src="/portal/portal.js?v=20250629v100"></script>
+    <script src="/portal/disease-risk-ui.js?v=20250629v105"></script>
+    <script src="/portal/portal.js?v=20250629v106"></script>
 </body>
 </html>
