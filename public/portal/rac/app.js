@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const sameGroupDupCount = countMatchedRacCodes(sameGroupData);
 
       let html = "";
-      html += '<div class="rotation-grid mt-3">';
+      html += '<div class="rotation-grid mt-3" id="rac-rotation-results">';
       html += '<div class="card"><div class="card-body">';
       html += `<h6 class="section-heading">同一グループを含む農薬 <span class="rac-dup-count">RAC重複：${sameGroupDupCount}</span></h6><ul class="list-group list-group-flush rotation-list">`;
       if (!sameGroupData || sameGroupData.length === 0) {
@@ -275,6 +275,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       html += "</div>";
 
       area.innerHTML = html;
+
+      const rotationResults = document.getElementById("rac-rotation-results");
+      if (rotationResults) {
+        requestAnimationFrame(() => {
+          rotationResults.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
     } catch (err) {
       area.innerHTML = `<div class="alert alert-danger mt-2">RAC/ローテーション取得エラー: ${escapeHtml(err.message)}</div>`;
     }

@@ -105,6 +105,7 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  scroll-margin-top: 12px;
 }
 
 .rotation-list {
