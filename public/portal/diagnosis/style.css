@@ -1,0 +1,416 @@
+body {
+  background: #f3f4f6;
+  min-height: 100vh;
+  padding: 10px;
+  color: #333;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.diag-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.portal-back {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.portal-back a {
+  color: #336699;
+  text-decoration: none;
+}
+
+.portal-back a:hover {
+  text-decoration: underline;
+}
+
+.portal-banners {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 720px;
+  margin: 0 auto 16px;
+}
+
+.portal-banner-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 76px;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 8px;
+  transition: opacity 0.15s ease;
+}
+
+.portal-banner-link:hover {
+  opacity: 0.88;
+}
+
+.portal-banner-link img {
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.diag-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.diag-header h1 {
+  color: #1e40af;
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.diag-version {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  margin: 0 0 12px;
+}
+
+.diag-lead {
+  color: #374151;
+  margin: 0 0 8px;
+}
+
+.diag-notice {
+  display: inline-block;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.9rem;
+}
+
+.diag-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.diag-section-title {
+  color: #1e40af;
+  font-size: 1.1rem;
+  margin: 0 0 16px;
+}
+
+.diag-photo-examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.diag-example {
+  margin: 0;
+}
+
+.diag-example img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.diag-example figcaption {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.diag-example--good figcaption {
+  color: #166534;
+}
+
+.diag-example--bad figcaption {
+  color: #b91c1c;
+}
+
+.diag-file-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.diag-file-input {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 8px;
+}
+
+.diag-caption {
+  margin: 4px 0;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.diag-fieldset {
+  border: 0;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.diag-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diag-radio {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.diag-radio input {
+  margin-top: 4px;
+  accent-color: #2e7d32;
+}
+
+.diag-info {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border-radius: 8px;
+  color: #1e40af;
+  font-size: 0.9rem;
+}
+
+.diag-symptom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.diag-symptom-item img {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.diag-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.diag-checkbox input {
+  accent-color: #2e7d32;
+}
+
+.diag-actions {
+  text-align: center;
+}
+
+.diag-submit {
+  appearance: none;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 28px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.diag-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.diag-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.diag-status {
+  min-height: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  color: #1e40af;
+  margin: 8px 0 16px;
+}
+
+.diag-status--error {
+  color: #b91c1c;
+}
+
+.diag-result-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.diag-result-title {
+  color: #1e40af;
+  margin: 0 0 8px;
+}
+
+.diag-result-summary {
+  color: #166534;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.diag-result-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.diag-disease-name {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.diag-confidence {
+  margin: 0 0 16px;
+}
+
+.diag-result-main h4 {
+  margin: 16px 0 6px;
+  color: #374151;
+}
+
+.diag-result-main p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.diag-rac-link-wrap {
+  margin: 20px 0;
+}
+
+.diag-rac-link {
+  display: inline-block;
+  padding: 10px 16px;
+  background: #059669;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.diag-rac-link:hover {
+  background: #047857;
+}
+
+.diag-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.diag-top-label {
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.diag-progress {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.diag-progress-bar {
+  height: 100%;
+  background: #2563eb;
+}
+
+.diag-ref-image {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.diag-upload-preview {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.diag-ref-missing {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.diag-footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.diag-disclaimer {
+  color: #666;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.footer-gp {
+  margin: 0 0 8px;
+}
+
+.footer-gp-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  color: #374151;
+}
+
+.footer-gp-logo {
+  display: block;
+}
+
+.footer-gp-name {
+  font-size: 0.9rem;
+}
+
+.diag-version-footer {
+  color: #9ca3af;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .portal-banners {
+    grid-template-columns: 1fr;
+  }
+
+  .diag-photo-examples,
+  .diag-symptom-grid,
+  .diag-result-grid {
+    grid-template-columns: 1fr;
+  }
+}

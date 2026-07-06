@@ -2,7 +2,7 @@
 
 芝管理ツールを集約するポータルサイト（Cloudflare Pages + Functions）。
 
-**現在のバージョン: v1.1.2**
+**現在のバージョン: v1.1.3**
 
 ## 本番 URL
 
@@ -12,6 +12,7 @@
 | https://www.turf-tools.jp/portal/spray/ | ピンポイント天気で芝しごと（本番） |
 | https://www.turf-tools.jp/portal/rac/ | 楽RAC農薬ローテ（本番） |
 | https://www.turf-tools.jp/portal/risk/ | 病害リスク予報（本番） |
+| https://www.turf-tools.jp/portal/diagnosis/ | 病害画像診断AI（本番・ブラウザ内推論） |
 | https://tool-portal-9y2.pages.dev/portal/ | Pages 直接 URL（検証・フォールバック用） |
 
 > `tool-portal-9y2` の `-9y2` は Cloudflare が付与した一意サフィックスで削除できません。  
@@ -27,6 +28,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | `/portal/spray/` | ピンポイント天気で芝しごと |
 | `/portal/rac/` | 楽RAC農薬ローテ（クライアント完結・FAMIC JSON） |
 | `/portal/risk/` | 病害リスク予報（Leaflet 地図・最大4施設） |
+| `/portal/diagnosis/` | 病害画像診断AI（ONNX Runtime Web・端末内推論） |
 | `/portal/api/risk-map` | 病害リスク一括取得 API（地図用） |
 | `/portal/api/dashboard` | ポータル TOP 用まとめ取得 API |
 | `/portal/api/weather` | 天気予報 API（単体・デバッグ用） |
@@ -139,7 +141,7 @@ API: `/portal/api/gdd`（NASA POWER daily）。dashboard とは独立して散�
 | 施肥設計ナビ | 管理 | 施設の管理方針、気象情報をもとにした成長能、土壌分析値などをもとに、月毎のNPK施肥量計算を支援（起動に30秒必要） |
 | 病害リスク予報 | 予報 | 同一サイト `/portal/risk/` へリンク。地図上に翌日・明後日 朝6:00 の5病害リスク（最大4施設） |
 | AI質問箱 | AI | 事前に登録した前提情報を使って、芝管理特化型AIチャットアシスタント（起動に30秒必要） |
-| 病害画像診断AI | AI | 病斑写真から芝生の5大病害をAI診断（起動に30秒必要） |
+| 病害画像診断AI | AI | 同一サイト `/portal/diagnosis/` へリンク。病斑写真から11クラスをブラウザ内 ONNX 推論（v1.1.0） |
 | ピンポイント天気で芝しごと | 予報 | 同一サイト `/portal/spray/` へリンク。時間毎の芝管理作業アドバイス |
 | 積算温度追跡マップ | マップ | 積算温度による病害、雑草、害虫発生や生育予察を地図上にアニメーション表示 |
 | 温量指数気候区分マップ | マップ | 1981-2025の温量指数による気候区分の変化を地図上にアニメーション表示。地域によって育成しやすい芝種選択を支援 |
@@ -292,6 +294,20 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 **その他 UI**
 
 - AI質問箱セクション下の区切り横線を削除
+
+### 病害画像診断AI v1.1.0 / ポータル v1.1.3（2026-07）
+
+**新規: `/portal/diagnosis/`**
+
+- Streamlit（Render）版を Cloudflare Pages 向けに移植。推論は **ONNX Runtime Web（WASM）** で端末内完結（画像はサーバー非送信）
+- MobileNetV3-Small 単一モデル + 芝種・症状チェックによる確率補正（従来ロジック踏襲）
+- 初回のみ `model.onnx`（約 6 MB）を Cache API で保存。推論中は経過秒数を表示
+- Google Analytics **`G-FT1B3ZCT2B`**（診断ページ専用・現行 Render 版と同一 ID）
+- `portalSettings` Cookie の **芝種（greenType）** から暖地型/寒地型の初期値を設定
+- 診断結果から `/portal/rac/?target=...` へ農薬検索を連携
+- PC 推奨。スマートフォンでは動作が遅い場合があります
+
+**学習リポジトリ:** `turf-disease-app`（`export_onnx.py` → 成果物を本リポジトリへコピー）
 
 ## npm スクリプト
 

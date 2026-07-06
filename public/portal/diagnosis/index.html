@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!-- Google tag (gtag.js) — diagnosis page only -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FT1B3ZCT2B"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-FT1B3ZCT2B');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="芝生の病斑写真をアップロードすると、ブラウザ上でAIが病害を推定します。">
+  <title>芝しごと・病害画像診断AI</title>
+  <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
+  <link rel="stylesheet" href="../portal.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="diag-page">
+    <p class="portal-back"><a href="/portal/">← ツールポータルに戻る</a></p>
+
+    <section class="portal-banners" aria-label="関連リンク">
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="240" height="90">
+      </a>
+      <a class="portal-banner-link" href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="220" height="73">
+      </a>
+      <a class="portal-banner-link" href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+        <img src="/portal/youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="220" height="73">
+      </a>
+    </section>
+
+    <header class="diag-header">
+      <h1>芝しごと・病害画像診断AI</h1>
+      <p class="diag-version">v1.1.0</p>
+      <p class="diag-lead">芝生の病斑写真をアップロードすると AI が病害を推定します。</p>
+      <p class="diag-notice">PC 推奨。スマートフォンでは動作が遅い場合があります。</p>
+    </header>
+
+    <section class="diag-panel" aria-labelledby="photo-guide-title">
+      <h2 id="photo-guide-title" class="diag-section-title">撮影方法</h2>
+      <div class="diag-photo-examples">
+        <figure class="diag-example diag-example--good">
+          <img src="ui_images/photo_good.jpg" alt="良い撮影例" width="420" height="280">
+          <figcaption>良い例：病斑がはっきり写っている</figcaption>
+        </figure>
+        <figure class="diag-example diag-example--bad">
+          <img src="ui_images/photo_bad.jpg" alt="悪い撮影例" width="420" height="280">
+          <figcaption>悪い例：遠すぎる / ピンぼけ / 影</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="diag-panel">
+      <h2 class="diag-section-title">写真をアップロード</h2>
+      <label class="diag-file-label" for="photo-input">芝生の写真を選択してください</label>
+      <input type="file" id="photo-input" class="diag-file-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+      <p class="diag-caption">対応形式：JPG / JPEG / PNG / WEBP（推奨: JPG）</p>
+      <p class="diag-caption">スマホの「カメラ起動」は端末負荷が高いため、撮影後の画像ファイル選択を推奨します。</p>
+      <p class="diag-caption">高解像度画像は自動で縮小してから推論します（長辺 1024px）。</p>
+      <p class="diag-caption">最大ファイルサイズ：12 MB</p>
+      <p class="diag-caption">現在使用中の patch 画像: <span id="file-name">未選択</span></p>
+    </section>
+
+    <form id="diagnosis-form" class="diag-panel diag-form">
+      <fieldset class="diag-fieldset">
+        <legend class="diag-section-title">芝種を選択してください</legend>
+        <div class="diag-radio-group" role="radiogroup" aria-label="芝種">
+          <label class="diag-radio">
+            <input type="radio" name="turf-type" id="turf-warm" value="暖地型芝">
+            <span>暖地型芝（野芝・高麗芝・バミューダ芝等）</span>
+          </label>
+          <label class="diag-radio">
+            <input type="radio" name="turf-type" id="turf-cool" value="寒地型芝">
+            <span>寒地型芝（ベントグラス・ライグラス・フェスク・ケンタッキーブルーグラス等）</span>
+          </label>
+        </div>
+        <p class="diag-info" id="turf-type-label">現在の芝種: 暖地型芝</p>
+      </fieldset>
+
+      <h2 class="diag-section-title">症状の特徴（わかる範囲で選択）</h2>
+      <div class="diag-symptom-grid">
+        <div class="diag-symptom-item">
+          <img src="ui_images/symptom_patch.jpg" alt="円形パッチの例" width="420" height="280">
+          <label class="diag-checkbox"><input type="checkbox" id="symptom-patch"> 円形パッチ</label>
+        </div>
+        <div class="diag-symptom-item">
+          <img src="ui_images/symptom_thread.jpg" alt="赤い糸の例" width="420" height="280">
+          <label class="diag-checkbox"><input type="checkbox" id="symptom-thread"> 赤い糸</label>
+        </div>
+        <div class="diag-symptom-item">
+          <img src="ui_images/symptom_water.jpg" alt="水浸状の例" width="420" height="280">
+          <label class="diag-checkbox"><input type="checkbox" id="symptom-water"> 水浸状</label>
+        </div>
+        <div class="diag-symptom-item">
+          <img src="ui_images/symptom_ring.jpg" alt="リング状の例" width="420" height="280">
+          <label class="diag-checkbox"><input type="checkbox" id="symptom-ring"> リング状</label>
+        </div>
+      </div>
+
+      <div class="diag-actions">
+        <button type="submit" id="diagnose-btn" class="diag-submit">AI診断を開始</button>
+      </div>
+    </form>
+
+    <p id="diagnosis-status" class="diag-status" aria-live="polite"></p>
+    <div id="diagnosis-results" class="hidden"></div>
+
+    <footer class="diag-footer">
+      <p class="diag-disclaimer">
+        本アプリは意思決定支援ツールです。最終判断は現場状況と専門家確認を推奨します。<br>
+        撮影条件やデータ分布により診断精度は変動します。推論は端末内で完結し、画像はサーバーに送信されません。<br>
+        推論モデル: MobileNetV3-Small（単一モデル分類）。PC 推奨。スマートフォンでは動作が遅い場合があります。
+      </p>
+      <p class="footer-gp">
+        <a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer" class="footer-gp-link">
+          <img src="/portal/grow-and-progress-logo.png?v=2" alt="" class="footer-gp-logo" width="72" height="72">
+          <span class="footer-gp-name">グロウアンドプログレス</span>
+        </a>
+      </p>
+      <p class="diag-version-footer">Version 1.1.0 ｜ 2026.07</p>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
