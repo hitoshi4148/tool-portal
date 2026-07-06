@@ -10,24 +10,71 @@ const AGROMAP_COOKIE_DAYS = 365;
 const LOCATION_NOT_SET_MESSAGE =
   "施設の場所が未設定です。右上の「⚙ 設定」から緯度・経度を入力してください";
 
-async function parseApiJson(response) {
-  const text = await response.text();
+const API_RETRYABLE_STATUSES = new Set([502, 503, 504, 520, 524, 525]);
+const API_MAX_INFRA_RETRIES = 2;
+const API_RETRY_BASE_MS = 1000;
+
+function isHtmlApiBody(text) {
   const trimmed = text.trimStart();
-  if (trimmed.startsWith("<") || trimmed.startsWith("<!")) {
+  return trimmed.startsWith("<") || trimmed.startsWith("<!");
+}
+
+function apiRetryDelayMs(attempt) {
+  const base = API_RETRY_BASE_MS * 2 ** attempt;
+  const jitter = Math.random() * 400;
+  return base + jitter;
+}
+
+function shouldRetryInfraResponse(status, text) {
+  if (API_RETRYABLE_STATUSES.has(status)) {
+    return true;
+  }
+  return isHtmlApiBody(text);
+}
+
+function buildApiJsonError(status, text) {
+  if (isHtmlApiBody(text)) {
     const isLocalDevHost =
       location.hostname === "localhost" || location.hostname === "127.0.0.1";
     const hint = isLocalDevHost
       ? "開発時は tool-portal で npm run dev を実行し、http://127.0.0.1:8788/portal/ から開いてください（Live Server 等の静的サーバーでは API が動きません）。"
       : "サーバーが HTML を返しました。https://www.turf-tools.jp/portal/ から開き直すか、しばらく待って再読み込みしてください。";
-    throw new Error(`API 応答が JSON ではありません。${hint}`);
+    return new Error(`API 応答が JSON ではありません。${hint}`);
   }
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error(
-      `API 応答の解析に失敗しました（${response.status}）: ${text.slice(0, 120)}`
-    );
+
+  return new Error(
+    `API 応答の解析に失敗しました（${status}）: ${text.slice(0, 120)}`
+  );
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchApiJson(url, init = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= API_MAX_INFRA_RETRIES; attempt += 1) {
+    const response = await fetch(url, init);
+    const text = await response.text();
+
+    if (shouldRetryInfraResponse(response.status, text)) {
+      lastError = buildApiJsonError(response.status, text);
+      if (attempt < API_MAX_INFRA_RETRIES) {
+        await sleep(apiRetryDelayMs(attempt));
+        continue;
+      }
+      throw lastError;
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw buildApiJsonError(response.status, text);
+    }
   }
+
+  throw lastError ?? new Error("API 応答の取得に失敗しました。");
 }
 
 const GERMINATION_GDD_CONFIG = {
@@ -357,10 +404,9 @@ function renderWeatherWidget(hourly, days) {
 }
 
 async function fetchLocationName(lat, lon) {
-  const response = await fetch(
+  const data = await fetchApiJson(
     `${GEOCODE_API}?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`
   );
-  const data = await parseApiJson(response);
 
   if (!data.success) {
     throw new Error(data.error || "地名の取得に失敗しました");
@@ -429,8 +475,7 @@ async function loadPortalData() {
   const gddPromise = refreshAllGdd(settings);
 
   try {
-    const response = await fetch(`${DASHBOARD_API}?${params.toString()}`);
-    const data = await parseApiJson(response);
+    const data = await fetchApiJson(`${DASHBOARD_API}?${params.toString()}`);
 
     if (!data.success) {
       throw new Error(data.error || "データの取得に失敗しました");
@@ -1091,8 +1136,7 @@ async function fetchProductGdd(lat, lon, startDate, baseTemp = 0) {
     start_date: startDate,
     base_temp: String(baseTemp),
   });
-  const response = await fetch(`${GDD_API}?${params.toString()}`);
-  const data = await parseApiJson(response);
+  const data = await fetchApiJson(`${GDD_API}?${params.toString()}`);
   if (!data.success) {
     throw new Error(data.error || "GDD取得に失敗しました");
   }
@@ -1397,7 +1441,7 @@ async function sendAdvisorMessage() {
     sendButton.innerHTML = '<span class="ai-advisor-loading"></span> 処理中...';
 
   try {
-    const response = await fetch(CHAT_API, {
+    const data = await fetchApiJson(CHAT_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1405,8 +1449,6 @@ async function sendAdvisorMessage() {
         settings: getAdvisorSettingsPayload(),
       }),
     });
-
-    const data = await parseApiJson(response);
 
     if (!data.success) {
       let errorMessage = data.error || "エラーが発生しました";
