@@ -175,7 +175,8 @@ function updatePortalTitle(settings = loadSettings()) {
     prefixEl.classList.toggle("hidden", !prefix);
   }
 
-  document.title = prefix ? `${prefix}芝しごとポータル` : "芝しごとポータル";
+  // GA4 のページタイトル集計を施設名・地名で分割しないため、document.title は固定のままにする。
+  document.title = "芝しごとポータル";
 }
 
 const WARM_GRASS_LEGACY = {
