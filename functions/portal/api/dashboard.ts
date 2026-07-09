@@ -52,16 +52,25 @@ function cachedDashboardResponse(
 
 async function waitForCachedDashboard(
   cache: Cache,
-  cacheKey: Request
-): Promise<Response | null> {
+  cacheKey: Request,
+  lockKey: Request
+): Promise<
+  | { status: "hit"; cached: Response }
+  | { status: "lock-released" }
+  | { status: "timeout" }
+> {
   for (let attempt = 0; attempt < CACHE_POLL_MAX_ATTEMPTS; attempt += 1) {
     await sleep(CACHE_POLL_INTERVAL_MS);
     const cached = await cache.match(cacheKey);
     if (cached) {
-      return cached;
+      return { status: "hit", cached };
+    }
+    const lockHeld = await cache.match(lockKey);
+    if (!lockHeld) {
+      return { status: "lock-released" };
     }
   }
-  return null;
+  return { status: "timeout" };
 }
 
 async function buildDashboardResponse(request: Request): Promise<Response> {
@@ -76,9 +85,23 @@ async function buildDashboardResponse(request: Request): Promise<Response> {
 
   const existingLock = await cache.match(lockKey);
   if (existingLock) {
-    const waited = await waitForCachedDashboard(cache, cacheKey);
-    if (waited) {
-      return cachedDashboardResponse(waited, "HIT-WAIT");
+    const waitResult = await waitForCachedDashboard(cache, cacheKey, lockKey);
+    if (waitResult.status === "hit") {
+      return cachedDashboardResponse(waitResult.cached, "HIT-WAIT");
+    }
+    if (waitResult.status === "timeout") {
+      const lockStillHeld = await cache.match(lockKey);
+      if (lockStillHeld) {
+        return jsonResponse(
+          {
+            success: false,
+            error:
+              "Dashboard is still being prepared. Please retry shortly.",
+          },
+          503,
+          { "Retry-After": "2", "X-Portal-Cache": "WAIT-TIMEOUT" }
+        );
+      }
     }
   }
 
@@ -138,16 +161,33 @@ async function buildDashboardResponse(request: Request): Promise<Response> {
   }
 }
 
+async function runDashboardRequest(request: Request): Promise<Response> {
+  try {
+    return await buildDashboardResponse(request);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return jsonResponse({ success: false, error: message }, 500);
+  }
+}
+
 export const onRequestGet: PagesFunction = async (context) => {
   const key = inflightKey(context.request);
-  let pending = inFlightByUrl.get(key);
-
-  if (!pending) {
-    pending = buildDashboardResponse(context.request).finally(() => {
-      inFlightByUrl.delete(key);
-    });
-    inFlightByUrl.set(key, pending);
+  const existing = inFlightByUrl.get(key);
+  if (existing) {
+    return existing;
   }
 
+  const pending = runDashboardRequest(context.request).then(
+    (response) => {
+      inFlightByUrl.delete(key);
+      return response;
+    },
+    (error) => {
+      inFlightByUrl.delete(key);
+      throw error;
+    }
+  );
+
+  inFlightByUrl.set(key, pending);
   return pending;
 };
