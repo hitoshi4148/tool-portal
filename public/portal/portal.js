@@ -11,8 +11,8 @@ const LOCATION_NOT_SET_MESSAGE =
   "施設の場所が未設定です。右上の「⚙ 設定」から緯度・経度を入力してください";
 
 const API_RETRYABLE_STATUSES = new Set([502, 503, 504, 520, 524, 525]);
-const API_MAX_INFRA_RETRIES = 2;
-const API_RETRY_BASE_MS = 1000;
+const API_MAX_INFRA_RETRIES = 5;
+const API_RETRY_BASE_MS = 2000;
 
 function isHtmlApiBody(text) {
   const trimmed = text.trimStart();
