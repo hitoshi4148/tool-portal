@@ -10,6 +10,10 @@ export interface HourlyWeatherRecord {
   datetime: string;
   temperature: number | null;
   humidity: number | null;
+  /** Hourly surface shortwave downwelling (Wh/m²), NASA POWER ALLSKY_SFC_SW_DWN */
+  shortwaveRadiation?: number | null;
+  /** 0–1 fraction, MET locationforecast cloud_area_fraction */
+  cloudAreaFraction?: number | null;
 }
 
 function formatDateForNasa(date: string): string {
@@ -58,6 +62,7 @@ function normalizeHourly(rawData: {
 
   const t2m = parameter.T2M ?? {};
   const rh2m = parameter.RH2M ?? {};
+  const sw = parameter.ALLSKY_SFC_SW_DWN ?? {};
 
   return Object.keys(t2m)
     .sort()
@@ -79,6 +84,7 @@ function normalizeHourly(rawData: {
         datetime: `${jstYear}-${jstMonth}-${jstDay}T${jstHour}:00:00+09:00`,
         temperature: toNumber(t2m[timestamp]),
         humidity: toNumber(rh2m[timestamp]),
+        shortwaveRadiation: toNumber(sw[timestamp]),
       };
     });
 }
@@ -136,7 +142,7 @@ export async function fetchNasaPowerHourly(
   endDate: string
 ): Promise<HourlyWeatherRecord[]> {
   const params = new URLSearchParams({
-    parameters: "T2M,RH2M",
+    parameters: "T2M,RH2M,ALLSKY_SFC_SW_DWN",
     community: "AG",
     longitude: String(longitude),
     latitude: String(latitude),

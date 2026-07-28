@@ -2,6 +2,7 @@ const COOKIE_NAME = "portalSettings";
 const SPRAY_CACHE_KEY = "portalSprayForecastCache";
 const SPRAY_CACHE_TTL_MS = 60 * 60 * 1000;
 const DASHBOARD_API = "/portal/api/dashboard";
+const CBI_API = "/portal/api/cbi";
 const GDD_API = "/portal/api/gdd";
 const CHAT_API = "/portal/api/chat";
 const GEOCODE_API = "/portal/api/geocode";
@@ -433,6 +434,32 @@ async function ensureLocationName(settings) {
   return settings;
 }
 
+async function fetchBentCarbonBalance(settings, dashboardData) {
+  if (dashboardData?.bentCarbonBalance?.forecasts?.length > 0) {
+    return dashboardData.bentCarbonBalance;
+  }
+
+  const params = new URLSearchParams({
+    lat: settings.lat,
+    lon: settings.lon,
+  });
+
+  try {
+    const data = await fetchApiJson(`${CBI_API}?${params.toString()}`);
+    if (data.success && data.forecasts?.length > 0) {
+      return {
+        version: data.version,
+        forecasts: data.forecasts,
+        energyReserve: data.energyReserve,
+      };
+    }
+  } catch {
+    /* dashboard または CBI API が未デプロイの場合 */
+  }
+
+  return dashboardData?.bentCarbonBalance ?? null;
+}
+
 async function loadPortalData() {
   let settings = loadSettings();
 
@@ -442,6 +469,10 @@ async function loadPortalData() {
     renderDiseaseRiskPlaceholder(LOCATION_NOT_SET_MESSAGE);
     renderGddPlaceholder(LOCATION_NOT_SET_MESSAGE);
     renderGpPlaceholder(LOCATION_NOT_SET_MESSAGE);
+    CbiUI.renderCbiPlaceholder(
+      document.getElementById("cbi-area"),
+      LOCATION_NOT_SET_MESSAGE
+    );
     return;
   }
 
@@ -454,6 +485,7 @@ async function loadPortalData() {
   const diseaseError = document.getElementById("disease-risk-error");
   const gddError = document.getElementById("gdd-error");
   const gpError = document.getElementById("gp-chart-error");
+  const cbiError = document.getElementById("cbi-error");
 
   weatherLoading.classList.remove("hidden");
   insightsLoading.classList.remove("hidden");
@@ -461,10 +493,12 @@ async function loadPortalData() {
   diseaseError.classList.add("hidden");
   gddError.classList.add("hidden");
   gpError.classList.add("hidden");
+  cbiError.classList.add("hidden");
   renderWeatherPlaceholder("");
   renderDiseaseRiskPlaceholder("");
   renderGddPlaceholder("");
   renderGpPlaceholder("");
+  CbiUI.renderCbiPlaceholder(document.getElementById("cbi-area"), "");
 
   const params = new URLSearchParams({
     lat: settings.lat,
@@ -488,6 +522,11 @@ async function loadPortalData() {
       dayAfterTomorrow: data.diseaseRisk.dayAfterTomorrow,
     });
     renderGpChart(data.growthPotential);
+    const bentCarbonBalance = await fetchBentCarbonBalance(settings, data);
+    CbiUI.renderCbiPanels(
+      document.getElementById("cbi-area"),
+      bentCarbonBalance
+    );
     if (data.sprayForecast) {
       cacheSprayForecast(settings.lat, settings.lon, data.sprayForecast);
     }
@@ -498,9 +537,15 @@ async function loadPortalData() {
     weatherError.classList.remove("hidden");
     diseaseError.classList.remove("hidden");
     gpError.classList.remove("hidden");
+    cbiError.textContent = err.message;
+    cbiError.classList.remove("hidden");
     renderWeatherPlaceholder("天気予報を表示できませんでした。");
     renderDiseaseRiskPlaceholder("病害リスクを表示できませんでした。");
     renderGpPlaceholder("GPを表示できませんでした。");
+    CbiUI.renderCbiPlaceholder(
+      document.getElementById("cbi-area"),
+      "ベント炭素収支を表示できませんでした。"
+    );
   } finally {
     await gddPromise;
     weatherLoading.classList.add("hidden");

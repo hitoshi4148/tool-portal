@@ -143,6 +143,7 @@ async function buildDashboardResponse(request: Request): Promise<Response> {
       diseaseRisk: dashboard.diseaseRisk,
       growthPotential: dashboard.growthPotential,
       sprayForecast: dashboard.sprayForecast,
+      bentCarbonBalance: dashboard.bentCarbonBalance,
     };
 
     const response = jsonResponse(payload, 200, {

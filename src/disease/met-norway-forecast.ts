@@ -10,6 +10,7 @@ export function normalizeMetNorwayForecast(
         details?: {
           air_temperature?: number;
           relative_humidity?: number;
+          cloud_area_fraction?: number;
         };
       };
     };
@@ -37,6 +38,7 @@ export function normalizeMetNorwayForecast(
 
     const temperature = instant.air_temperature;
     const humidity = instant.relative_humidity;
+    const cloudRaw = instant.cloud_area_fraction;
 
     if (temperature == null || humidity == null) {
       continue;
@@ -46,6 +48,8 @@ export function normalizeMetNorwayForecast(
       datetime,
       temperature: Number(temperature),
       humidity: Number(humidity),
+      cloudAreaFraction:
+        cloudRaw == null ? null : Number(cloudRaw) / 100,
     });
   }
 

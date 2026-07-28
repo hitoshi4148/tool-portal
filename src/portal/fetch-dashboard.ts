@@ -1,3 +1,4 @@
+import { computeBentCbiReport } from "../cbi/prepare-cbi";
 import {
   addDaysToDateString,
   extractMetNorwayForecast,
@@ -28,6 +29,7 @@ export interface PortalDashboardData {
     series: ReturnType<typeof buildGpSeriesList>;
   };
   sprayForecast: ReturnType<typeof judge>;
+  bentCarbonBalance: ReturnType<typeof computeBentCbiReport>;
 }
 
 export async function fetchPortalDashboard(
@@ -40,6 +42,7 @@ export async function fetchPortalDashboard(
   const today = jstTodayString();
   const endDate = addDaysToDateString(today, -1);
   const diseaseStartDate = addDaysToDateString(today, -7);
+  const cbiHistoryStartDate = addDaysToDateString(today, -8);
 
   const [metData, nasaDailyAll, nasaHourly] = await Promise.all([
     fetchMet(latitude, longitude),
@@ -49,7 +52,7 @@ export async function fetchPortalDashboard(
       `${lastYear}-01-01`,
       endDate
     ),
-    fetchNasaPowerHourly(latitude, longitude, diseaseStartDate, endDate),
+    fetchNasaPowerHourly(latitude, longitude, cbiHistoryStartDate, endDate),
   ]);
 
   const weather = extractHourlyWeather(metData.properties.timeseries, 48);
@@ -82,5 +85,6 @@ export async function fetchPortalDashboard(
       series: buildGpSeriesList(warmGrass, coolGrass, monthlyTemperatures),
     },
     sprayForecast: judge(metData.properties.timeseries),
+    bentCarbonBalance: computeBentCbiReport(metData, nasaHourly),
   };
 }
