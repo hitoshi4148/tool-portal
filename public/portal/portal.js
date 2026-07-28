@@ -1409,11 +1409,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("save-settings-btn").addEventListener("click", handleSaveSettings);
   DiseaseRiskUI.init();
   DiseaseRiskUI.bindLogicButtons(document.getElementById("disease-risk-area"));
+  CbiUI.bindLogicButtons(document.getElementById("cbi-area"));
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeSettingsModal();
       DiseaseRiskUI.closeDiseaseLogicModal();
+      CbiUI.closeCbiLogicModal();
     }
   });
 

@@ -682,70 +682,86 @@ section h2 {
 .cbi-panel {
     flex: 1;
     min-width: 0;
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
-.cbi-forecast-list {
+.cbi-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.cbi-logic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.cbi-logic-table th,
+.cbi-logic-table td {
+    padding: 4px 6px;
+    border: 1px solid #FCD34D;
+    text-align: center;
+}
+
+.cbi-logic-table th {
+    background: #FEF9C3;
+    font-weight: 600;
+}
+
+.cbi-item .disease-risk-item-values {
+    gap: 8px;
+}
+
+.cbi-value-cell {
+    width: 56px;
+    min-height: 52px;
+    padding: 4px 2px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    line-height: 1.15;
+    white-space: normal;
 }
 
-.cbi-forecast-block + .cbi-forecast-block {
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+.cbi-value-cell--empty {
+    background-color: #808080 !important;
 }
 
-.cbi-forecast-subtitle {
-    margin: 0 0 8px;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: #4b5563;
+.cbi-value-cell--energy {
+    width: 72px;
+    min-height: 52px;
 }
 
-.cbi-title {
-    margin: 0 0 12px;
-    font-size: 1rem;
+.cbi-energy-values {
+    justify-content: flex-end;
+}
+
+.cbi-cell-stars {
+    font-size: 10px;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.cbi-cell-label {
+    font-size: 9px;
     font-weight: 700;
-    color: #1f2937;
-}
-
-.cbi-stars {
-    font-size: 1.5rem;
-    letter-spacing: 2px;
-    color: #f59e0b;
-    line-height: 1.2;
-}
-
-.cbi-star-label,
-.cbi-energy-label {
-    margin: 6px 0 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #374151;
-}
-
-.cbi-energy-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #059669;
     line-height: 1.1;
 }
 
-.cbi-comment {
-    margin: 10px 0 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: #4b5563;
+.cbi-cell-meta,
+.cbi-cell-percent {
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1.1;
+    opacity: 0.95;
 }
 
-.cbi-meta {
-    margin: 10px 0 0;
-    font-size: 0.78rem;
-    color: #9ca3af;
+.cbi-cell-percent {
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .portal-gp-row {
