@@ -97,8 +97,10 @@ export function filterDailyByDateRange(
   return daily.filter((row) => row.date >= startDate && row.date <= endDate);
 }
 
+import { fetchWithTimeout } from "../shared/fetch-with-timeout";
+
 async function fetchRaw(url: string) {
-  const response = await fetch(url);
+  const response = await fetchWithTimeout(url);
   if (!response.ok) {
     throw new Error(`NASA POWER API error: ${response.status}`);
   }

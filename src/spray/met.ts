@@ -28,9 +28,11 @@ export interface MetResponse {
   };
 }
 
+import { fetchWithTimeout } from "../shared/fetch-with-timeout";
+
 export async function fetchMet(lat: number, lon: number): Promise<MetResponse> {
   const url = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: {
       "User-Agent": "tool-portal/0.1 (contact: hitoshi.yoshinobu@gmail.com)",
     },

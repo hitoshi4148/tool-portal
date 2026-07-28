@@ -1,6 +1,7 @@
 import { fetchPortalDashboard } from "../../../src/portal/fetch-dashboard";
 
 const DASHBOARD_CACHE_TTL_SECONDS = 30 * 60;
+const DASHBOARD_FETCH_TIMEOUT_MS = 45_000;
 const DASHBOARD_LOCK_TTL_SECONDS = 120;
 const CACHE_POLL_INTERVAL_MS = 500;
 const CACHE_POLL_MAX_ATTEMPTS = 60;
@@ -163,11 +164,33 @@ async function buildDashboardResponse(request: Request): Promise<Response> {
 }
 
 async function runDashboardRequest(request: Request): Promise<Response> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await buildDashboardResponse(request);
+    return await Promise.race([
+      buildDashboardResponse(request),
+      new Promise<Response>((resolve) => {
+        timeoutId = setTimeout(() => {
+          resolve(
+            jsonResponse(
+              {
+                success: false,
+                error:
+                  "Dashboard request timed out. Please reload in a moment.",
+              },
+              504,
+              { "Retry-After": "3", "X-Portal-Cache": "TIMEOUT" }
+            )
+          );
+        }, DASHBOARD_FETCH_TIMEOUT_MS);
+      }),
+    ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return jsonResponse({ success: false, error: message }, 500);
+  } finally {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+    }
   }
 }
 
