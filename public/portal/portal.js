@@ -1451,6 +1451,11 @@ function expandAdvisorChat() {
   messagesEl.classList.add("expanded");
 }
 
+function scrollAdvisorMessageToStart(container, messageEl) {
+  const paddingTop = Number.parseFloat(getComputedStyle(container).paddingTop) || 0;
+  container.scrollTop = Math.max(0, messageEl.offsetTop - paddingTop);
+}
+
 function addAdvisorMessage(content, isUser = false) {
   const messagesEl = document.getElementById("ai-advisor-messages");
   const messageDiv = document.createElement("div");
@@ -1469,7 +1474,16 @@ function addAdvisorMessage(content, isUser = false) {
 
   messageDiv.appendChild(contentDiv);
   messagesEl.appendChild(messageDiv);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  if (isUser) {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    scrollAdvisorMessageToStart(messagesEl, messageDiv);
+    messageDiv.scrollIntoView({ block: "start", behavior: "smooth" });
+  });
 }
 
 async function sendAdvisorMessage() {
@@ -1516,7 +1530,7 @@ async function sendAdvisorMessage() {
   } finally {
     sendButton.disabled = false;
     sendButton.textContent = "AIに質問";
-    input.focus();
+    input.focus({ preventScroll: true });
   }
 }
 
