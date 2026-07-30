@@ -1321,6 +1321,28 @@ section h2 {
     padding-bottom: 6px;
 }
 
+.disease-risk-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px 0;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 6px;
+}
+
+.disease-risk-title-row .disease-risk-title {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.disease-risk-more-link {
+    position: static;
+    flex-shrink: 0;
+    box-shadow: none;
+}
+
 .disease-risk-table-header {
     display: grid;
     grid-template-columns: 1fr 56px 56px;

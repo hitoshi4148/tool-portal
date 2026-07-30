@@ -230,7 +230,16 @@ button.secondary:hover {
 
 .forecast-table-container {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: min(70vh, 640px);
     margin-top: 10px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.forecast-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 .forecast-table {

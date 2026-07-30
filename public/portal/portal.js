@@ -341,7 +341,9 @@ function getJstDateParts(date = new Date()) {
 }
 
 function renderDiseaseRiskPanels(forecast) {
-  DiseaseRiskUI.renderDiseaseRiskPanels(document.getElementById("disease-risk-area"), forecast);
+  DiseaseRiskUI.renderDiseaseRiskPanels(document.getElementById("disease-risk-area"), forecast, {
+    showRegionLink: true,
+  });
 }
 
 function renderWeatherWidget(hourly, days) {

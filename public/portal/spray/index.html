@@ -244,6 +244,39 @@
             fetchForecast();
         }
 
+        function findFirstUpcomingSlotHour(now, timeSlots, dates) {
+            for (const dateInfo of dates) {
+                for (const timeSlot of timeSlots) {
+                    const slotDate = new Date(dateInfo.date);
+                    slotDate.setHours(timeSlot.hour, 0, 0, 0);
+                    if (slotDate >= now) {
+                        return timeSlot.hour;
+                    }
+                }
+            }
+
+            return timeSlots[timeSlots.length - 1]?.hour ?? null;
+        }
+
+        function scrollForecastToCurrentTime(container, targetHour) {
+            if (targetHour == null) {
+                return;
+            }
+
+            const targetRow = container.querySelector(`tbody tr[data-hour="${targetHour}"]`);
+            if (!targetRow) {
+                return;
+            }
+
+            requestAnimationFrame(() => {
+                const thead = container.querySelector('thead');
+                const theadHeight = thead ? thead.offsetHeight : 0;
+                const rowTop = targetRow.getBoundingClientRect().top;
+                const containerTop = container.getBoundingClientRect().top;
+                container.scrollTop += rowTop - containerTop - theadHeight;
+            });
+        }
+
         function displayResults(results) {
             const container = document.getElementById('forecast-table');
             container.innerHTML = '';
@@ -304,7 +337,7 @@
             tableHTML += '</tr></thead><tbody>';
 
             timeSlots.forEach(timeSlot => {
-                tableHTML += '<tr>';
+                tableHTML += `<tr data-hour="${timeSlot.hour}">`;
                 tableHTML += `<td class="time-cell">${timeSlot.label}</td>`;
 
                 dates.forEach(dateInfo => {
@@ -385,6 +418,7 @@
             tableHTML += '</tbody></table>';
             container.innerHTML = tableHTML;
             document.getElementById('results').classList.remove('hidden');
+            scrollForecastToCurrentTime(container, findFirstUpcomingSlotHour(now, timeSlots, dates));
         }
 
         function showError(message) {

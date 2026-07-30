@@ -198,10 +198,18 @@ const DiseaseRiskUI = (() => {
     firstLabel,
     secondLabel,
     firstRisks,
-    secondRisks
+    secondRisks,
+    showRegionLink = false
   ) {
+    const titleHtml = showRegionLink
+      ? `<div class="disease-risk-title-row">
+      <h3 class="disease-risk-title">${title}</h3>
+      <a href="/portal/risk/" class="weather-more-link disease-risk-more-link" title="病害リスク予報">他地域を見る</a>
+    </div>`
+      : `<h3 class="disease-risk-title">${title}</h3>`;
+
     let html = `<div class="disease-risk-panel disease-risk-panel--combined">
-    <h3 class="disease-risk-title">${title}</h3>
+    ${titleHtml}
     <div class="disease-risk-table">
       <div class="disease-risk-table-header">
         <div class="disease-risk-table-name"></div>
@@ -245,13 +253,14 @@ const DiseaseRiskUI = (() => {
       tomorrowLabel,
       dayAfterTomorrowLabel,
       forecast.tomorrow,
-      forecast.dayAfterTomorrow
+      forecast.dayAfterTomorrow,
+      options.showRegionLink === true
     );
   }
 
-  function renderDiseaseRiskPanels(container, forecast) {
+  function renderDiseaseRiskPanels(container, forecast, options = {}) {
     if (!container) return;
-    container.innerHTML = buildForecastPanelHtml(forecast);
+    container.innerHTML = buildForecastPanelHtml(forecast, options);
   }
 
   function getRiskValues(risks) {
