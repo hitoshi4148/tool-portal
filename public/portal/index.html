@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20250731v128">
+    <link rel="stylesheet" href="/portal/portal.css?v=20250806v131">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -107,7 +107,10 @@
             </div>
             <div id="portal-cbi-row" class="portal-cbi-row">
                 <div id="cbi-error" class="error hidden"></div>
-                <div id="cbi-area"></div>
+                <div class="cbi-row-inner">
+                    <div id="cbi-area" class="cbi-row-col"></div>
+                    <div id="work-memo-area" class="cbi-row-col"></div>
+                </div>
             </div>
             <div id="portal-gp-row" class="portal-gp-row portal-gp-rac-row">
                 <div class="portal-gp-col">
@@ -264,7 +267,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.3.2</p>
+            <p class="footer-version">v1.4.0</p>
         </footer>
     </div>
 
@@ -370,8 +373,9 @@
         </div>
     </div>
 
+    <script src="/portal/work-memo-ui.js?v=20250806v137"></script>
     <script src="/portal/disease-risk-ui.js?v=20250731v128"></script>
-    <script src="/portal/cbi-ui.js?v=20250728v125"></script>
-    <script src="/portal/portal.js?v=20250731v128"></script>
+    <script src="/portal/cbi-ui.js?v=20250806v129"></script>
+    <script src="/portal/portal.js?v=20250806v129"></script>
 </body>
 </html>

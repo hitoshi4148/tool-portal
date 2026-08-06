@@ -679,9 +679,183 @@ section h2 {
     align-items: stretch;
 }
 
+.cbi-row-col {
+    flex: 1;
+    min-width: 0;
+}
+
 .cbi-panel {
     flex: 1;
     min-width: 0;
+    height: 100%;
+}
+
+.cbi-panel--combined {
+    display: flex;
+    flex-direction: column;
+}
+
+.cbi-section {
+    margin-bottom: 12px;
+}
+
+.cbi-section--energy {
+    margin-bottom: 0;
+}
+
+.cbi-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.cbi-section-label {
+    font-size: 0.82em;
+    font-weight: 700;
+    color: #374151;
+}
+
+.work-memo-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.work-memo-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.work-memo-title-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.work-memo-title-main .disease-risk-title {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.work-memo-info-anchor .work-memo-info-popover {
+    left: auto;
+    right: 0;
+    max-width: min(360px, 92vw);
+}
+
+.work-memo-title-row .disease-risk-title {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.work-memo-intro {
+    margin: 8px 0 12px;
+    font-size: 0.82em;
+    line-height: 1.5;
+    color: #4b5563;
+}
+
+.work-memo-sheet-name {
+    margin: 0 0 8px;
+    font-size: 0.75em;
+    color: #6b7280;
+}
+
+.work-memo-connect-btn,
+.work-memo-add-btn {
+    align-self: flex-start;
+}
+
+.work-memo-disconnect-btn {
+    padding: 1px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.work-memo-table-wrap {
+    flex: 1;
+    min-height: 132px;
+    max-height: 132px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #fff;
+}
+
+.work-memo-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.work-memo-table th,
+.work-memo-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eef2f7;
+    text-align: left;
+    vertical-align: top;
+}
+
+.work-memo-table th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    z-index: 1;
+    font-weight: 700;
+    color: #374151;
+}
+
+.work-memo-table td:nth-child(1) {
+    width: 28%;
+    white-space: nowrap;
+}
+
+.work-memo-table td:nth-child(2) {
+    width: 24%;
+}
+
+.work-memo-empty {
+    text-align: center;
+    color: #9ca3af;
+}
+
+.work-memo-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+    gap: 6px;
+    align-items: center;
+}
+
+.work-memo-form input[type="date"],
+.work-memo-form input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.work-memo-status {
+    margin: 8px 0 0;
+    font-size: 0.75em;
+    color: #059669;
+}
+
+.work-memo-status--error {
+    color: #dc2626;
 }
 
 .cbi-panel-title {
@@ -2036,6 +2210,10 @@ footer p {
 
     .cbi-row-inner {
         flex-direction: column;
+    }
+
+    .work-memo-form {
+        grid-template-columns: 1fr;
     }
 
     .portal-gp-rac-row {

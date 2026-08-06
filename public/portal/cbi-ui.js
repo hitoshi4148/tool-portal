@@ -231,61 +231,62 @@ const CbiUI = (() => {
     </div>`;
   }
 
-  function buildForecastPanel(forecasts) {
+  function buildCombinedCbiPanel(forecasts, energy) {
     const tomorrow = getForecastByDay(forecasts, 1);
     const dayAfter = getForecastByDay(forecasts, 2);
     const tomorrowLabel = tomorrow?.targetLabel ?? formatTargetLabel(1);
     const dayAfterLabel = dayAfter?.targetLabel ?? formatTargetLabel(2);
-    const comments = [tomorrow, dayAfter]
+    const forecastComments = [tomorrow, dayAfter]
       .filter(Boolean)
       .map((entry) => {
         const prefix = entry.daysFromToday === 2 ? "明後日" : "明日";
         return `${prefix}: ${entry.comment}`;
       })
       .join(" ");
+    const energyColor = getEnergyColor(energy.percent);
+    const footerParts = [
+      forecastComments,
+      `${energy.comment}（加重平均 CBI ${energy.weightedCbi.toFixed(2)}）`,
+    ].filter(Boolean);
 
-    return `<div class="disease-risk-panel disease-risk-panel--combined cbi-panel">
-      <h3 class="disease-risk-title cbi-panel-title">
-        <span>ベント炭素収支予測</span>
-        <button type="button" class="disease-logic-btn" data-cbi-logic="forecast">判定ロジック</button>
-      </h3>
-      <div class="disease-risk-table">
-        <div class="disease-risk-table-header">
-          <div class="disease-risk-table-name"></div>
-          <div class="disease-risk-table-col">${tomorrowLabel}</div>
-          <div class="disease-risk-table-col">${dayAfterLabel}</div>
+    return `<div class="disease-risk-panel disease-risk-panel--combined cbi-panel cbi-panel--combined">
+      <h3 class="disease-risk-title">ベント炭素収支・体力指数</h3>
+      <div class="cbi-section">
+        <div class="cbi-section-head">
+          <span class="cbi-section-label">炭素収支予測</span>
+          <button type="button" class="disease-logic-btn" data-cbi-logic="forecast">判定ロジック</button>
         </div>
-        <div class="disease-risk-list">
-          <div class="disease-risk-item cbi-item">
-            <div class="disease-risk-item-name">
-              <span class="disease-risk-item-label">炭素収支</span>
-            </div>
-            <div class="disease-risk-item-values">
-              ${buildCbiValueCell(tomorrow)}
-              ${buildCbiValueCell(dayAfter)}
+        <div class="disease-risk-table">
+          <div class="disease-risk-table-header">
+            <div class="disease-risk-table-name"></div>
+            <div class="disease-risk-table-col">${tomorrowLabel}</div>
+            <div class="disease-risk-table-col">${dayAfterLabel}</div>
+          </div>
+          <div class="disease-risk-list">
+            <div class="disease-risk-item cbi-item">
+              <div class="disease-risk-item-name">
+                <span class="disease-risk-item-label">炭素収支</span>
+              </div>
+              <div class="disease-risk-item-values">
+                ${buildCbiValueCell(tomorrow)}
+                ${buildCbiValueCell(dayAfter)}
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <p class="disease-risk-footer">${comments || "予測コメントを取得できませんでした。"}</p>
-    </div>`;
-  }
-
-  function buildEnergyPanel(energy) {
-    const color = getEnergyColor(energy.percent);
-    return `<div class="disease-risk-panel disease-risk-panel--combined cbi-panel">
-      <h3 class="disease-risk-title cbi-panel-title">
-        <span>ベント体力指数</span>
-        <button type="button" class="disease-logic-btn" data-cbi-logic="energy">判定ロジック</button>
-      </h3>
-      <div class="disease-risk-table">
+      <div class="cbi-section cbi-section--energy">
+        <div class="cbi-section-head">
+          <span class="cbi-section-label">体力指数（過去7日）</span>
+          <button type="button" class="disease-logic-btn" data-cbi-logic="energy">判定ロジック</button>
+        </div>
         <div class="disease-risk-list">
           <div class="disease-risk-item cbi-item">
             <div class="disease-risk-item-name">
-              <span class="disease-risk-item-label">過去7日</span>
+              <span class="disease-risk-item-label">指数</span>
             </div>
             <div class="disease-risk-item-values cbi-energy-values">
-              <div class="disease-risk-item-value cbi-value-cell cbi-value-cell--energy" style="background-color: ${color}" aria-label="${energy.label}">
+              <div class="disease-risk-item-value cbi-value-cell cbi-value-cell--energy" style="background-color: ${energyColor}" aria-label="${energy.label}">
                 <span class="cbi-cell-percent">${energy.percent}%</span>
                 <span class="cbi-cell-label">${energy.label}</span>
               </div>
@@ -293,7 +294,7 @@ const CbiUI = (() => {
           </div>
         </div>
       </div>
-      <p class="disease-risk-footer">${energy.comment}（加重平均 CBI ${energy.weightedCbi.toFixed(2)}）</p>
+      <p class="disease-risk-footer">${footerParts.join(" ")}</p>
     </div>`;
   }
 
@@ -310,10 +311,7 @@ const CbiUI = (() => {
       return;
     }
 
-    container.innerHTML = `<div class="cbi-row-inner">
-      ${buildForecastPanel(report.forecasts)}
-      ${buildEnergyPanel(report.energyReserve)}
-    </div>`;
+    container.innerHTML = buildCombinedCbiPanel(report.forecasts, report.energyReserve);
   }
 
   function renderCbiPlaceholder(container, message) {

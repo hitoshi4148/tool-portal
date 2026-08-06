@@ -2,7 +2,7 @@
 
 芝管理ツールを集約するポータルサイト（Cloudflare Pages + Functions）。
 
-**現在のバージョン: v1.3.2**
+**現在のバージョン: v1.4.0**
 
 ## 本番 URL
 
@@ -35,6 +35,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | `/portal/api/disease-risk` | 病害リスク API（単体・デバッグ用） |
 | `/portal/api/growth-potential` | Growth Potential API（単体・デバッグ用） |
 | `/portal/api/cbi` | ベント炭素収支（CBI）・体力指数 API（単体・デバッグ用） |
+| `/portal/api/google-config` | 芝しごとノート用 Google OAuth クライアント ID 取得 |
 | `/portal/api/gdd` | 積算温度（GDD）API |
 | `/portal/api/chat` | 芝しごと・AI質問箱 API（Gemini） |
 | `/portal/api/geocode` | 逆ジオコーディング API |
@@ -55,9 +56,8 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 │ 病害リスク予測   │ PGR適時・発芽予測 │
 └─────────────────┴─────────────────┘
 ┌─────────────────┬─────────────────┐
-│ ベント炭素収支   │ ベント体力指数   │
-│ 予測（明日・     │ （過去7日）      │
-│  明後日 6:00）   │                  │
+│ ベント炭素収支   │ 芝しごとノート   │
+│ ・体力指数       │ （Google連携）   │
 └─────────────────┴─────────────────┘
 ┌─────────────────┬─────────────────┐
 │ 成長能(Growth   │ 農薬検索         │
@@ -65,7 +65,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 └─────────────────┴─────────────────┘
 [芝しごとシリーズ（2列カードグリッド）]
 [PR | ブログ | YouTube バナー（3列）]
-[フッター: 気象クレジット / グロウアンドプログレス / v1.3.2]
+[フッター: 気象クレジット / グロウアンドプログレス / v1.4.0]
 ```
 
 | 機能 | 説明 |
@@ -77,13 +77,14 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | AI質問箱 | タイトル下の入力欄から Gemini による芝管理 Q&A（Cloudflare Functions） |
 | 天気予報 | 48h 横スクロールウィジェット。「もっと詳しく」から `/portal/spray/` へ（予報データはキャッシュ利用） |
 | 病害リスク予測 | 翌日・明後日 朝6:00 時点の5病害リスク（%）。各病害名横に「判定ロジック」モーダル。パネル内右上に **他地域を見る** → `/portal/risk/` |
-| ベント炭素収支（CBI） | 病害リスク予測と同じコンパクト表形式。明日・明後日 6:00 の炭素収支（★1〜5）と過去7日の体力指数（%）。各パネルに **判定ロジック** モーダル |
+| ベント炭素収支（CBI） | 1パネルに炭素収支予測（明日/明後日）と体力指数（過去7日）を統合。各項目に **判定ロジック** モーダル |
+| 芝しごとノート | 右隣パネル。**Googleで連携** した利用者のみ、マイドライブに `{施設名}作業履歴` スプレッドシート（日付・エリア・メモ）を保存 |
 | PGR適時・発芽予測 | 除草剤（トリネキサパックエチル / フルルプリミドール）の散布日から昨日までの GDD ゲージ、および設定芝種の発芽積算温度ゲージ。各 PGR 名横の **ℹ** でリバウンド説明（GDD 表）を表示 |
 | 成長能(Growth Potential) | 昨年の月平均気温から算出した GP 曲線（暖地型・寒地型・未指定）。右隣に農薬検索パネル |
 | 農薬検索 | 農薬名・病害虫名で検索し `/portal/rac/` へ遷移して結果一覧を自動表示（URL クエリ `pesticide` / `target`） |
 | 芝しごとシリーズ | 外部アプリへのリンクカード（2列）。各カード名横の **ℹ** で説明文を表示（PC: ホバー、スマホ: タップ） |
 | 関連バナー | PR・ブログ・YouTube を 3 列 1 行（最大幅 720px）でフッター上に表示 |
-| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.3.2** |
+| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.4.0** |
 
 ### PGR適時・発芽予測（積算温度 GDD）
 
@@ -122,6 +123,7 @@ API: `/portal/api/gdd`（NASA POWER daily）。dashboard とは独立して散�
 |------|------|------|
 | `GEMINI_API_KEY` | はい | [Google AI Studio](https://aistudio.google.com/) の API キー |
 | `GEMINI_MODEL` | いいえ | デフォルト `gemini-2.5-flash` |
+| `GOOGLE_OAUTH_CLIENT_ID` | 芝しごとノート利用時 | Google Cloud OAuth 2.0 Web クライアント ID |
 
 **ローカル**: `.dev.vars.example` を `.dev.vars` にコピーしてキーを設定（`wrangler pages dev` が自動読み込み）
 
@@ -182,6 +184,31 @@ NASA POWER の過去7日間の実績気象から日次 CBI を算出し、直近
 
 係数（Q10、Topt、DLI 基準、重み、閾値）は `src/cbi/cbi-config.ts` に集約しています。UI は `public/portal/cbi-ui.js`、単体 API は `GET /portal/api/cbi?lat=&lon=` です。
 
+### 芝しごとノート（Google スプレッドシート）
+
+CBI 行の右列に **芝しごとノート** パネルを表示します。メモ機能を使う場合のみ **Googleで連携** ボタンから OAuth 同意を求めます（使わない利用者にはアカウント選択は表示されません）。
+
+| 項目 | 内容 |
+|------|------|
+| 保存先 | 利用者 Google ドライブ（マイドライブ） |
+| ファイル名 | `{施設名}作業履歴`（設定の施設名から自動生成） |
+| 列 | A: 日付 / B: エリア / C: メモ |
+| UI | 直近履歴を約5行分表示、スクロールで過去分を参照。下部フォームから追記 |
+| OAuth スコープ | `drive.file`（このアプリが作成したファイルのみ） |
+| 設定 | Cloudflare 環境変数 `GOOGLE_OAUTH_CLIENT_ID` |
+
+**Testing モード（100名未満・審査なし）**
+
+Google Cloud Console で OAuth 同意画面を **Testing** のまま運用し、利用者の Google アカウントを **テストユーザー** に登録してください（最大100件）。本番審査なしで利用できます（初回連携時に「未確認アプリ」の警告が出る場合があります）。
+
+**Google Cloud 設定手順（概要）**
+
+1. プロジェクト作成 → **Google Drive API** / **Google Sheets API** を有効化
+2. OAuth 同意画面（External・Testing）→ テストユーザーを追加
+3. OAuth 2.0 クライアント ID（Web）を作成  
+   - 許可 JS オリジン: `https://www.turf-tools.jp` / `http://127.0.0.1:8788`  
+4. クライアント ID を `GOOGLE_OAUTH_CLIENT_ID` に設定（`.dev.vars` / Cloudflare Pages）
+
 ### 芝しごとシリーズ
 
 外部アプリ（主に Render 上）へのリンクを 2 列カードグリッドで表示します。カードにマウスオーバー（またはキーボードフォーカス）すると説明文が重なって表示されます。
@@ -226,6 +253,19 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 デスクトップ: 3 列 1 行（最大幅 720px・高さ 76px）。スマホ: 1 列縦積み（最大幅 280px）。
 
 ## 変更履歴
+
+### ポータル TOP v1.4.0（2026-08）
+
+**芝しごとノート（Google スプレッドシート）**
+
+- CBI 行右列に **芝しごとノート** パネルを追加。**Googleで連携** 後、利用者のマイドライブに `{施設名}作業履歴` スプレッドシート（日付・エリア・メモ）を保存
+- OAuth スコープ `drive.file`（このアプリが作成したファイルのみ）。芝しごとポータルのサーバー側ではデータを保持しない
+- タイトル横 **ℹ** と初期表示で試験運用・モニター参加案内を表示（Gmail 連絡、個人情報不要）
+- API: `GET /portal/api/google-config`（OAuth クライアント ID）。環境変数 `GOOGLE_OAUTH_CLIENT_ID`
+
+**ベント炭素収支（CBI）**
+
+- **ベント炭素収支予測** と **ベント体力指数** を 1 パネルに統合（CBI 行左列）
 
 ### v1.0.0（2026-06）
 
@@ -578,6 +618,7 @@ tool-portal/
 │       ├── index.html            # ポータル TOP
 │       ├── portal.js / portal.css
 │       ├── cbi-ui.js             # ベント炭素収支・体力指数表示・判定ロジック
+│       ├── work-memo-ui.js       # 芝しごとノート（Google Sheets / drive.file）
 │       ├── portal-title-logo.png # タイトル PNG ロゴ
 │       ├── banner_*.png / bloglink.png / youtubelink.png
 │       ├── spray/                # ピンポイント天気 UI
@@ -592,6 +633,7 @@ tool-portal/
 │   │   ├── risk-map.ts
 │   │   ├── growth-potential.ts
 │   │   ├── cbi.ts
+│   │   ├── google-config.ts
 │   │   ├── gdd.ts
 │   │   ├── chat.ts
 │   │   └── geocode.ts

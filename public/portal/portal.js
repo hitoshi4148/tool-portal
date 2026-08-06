@@ -602,6 +602,7 @@ async function handleSaveSettings() {
 
   saveSettings(settings);
   updatePortalTitle(settings);
+  WorkMemoUI.updateFacilityName(settings.facilityName);
   showLocationStatus(
     settings.locationName
       ? `設定を保存しました（${settings.locationName}）`
@@ -1412,6 +1413,7 @@ document.addEventListener("DOMContentLoaded", () => {
   DiseaseRiskUI.init();
   DiseaseRiskUI.bindLogicButtons(document.getElementById("disease-risk-area"));
   CbiUI.bindLogicButtons(document.getElementById("cbi-area"));
+  WorkMemoUI.init(document.getElementById("work-memo-area"), loadSettings());
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
