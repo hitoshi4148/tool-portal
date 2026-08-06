@@ -769,8 +769,60 @@ section h2 {
 }
 
 .work-memo-connect-btn,
-.work-memo-add-btn {
+.work-memo-add-btn,
+.work-memo-save-btn {
     align-self: flex-start;
+}
+
+.work-memo-table tbody tr.work-memo-row {
+    cursor: pointer;
+}
+
+.work-memo-table tbody tr.work-memo-row:hover {
+    background: #f9fafb;
+}
+
+.work-memo-table tbody tr.work-memo-row--selected {
+    background: #eef2ff;
+}
+
+.work-memo-form--edit {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr);
+}
+
+.work-memo-form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.work-memo-cancel-btn,
+.work-memo-delete-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    cursor: pointer;
+}
+
+.work-memo-cancel-btn {
+    color: #374151;
+}
+
+.work-memo-delete-btn {
+    color: #dc2626;
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.work-memo-cancel-btn:disabled,
+.work-memo-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .work-memo-disconnect-btn {
@@ -2212,7 +2264,8 @@ footer p {
         flex-direction: column;
     }
 
-    .work-memo-form {
+    .work-memo-form,
+    .work-memo-form--edit {
         grid-template-columns: 1fr;
     }
 

@@ -16,6 +16,7 @@ const WorkMemoUI = (() => {
   let statusIsError = false;
   let isConnecting = false;
   let isSaving = false;
+  let selectedSheetRow = null;
 
   function getJstTodayString() {
     return new Intl.DateTimeFormat("en-CA", {
@@ -73,6 +74,42 @@ const WorkMemoUI = (() => {
   function clearStatus() {
     statusMessage = "";
     statusIsError = false;
+  }
+
+  function normalizeDateForInput(value) {
+    const text = String(value || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      return text;
+    }
+
+    const parsed = new Date(text);
+    if (!Number.isNaN(parsed.getTime())) {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(parsed);
+    }
+
+    return getJstTodayString();
+  }
+
+  function clearSelection() {
+    selectedSheetRow = null;
+  }
+
+  function getSelectedRow() {
+    if (!selectedSheetRow) return null;
+    return rows.find((row) => row.sheetRow === selectedSheetRow) ?? null;
+  }
+
+  function selectRow(sheetRow) {
+    const row = rows.find((entry) => entry.sheetRow === sheetRow);
+    if (!row || selectedSheetRow === sheetRow) return;
+    selectedSheetRow = sheetRow;
+    clearStatus();
+    render();
   }
 
   function escapeHtml(value) {
@@ -308,12 +345,64 @@ const WorkMemoUI = (() => {
       `/${sheetId}/values/${encodeURIComponent(SHEET_DATA_RANGE)}?majorDimension=ROWS`
     );
     rows = (data.values || [])
-      .filter((row) => row.some((cell) => String(cell || "").trim() !== ""))
-      .map((row) => ({
-        date: row[0] ?? "",
-        area: row[1] ?? "",
-        memo: row[2] ?? "",
-      }));
+      .map((row, index) => ({
+        sheetRow: index + 2,
+        date: String(row[0] ?? "").trim(),
+        area: String(row[1] ?? "").trim(),
+        memo: String(row[2] ?? "").trim(),
+      }))
+      .filter((row) => row.date || row.area || row.memo);
+
+    if (selectedSheetRow && !rows.some((row) => row.sheetRow === selectedSheetRow)) {
+      clearSelection();
+    }
+  }
+
+  async function getWorkHistorySheetTabId(spreadsheetId) {
+    const data = await sheetsFetch(`/${spreadsheetId}?fields=sheets(properties(sheetId,title))`);
+    const sheet = data.sheets?.find((entry) => entry.properties?.title === "作業履歴");
+    if (!sheet?.properties || sheet.properties.sheetId == null) {
+      throw new Error("作業履歴シートが見つかりません");
+    }
+    return sheet.properties.sheetId;
+  }
+
+  async function updateRow(sheetRow, date, area, memo) {
+    const sheetId = await ensureSpreadsheetId();
+    const range = `作業履歴!A${sheetRow}:C${sheetRow}`;
+    await sheetsFetch(
+      `/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          range,
+          majorDimension: "ROWS",
+          values: [[date, area, memo]],
+        }),
+      }
+    );
+  }
+
+  async function deleteRow(sheetRow) {
+    const spreadsheetId = await ensureSpreadsheetId();
+    const sheetTabId = await getWorkHistorySheetTabId(spreadsheetId);
+    await sheetsFetch(`/${spreadsheetId}:batchUpdate`, {
+      method: "POST",
+      body: JSON.stringify({
+        requests: [
+          {
+            deleteDimension: {
+              range: {
+                sheetId: sheetTabId,
+                dimension: "ROWS",
+                startIndex: sheetRow - 1,
+                endIndex: sheetRow,
+              },
+            },
+          },
+        ],
+      }),
+    });
   }
 
   async function appendRow(date, area, memo) {
@@ -359,13 +448,43 @@ const WorkMemoUI = (() => {
 
     return rows
       .map(
-        (row) => `<tr>
+        (row) => `<tr class="work-memo-row${row.sheetRow === selectedSheetRow ? " work-memo-row--selected" : ""}" data-sheet-row="${row.sheetRow}" tabindex="0" role="button" aria-label="記録を編集">
         <td>${escapeHtml(row.date)}</td>
         <td>${escapeHtml(row.area)}</td>
         <td>${escapeHtml(row.memo)}</td>
       </tr>`
       )
       .join("");
+  }
+
+  function buildFormHtml(today) {
+    const editing = selectedSheetRow != null;
+    const selectedRow = getSelectedRow();
+    const formDate = editing && selectedRow ? normalizeDateForInput(selectedRow.date) : today;
+    const formArea = editing && selectedRow ? selectedRow.area : "";
+    const formMemo = editing && selectedRow ? selectedRow.memo : "";
+    const savingLabel = editing ? "更新中..." : "保存中...";
+    const submitLabel = editing ? "更新" : "追加";
+
+    if (editing) {
+      return `<form class="work-memo-form work-memo-form--edit" id="work-memo-form">
+        <input type="date" id="work-memo-date" value="${escapeHtml(formDate)}" aria-label="日付">
+        <input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア" value="${escapeHtml(formArea)}">
+        <input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ" value="${escapeHtml(formMemo)}">
+        <div class="work-memo-form-actions">
+          <button type="submit" class="btn-primary work-memo-save-btn" ${isSaving ? "disabled" : ""}>${isSaving ? savingLabel : submitLabel}</button>
+          <button type="button" class="work-memo-cancel-btn" id="work-memo-cancel-btn" ${isSaving ? "disabled" : ""}>キャンセル</button>
+          <button type="button" class="work-memo-delete-btn" id="work-memo-delete-btn" ${isSaving ? "disabled" : ""}>削除</button>
+        </div>
+      </form>`;
+    }
+
+    return `<form class="work-memo-form" id="work-memo-form">
+      <input type="date" id="work-memo-date" value="${escapeHtml(formDate)}" aria-label="日付">
+      <input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア">
+      <input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ">
+      <button type="submit" class="btn-primary work-memo-add-btn" ${isSaving ? "disabled" : ""}>${isSaving ? savingLabel : submitLabel}</button>
+    </form>`;
   }
 
   function render() {
@@ -400,12 +519,7 @@ const WorkMemoUI = (() => {
           <tbody>${buildRowsHtml()}</tbody>
         </table>
       </div>
-      <form class="work-memo-form" id="work-memo-form">
-        <input type="date" id="work-memo-date" value="${today}" aria-label="日付">
-        <input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア">
-        <input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ">
-        <button type="submit" class="btn-primary work-memo-add-btn" ${isSaving ? "disabled" : ""}>${isSaving ? "保存中..." : "追加"}</button>
-      </form>
+      ${buildFormHtml(today)}
       ${statusMessage ? `<p class="work-memo-status ${statusIsError ? "work-memo-status--error" : ""}">${escapeHtml(statusMessage)}</p>` : ""}
     </div>`;
 
@@ -414,6 +528,11 @@ const WorkMemoUI = (() => {
     const scrollEl = document.getElementById("work-memo-scroll");
     if (scrollEl) {
       requestAnimationFrame(() => {
+        if (selectedSheetRow) {
+          const rowEl = scrollEl.querySelector(`tr[data-sheet-row="${selectedSheetRow}"]`);
+          rowEl?.scrollIntoView({ block: "nearest" });
+          return;
+        }
         scrollEl.scrollTop = scrollEl.scrollHeight;
       });
     }
@@ -442,20 +561,27 @@ const WorkMemoUI = (() => {
   function disconnect() {
     saveAuthState(null);
     rows = [];
+    clearSelection();
     clearStatus();
     render();
+  }
+
+  function readFormValues() {
+    const dateInput = document.getElementById("work-memo-date");
+    const areaInput = document.getElementById("work-memo-area-input");
+    const memoInput = document.getElementById("work-memo-text");
+    return {
+      date: dateInput?.value?.trim() ?? "",
+      area: areaInput?.value?.trim() ?? "",
+      memo: memoInput?.value?.trim() ?? "",
+    };
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (isSaving) return;
 
-    const dateInput = document.getElementById("work-memo-date");
-    const areaInput = document.getElementById("work-memo-area-input");
-    const memoInput = document.getElementById("work-memo-text");
-    const date = dateInput?.value?.trim();
-    const area = areaInput?.value?.trim();
-    const memo = memoInput?.value?.trim();
+    const { date, area, memo } = readFormValues();
 
     if (!date) {
       setStatus("日付を入力してください", true);
@@ -463,18 +589,58 @@ const WorkMemoUI = (() => {
       return;
     }
 
+    const editing = selectedSheetRow != null;
     isSaving = true;
-    setStatus("保存中...");
+    setStatus(editing ? "更新中..." : "保存中...");
     render();
 
     try {
-      await appendRow(date, area || "", memo || "");
-      if (areaInput) areaInput.value = "";
-      if (memoInput) memoInput.value = "";
-      await loadRows();
-      setStatus("保存しました");
+      if (editing) {
+        await updateRow(selectedSheetRow, date, area || "", memo || "");
+        clearSelection();
+        await loadRows();
+        setStatus("更新しました");
+      } else {
+        await appendRow(date, area || "", memo || "");
+        const areaInput = document.getElementById("work-memo-area-input");
+        const memoInput = document.getElementById("work-memo-text");
+        if (areaInput) areaInput.value = "";
+        if (memoInput) memoInput.value = "";
+        await loadRows();
+        setStatus("保存しました");
+      }
     } catch (error) {
-      setStatus(error.message || "保存に失敗しました", true);
+      setStatus(error.message || (editing ? "更新に失敗しました" : "保存に失敗しました"), true);
+    } finally {
+      isSaving = false;
+      render();
+    }
+  }
+
+  function handleCancel() {
+    if (isSaving) return;
+    clearSelection();
+    clearStatus();
+    render();
+  }
+
+  async function handleDelete() {
+    if (isSaving || !selectedSheetRow) return;
+    if (!window.confirm("この記録を削除しますか？")) {
+      return;
+    }
+
+    isSaving = true;
+    setStatus("削除中...");
+    render();
+
+    try {
+      await deleteRow(selectedSheetRow);
+      clearSelection();
+      await loadRows();
+      setStatus("削除しました");
+    } catch (error) {
+      setStatus(error.message || "削除に失敗しました", true);
     } finally {
       isSaving = false;
       render();
@@ -496,6 +662,31 @@ const WorkMemoUI = (() => {
     if (form) {
       form.addEventListener("submit", handleSubmit);
     }
+
+    const cancelBtn = container.querySelector("#work-memo-cancel-btn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", handleCancel);
+    }
+
+    const deleteBtn = container.querySelector("#work-memo-delete-btn");
+    if (deleteBtn) {
+      deleteBtn.addEventListener("click", handleDelete);
+    }
+
+    container.querySelectorAll(".work-memo-row[data-sheet-row]").forEach((rowEl) => {
+      rowEl.addEventListener("click", () => {
+        const sheetRow = Number(rowEl.dataset.sheetRow);
+        if (!Number.isFinite(sheetRow)) return;
+        selectRow(sheetRow);
+      });
+      rowEl.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        const sheetRow = Number(rowEl.dataset.sheetRow);
+        if (!Number.isFinite(sheetRow)) return;
+        selectRow(sheetRow);
+      });
+    });
   }
 
   function bindEvents() {
