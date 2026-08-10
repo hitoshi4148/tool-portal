@@ -605,8 +605,8 @@ async function handleSaveSettings() {
   WorkMemoUI.updateFacilityName(settings.facilityName);
   showLocationStatus(
     settings.locationName
-      ? `設定を保存しました（${settings.locationName}）`
-      : "設定を保存しました"
+      ? `端末のCookieに保存しました（${settings.locationName}）`
+      : "端末のCookieに保存しました"
   );
 
   const btn = document.getElementById("save-settings-btn");
