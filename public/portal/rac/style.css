@@ -395,25 +395,67 @@ body {
 
 .rac-site-footer {
   margin-top: 24px;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  border-top: none;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
   text-align: left;
   color: #4f5b66;
-  font-size: 0.88rem;
-  line-height: 1.8;
+}
+
+.rac-footer-notice {
+  padding: 12px 14px;
+  background: #f8f9fa;
+  border: 1px solid #d8dee4;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #4f5b66;
+}
+
+.rac-footer-notice p {
+  margin: 0 0 0.35rem;
+}
+
+.rac-footer-notice p:last-child {
+  margin-bottom: 0;
 }
 
 .rac-footer-title {
-  margin: 0 0 0.6rem;
-  font-size: 1rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: #44515c;
 }
 
-.rac-site-footer a {
+.rac-footer-notice a {
   color: #336699;
+}
+
+.rac-site-footer .footer-gp {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.rac-app-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rac-app-links a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #336699;
+  text-decoration: none;
+}
+
+.rac-app-links a:hover {
+  color: #1e40af;
+  text-decoration: underline;
 }
 
 .rac-footer-version {
@@ -450,7 +492,8 @@ body {
     font-size: 0.92rem;
   }
 
-  .rac-site-footer {
-    font-size: 0.84rem;
+  .rac-footer-notice {
+    font-size: 0.74rem;
+    line-height: 1.4;
   }
 }
