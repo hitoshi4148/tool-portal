@@ -350,6 +350,31 @@ body {
   text-decoration: underline;
 }
 
+.risk-app-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 14px;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.risk-app-links a {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e40af;
+  text-decoration: none;
+}
+
+.risk-app-links a:hover {
+  text-decoration: underline;
+}
+
+.risk-footer .footer-gp {
+  margin-top: 1rem;
+}
+
 .risk-version {
   margin-top: 8px;
   font-size: 0.72rem;
