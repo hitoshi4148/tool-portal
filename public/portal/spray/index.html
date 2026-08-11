@@ -19,19 +19,17 @@
 <body>
     <div class="container">
         <p class="portal-back"><a href="/portal/">← ツールポータルに戻る</a></p>
-        <div class="banner-pr">
-            <a href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
-                <img src="banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="320" height="120">
+        <section class="portal-banners" aria-label="関連リンク">
+            <a class="portal-banner-link" href="https://www.turf-tools.jp/services-4" target="_blank" rel="noopener noreferrer">
+                <img src="banner_pr_size1.png" alt="芝管理のプロにPRしませんか？農薬・資材・機械メーカー様向け アプリ内掲載パートナー募集中" width="240" height="76">
             </a>
-        </div>
-        <div class="banner-row">
-            <a href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
-                <img src="bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="300" height="100">
+            <a class="portal-banner-link" href="https://www.turf-tools.jp/blog" target="_blank" rel="noopener noreferrer">
+                <img src="bloglink.png" alt="芝管理技術ブログ — 芝管理の考え方を理解する" width="240" height="76">
             </a>
-            <a href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
-                <img src="youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="300" height="100">
+            <a class="portal-banner-link" href="https://www.youtube.com/channel/UCSRU0zk4Fj1ETWqMRlJDPJQ" target="_blank" rel="noopener noreferrer">
+                <img src="youtubelink.png" alt="YouTube — 現場で役立つ芝管理ノウハウ グロウアンドプログレス" width="240" height="76">
             </a>
-        </div>
+        </section>
         <header>
             <h1>ピンポイント天気で芝しごと</h1>
             <p class="subtitle">気象予測から農薬・肥料散布タイミングをアドバイス</p>
@@ -49,7 +47,7 @@
             <p class="help-text">※緯度・経度はGoogleマップなどで確認できます。<br>地図上で右クリック → 「座標をコピー」で取得できます。</p>
             <div class="button-group">
                 <button id="current-location-btn" onclick="getCurrentLocation()" class="secondary">現在地を取得</button>
-                <button id="save-btn" onclick="saveAndReload()" class="secondary">設定を保存</button>
+                <button id="save-btn" onclick="saveAndReload()" class="secondary">端末のCookieに保存</button>
             </div>
         </div>
 
@@ -86,12 +84,25 @@
         <footer>
             <p>気象データ提供: <a href="https://www.met.no/" target="_blank">MET Norway</a></p>
             <p>推奨散布時間帯: 早朝 4-7時、夕方 16-19時</p>
+            <nav class="spray-app-links" aria-label="芝しごとアプリ">
+                <a href="/portal/">ポータル</a>
+                <a href="https://turfpool.onrender.com/" target="_blank" rel="noopener noreferrer">ターフプール</a>
+                <a href="/portal/rac/">楽RAC農薬ローテ</a>
+                <a href="https://fertilization-design.onrender.com/" target="_blank" rel="noopener noreferrer">施肥設計ナビ</a>
+                <a href="/portal/risk/">病害リスク予報</a>
+                <a href="/portal/#ai-advisor-section">AI質問箱</a>
+                <a href="/portal/diagnosis/">病害画像診断AI</a>
+                <a href="https://turfmap.onrender.com/" target="_blank" rel="noopener noreferrer">積算温度追跡マップ</a>
+                <a href="https://climate-map-x30t.onrender.com/" target="_blank" rel="noopener noreferrer">温量指数気候区分マップ</a>
+                <a href="https://claim-survival.onrender.com/" target="_blank" rel="noopener noreferrer">クレームサバイバル</a>
+            </nav>
             <p class="footer-gp">
                 <a href="https://www.turf-tools.jp/" target="_blank" rel="noopener noreferrer" class="footer-gp-link">
                     <img src="/portal/grow-and-progress-logo.png?v=2" alt="" class="footer-gp-logo" width="72" height="72">
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
+            <p class="spray-version">Version 1.1.0 ｜ 2026.08</p>
         </footer>
     </div>
 
