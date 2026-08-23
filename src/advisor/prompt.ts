@@ -1,5 +1,17 @@
 import type { PortalAdvisorSettings } from "./types";
 
+function formatOverseedForPrompt(overseed: string): string | null {
+  if (!overseed || overseed === "無") {
+    return null;
+  }
+
+  if (overseed === "WOS" || overseed === "有") {
+    return "Winter Over Seed";
+  }
+
+  return overseed;
+}
+
 export function generatePrefix(settings: PortalAdvisorSettings): string {
   const lat = settings.lat?.trim() ?? "";
   const lon = settings.lon?.trim() ?? "";
@@ -32,8 +44,9 @@ export function generatePrefix(settings: PortalAdvisorSettings): string {
     prefix += `グリーンタイプ: ${greenType}\n`;
   }
 
-  if (overseed !== "無") {
-    prefix += `オーバーシード: ${overseed}\n`;
+  const overseedLabel = formatOverseedForPrompt(overseed);
+  if (overseedLabel) {
+    prefix += `オーバーシード: ${overseedLabel}\n`;
   }
 
   if (warmGrass !== "未指定(C4)") {
