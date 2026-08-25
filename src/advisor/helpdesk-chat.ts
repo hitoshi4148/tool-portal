@@ -4,13 +4,17 @@ export type HelpdeskEnv = {
   HELPDESK_CHAT_URL?: string;
 };
 
-export async function askHelpdesk(env: HelpdeskEnv, body: unknown): Promise<Response> {
+export async function askHelpdesk(
+  env: HelpdeskEnv,
+  body: unknown,
+  options?: { accept?: string },
+): Promise<Response> {
   const url = env.HELPDESK_CHAT_URL?.trim() || DEFAULT_CHAT_URL;
   return fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Accept: "application/json",
+      Accept: options?.accept ?? "application/json",
     },
     body: JSON.stringify(body),
   });

@@ -20,13 +20,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const settings = body.settings ?? {};
-    const upstream = await askHelpdesk(context.env, {
-      messages: [{ role: "user", content: message }],
-      settings,
-      stream: false,
-    });
+    const accept = context.request.headers.get("Accept") ?? "";
+    const wantsStream = accept.includes("text/event-stream");
+    const upstream = await askHelpdesk(
+      context.env,
+      {
+        messages: [{ role: "user", content: message }],
+        settings,
+        ...(wantsStream ? {} : { stream: false }),
+      },
+      { accept: wantsStream ? "text/event-stream" : "application/json" },
+    );
 
     const contentType = upstream.headers.get("content-type") || "";
+    if (wantsStream && upstream.ok && contentType.includes("text/event-stream") && upstream.body) {
+      return new Response(upstream.body, {
+        status: upstream.status,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+
     const raw = await upstream.text();
 
     if (contentType.includes("application/json")) {
@@ -91,7 +107,7 @@ export const onRequestOptions: PagesFunction = async () => {
     status: 204,
     headers: {
       "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Headers": "Content-Type, Accept",
     },
   });
 };

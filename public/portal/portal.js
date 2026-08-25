@@ -1459,6 +1459,14 @@ function scrollAdvisorMessageToStart(container, messageEl) {
   container.scrollTop = Math.max(0, messageEl.offsetTop - paddingTop);
 }
 
+function setAdvisorBotContent(contentDiv, text) {
+  if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
+    contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  } else {
+    contentDiv.textContent = text;
+  }
+}
+
 function addAdvisorMessage(content, isUser = false) {
   const messagesEl = document.getElementById("ai-advisor-messages");
   const messageDiv = document.createElement("div");
@@ -1469,10 +1477,8 @@ function addAdvisorMessage(content, isUser = false) {
 
   if (isUser) {
     contentDiv.textContent = content;
-  } else if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
-    contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(content));
   } else {
-    contentDiv.textContent = content;
+    setAdvisorBotContent(contentDiv, content);
   }
 
   messageDiv.appendChild(contentDiv);
@@ -1487,6 +1493,81 @@ function addAdvisorMessage(content, isUser = false) {
     scrollAdvisorMessageToStart(messagesEl, messageDiv);
     messageDiv.scrollIntoView({ block: "start", behavior: "smooth" });
   });
+}
+
+function createAdvisorBotDraft() {
+  const messagesEl = document.getElementById("ai-advisor-messages");
+  const messageDiv = document.createElement("div");
+  messageDiv.className = "ai-advisor-message ai-advisor-bot";
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "ai-advisor-message-content";
+  contentDiv.textContent = "…";
+  messageDiv.appendChild(contentDiv);
+  messagesEl.appendChild(messageDiv);
+  requestAnimationFrame(() => {
+    scrollAdvisorMessageToStart(messagesEl, messageDiv);
+  });
+  return { messageDiv, contentDiv };
+}
+
+function takeAdvisorDelta(chunk) {
+  let text = "";
+  let truncated = false;
+  for (const line of chunk.split("\n")) {
+    const payload = line.startsWith("data:") ? line.slice(5).trim() : "";
+    if (!payload || payload === "[DONE]") continue;
+    try {
+      const parsed = JSON.parse(payload);
+      if (parsed.choices?.[0]?.finish_reason === "length") truncated = true;
+      if (typeof parsed.response === "string" && parsed.response) {
+        text += parsed.response;
+      } else {
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (typeof content === "string") text += content;
+      }
+    } catch {
+      /* ignore partial JSON */
+    }
+  }
+  return { text, truncated };
+}
+
+async function readAdvisorSse(response, onDelta) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let output = "";
+  let truncated = false;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() || "";
+    for (const chunk of chunks) {
+      const part = takeAdvisorDelta(chunk);
+      output += part.text;
+      if (part.truncated) truncated = true;
+      if (output) onDelta(output);
+    }
+  }
+  if (buffer) {
+    const part = takeAdvisorDelta(buffer);
+    output += part.text;
+    if (part.truncated) truncated = true;
+  }
+  const text = output.trim();
+  if (text) onDelta(text);
+  return { text, truncated };
+}
+
+async function parseAdvisorJsonResponse(response) {
+  const raw = await response.text();
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error(raw.slice(0, 200) || "モデルの応答を解析できませんでした。");
+  }
 }
 
 function advisorChatUrl() {
@@ -1525,23 +1606,25 @@ async function sendAdvisorMessage() {
   input.value = "";
 
   sendButton.disabled = true;
-    sendButton.innerHTML = '<span class="ai-advisor-loading"></span> 処理中...';
+  sendButton.innerHTML = '<span class="ai-advisor-loading"></span> 処理中...';
 
+  let draft = null;
   try {
-    const data = await fetchApiJson(advisorChatUrl(), {
+    const response = await fetch(advisorChatUrl(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/json",
+        Accept: "text/event-stream",
       },
       body: JSON.stringify({
         message,
         settings: getAdvisorSettingsPayload(),
-        stream: false,
       }),
     });
 
-    if (!data.success) {
+    const contentType = response.headers.get("content-type") || "";
+    if (!response.ok) {
+      const data = await parseAdvisorJsonResponse(response);
       let errorMessage = advisorErrorMessage(data);
       if (data.details) {
         errorMessage += `\n\n詳細: ${data.details}`;
@@ -1549,13 +1632,39 @@ async function sendAdvisorMessage() {
       throw new Error(errorMessage);
     }
 
-    addAdvisorMessage(data.response, false);
+    if (contentType.includes("text/event-stream") && response.body) {
+      draft = createAdvisorBotDraft();
+      const { text, truncated } = await readAdvisorSse(response, (partial) => {
+        setAdvisorBotContent(draft.contentDiv, partial);
+      });
+      if (!text) {
+        throw new Error("モデルから空の応答が返りました。");
+      }
+      const display = truncated
+        ? `${text}\n\n応答が長さの上限で切れました。「続きを書いて」と送ると続きが出ます。`
+        : text;
+      setAdvisorBotContent(draft.contentDiv, display);
+    } else {
+      const data = await parseAdvisorJsonResponse(response);
+      if (!data.success) {
+        let errorMessage = advisorErrorMessage(data);
+        if (data.details) {
+          errorMessage += `\n\n詳細: ${data.details}`;
+        }
+        throw new Error(errorMessage);
+      }
+      addAdvisorMessage(data.response, false);
+    }
   } catch (error) {
     let errorMsg = "申し訳ございません。エラーが発生しました。";
     if (error.message) {
       errorMsg += `\n\n${error.message}`;
     }
-    addAdvisorMessage(errorMsg, false);
+    if (draft) {
+      draft.contentDiv.textContent = errorMsg;
+    } else {
+      addAdvisorMessage(errorMsg, false);
+    }
   } finally {
     sendButton.disabled = false;
     sendButton.textContent = "AIに質問";

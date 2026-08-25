@@ -2,7 +2,7 @@
 
 芝管理ツールを集約するポータルサイト（Cloudflare Pages + Functions）。
 
-**現在のバージョン: v1.5.2**
+**現在のバージョン: v1.5.3**
 
 ## 本番 URL
 
@@ -65,7 +65,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 └─────────────────┴─────────────────┘
 [芝しごとシリーズ（2列カードグリッド）]
 [PR | ブログ | YouTube バナー（3列）]
-[フッター: 気象クレジット / グロウアンドプログレス / v1.5.2]
+[フッター: 気象クレジット / グロウアンドプログレス / v1.5.3]
 ```
 
 | 機能 | 説明 |
@@ -74,7 +74,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | ブランドメッセージ | ロゴ下に「スポーツターフ管理を、もっとシンプルに。」。右の **ℹ** でサイト説明（PC: ホバー、スマホ: タップ） |
 | タイトルアニメ | PNG ロゴにきらんと光る CSS アニメーション（`prefers-reduced-motion` 時は停止） |
 | 設定 | 施設名・緯度経度・芝種・AI回答モードなど（Cookie `portalSettings` に保存） |
-| AI質問箱 | タイトル下の入力欄から Gemma 4 による芝管理 Q&A（本番は同一オリジンの `/aihelpdesk/api/chat`）。入力欄上右に **AI相談室**（`/aihelpdesk/`）。入力欄下左に注意、右端に **AIモデル: Gemma 4 26B** |
+| AI質問箱 | タイトル下の入力欄から Gemma 4 による芝管理 Q&A（本番は同一オリジンの `/aihelpdesk/api/chat`、SSE で逐次表示）。入力欄上右に **AI相談室**（`/aihelpdesk/`）。入力欄下左に注意、右端に **AIモデル: Gemma 4 26B** |
 | 天気予報 | 48h 横スクロールウィジェット。「もっと詳しく」から `/portal/spray/` へ（予報データはキャッシュ利用） |
 | 病害リスク予測 | 翌日・明後日 朝6:00 時点の5病害リスク（%）。各病害名横に「判定ロジック」モーダル。パネル内右上に **他地域を見る** → `/portal/risk/` |
 | ベント炭素収支（CBI） | 1パネルに炭素収支予測（明日/明後日）と体力指数（過去7日）を統合。各項目に **判定ロジック** モーダル |
@@ -84,7 +84,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | 農薬検索 | 農薬名・病害虫名で検索し `/portal/rac/` へ遷移して結果一覧を自動表示（URL クエリ `pesticide` / `target`） |
 | 芝しごとシリーズ | 外部アプリへのリンクカード（2列）。各カード名横の **ℹ** で説明文を表示（PC: ホバー、スマホ: タップ） |
 | 関連バナー | PR・ブログ・YouTube を 3 列 1 行（最大幅 720px）でフッター上に表示 |
-| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.5.2** |
+| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.5.3** |
 
 ### PGR適時・発芽予測（積算温度 GDD）
 
@@ -110,14 +110,14 @@ API: `/portal/api/gdd`（NASA POWER daily）。dashboard とは独立して散�
 
 ### 芝しごと・AI質問箱
 
-[turf_advisor](https://github.com/hitoshi4148/turf_advisor) のチャット機能を Cloudflare Pages Functions に移植しています（Render のコールドスタートなし）。
+[turf_advisor](https://github.com/hitoshi4148/turf_advisor) のチャット UI を移植したのがポータルトップの入力欄です。本番の回答は相談室 Worker（Gemma 4）で、同一オリジンの `/aihelpdesk/api/chat` を SSE で逐次表示します。Render の旧 AI質問箱は使いません。
 
 - UI: タイトル下に注意4カ条（ℹ ボタンでホバー/フォーカス表示）・入力欄・マイク（音声入力）・「AIに質問」ボタン。初回送信でチャット欄が縦に展開。音声は Web Speech API（Chrome / Edge。iPhone は非対応が多い）
 - 入力欄下: 左に「個人情報・顧客情報は入力しないでください」、同じ行の右端に「AIモデル: Gemma 4 26B」（幅が足りないときは次行の右寄せ）
 - 入力欄上右: **AI相談室**（天気欄の「もっと詳しく」と同じピル型。`/aihelpdesk/` へ）
 - 設定: ポータル設定（緯度経度・芝種等）＋ AI回答モード（デフォルト「慎重に回答」）をプロンプトに反映
 - 履歴: ページを開いている間のみ（リロードで消える）
-- API: 本番は同一オリジンの `POST /aihelpdesk/api/chat`（Gemma 4）。ローカルは `POST /portal/api/chat` が相談室へ中継
+- API: 本番は同一オリジンの `POST /aihelpdesk/api/chat`（Gemma 4・SSE）。ローカルは `POST /portal/api/chat` が相談室へ中継（SSE 可）
 
 #### 環境変数
 
@@ -254,6 +254,15 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 デスクトップ: 3 列 1 行（最大幅 720px・高さ 76px）。スマホ: 1 列縦積み（最大幅 280px）。
 
 ## 変更履歴
+
+### サブページフッタ（2026-08）
+
+- 散布・RAC・病害リスク・診断のフッタから旧 **AI質問箱** リンクを削除（**AI相談室** のみ残す）
+
+### ポータル TOP v1.5.3（2026-08）
+
+- AI質問箱の回答を相談室と同じ SSE で逐次表示する
+- 注意文はそのまま（③を含む）
 
 ### ポータル TOP v1.5.2（2026-08）
 
@@ -543,7 +552,7 @@ npm run dev
 - http://127.0.0.1:8788/portal/rac/
 - http://127.0.0.1:8788/portal/risk/
 
-AI質問箱をローカルで試す場合、`.dev.vars` の `HELPDESK_CHAT_URL`（未設定なら本番の `/aihelpdesk/api/chat`）へ Pages Function が中継します。
+AI質問箱をローカルで試す場合、`.dev.vars` の `HELPDESK_CHAT_URL`（未設定なら本番の `/aihelpdesk/api/chat`）へ Pages Function が中継します。ブラウザが `Accept: text/event-stream` なら Function は SSE をそのまま流します。
 
 ### wrangler レジストリエラー（Windows）
 
@@ -733,7 +742,7 @@ tool-portal/
 | [spray-forecast](https://github.com/hitoshi4148/spray-forecast) | `/portal/spray/` の元。リポジトリ自体は未変更 |
 | [racrac](https://github.com/hitoshi4148/racrac) | `/portal/rac/` の元。Render 版からクライアント完結に移植 |
 | [ai_forecast](https://github.com/hitoshi4148/ai_forecast) | `/portal/risk/` の元。Render 版から Cloudflare に移植 |
-| [turf_advisor](https://github.com/hitoshi4148/turf_advisor) | AI質問箱を Cloudflare Functions に移植 |
+| [turf_advisor](https://github.com/hitoshi4148/turf_advisor) | ポータル入力欄の移植元。本番では未使用 |
 | [agromap](https://github.com/hitoshi4148/agromap) | 散布日・播種日 Cookie 名を共有 |
 
 ロジックは Python 版から TypeScript に移植済みです。芝しごとシリーズの外部アプリは Render 等で個別稼働し、ポータルからリンクします。
