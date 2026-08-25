@@ -1302,6 +1302,21 @@ function initPortalRacSearch() {
     return;
   }
 
+  if (window.VoiceInput) {
+    window.VoiceInput.bindVoiceField({
+      input: document.getElementById("portal-rac-pesticide"),
+      micBtn: document.getElementById("portal-rac-pesticide-mic"),
+      micStatus: document.getElementById("portal-rac-pesticide-mic-status"),
+      maxLength: 80,
+    });
+    window.VoiceInput.bindVoiceField({
+      input: document.getElementById("portal-rac-target"),
+      micBtn: document.getElementById("portal-rac-target-mic"),
+      micStatus: document.getElementById("portal-rac-target-mic-status"),
+      maxLength: 80,
+    });
+  }
+
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
@@ -1672,139 +1687,19 @@ async function sendAdvisorMessage() {
   }
 }
 
-function speechRecognitionCtor() {
-  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-}
-
-function joinSpoken(prefix, spoken) {
-  if (!spoken) return prefix;
-  if (!prefix) return spoken;
-  if (/\s$/.test(prefix) || /^[、。,.!?\s]/.test(spoken)) return prefix + spoken;
-  const glue = /[A-Za-z0-9]$/.test(prefix) ? " " : "";
-  return prefix + glue + spoken;
-}
-
 function initAdvisorVoice() {
   const input = document.getElementById("ai-advisor-input");
   const micBtn = document.getElementById("ai-advisor-mic");
   const micStatus = document.getElementById("ai-advisor-mic-status");
-  if (!input || !micBtn || !micStatus) return;
+  if (!input || !micBtn || !micStatus || !window.VoiceInput) return;
 
-  const Ctor = speechRecognitionCtor();
-  let recognition = null;
-  let wantListen = false;
-  let baseText = "";
-
-  function setMicStatus(message, isError = false) {
-    if (!message) {
-      micStatus.hidden = true;
-      micStatus.textContent = "";
-      micStatus.classList.remove("error");
-      return;
-    }
-    micStatus.hidden = false;
-    micStatus.textContent = message;
-    micStatus.classList.toggle("error", isError);
-  }
-
-  function setListeningUi(on) {
-    micBtn.classList.toggle("listening", on);
-    micBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    micBtn.setAttribute("aria-label", on ? "音声入力を終了" : "音声入力を開始");
-  }
-
-  function stopListening() {
-    wantListen = false;
-    setListeningUi(false);
-    if (micStatus.textContent.startsWith("聞いています")) setMicStatus("");
-    if (recognition) {
-      try {
-        recognition.stop();
-      } catch {
-        /* already stopped */
-      }
-    }
-  }
-
-  window.stopAdvisorVoice = stopListening;
-
-  if (!Ctor) {
-    micBtn.addEventListener("click", () => {
-      setMicStatus(
-        "このブラウザでは音声入力ができません。PC または Android の Chrome / Edge をご利用ください。",
-        true
-      );
-    });
-    return;
-  }
-
-  recognition = new Ctor();
-  recognition.lang = "ja-JP";
-  recognition.interimResults = true;
-  recognition.continuous = true;
-
-  recognition.onresult = (event) => {
-    let interimText = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const piece = (event.results[i][0]?.transcript || "").trim();
-      if (!piece) continue;
-      if (event.results[i].isFinal) {
-        baseText = joinSpoken(baseText, piece).slice(0, 16000);
-      } else {
-        interimText += piece;
-      }
-    }
-    input.value = joinSpoken(baseText, interimText).slice(0, 16000);
-  };
-
-  recognition.onerror = (event) => {
-    const error = event.error;
-    if (error === "no-speech" || error === "aborted") return;
-    wantListen = false;
-    setListeningUi(false);
-    if (error === "not-allowed" || error === "service-not-allowed") {
-      setMicStatus("マイクの使用が許可されていません。ブラウザの設定を確認してください。", true);
-      return;
-    }
-    if (error === "network") {
-      setMicStatus("音声認識に接続できませんでした。通信を確認してください。", true);
-      return;
-    }
-    setMicStatus("音声認識を開始できませんでした。", true);
-  };
-
-  recognition.onend = () => {
-    if (wantListen) {
-      try {
-        recognition.start();
-      } catch {
-        /* start in progress */
-      }
-      return;
-    }
-    setListeningUi(false);
-    if (micStatus.textContent.startsWith("聞いています")) setMicStatus("");
-  };
-
-  micBtn.addEventListener("click", () => {
-    if (wantListen) {
-      stopListening();
-      setMicStatus("");
-      input.focus({ preventScroll: true });
-      return;
-    }
-    baseText = input.value.trimEnd();
-    wantListen = true;
-    setListeningUi(true);
-    setMicStatus("聞いています… もう一度マイクを押すと終了します。音声はブラウザが文字にします。");
-    try {
-      recognition.start();
-    } catch {
-      wantListen = false;
-      setListeningUi(false);
-      setMicStatus("音声認識を開始できませんでした。", true);
-    }
+  window.VoiceInput.bindVoiceField({
+    input,
+    micBtn,
+    micStatus,
+    maxLength: 16000,
   });
+  window.stopAdvisorVoice = window.VoiceInput.stopAll;
 }
 
 function initAdvisorChat() {

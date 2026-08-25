@@ -418,6 +418,35 @@ a.weather-more-link.ai-advisor-more-link {
     color: #8a2b2b;
 }
 
+.voice-unsupported-hint {
+    margin: 6px 0 0;
+    color: #6b7280;
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.voice-unsupported-hint[hidden] {
+    display: none;
+}
+
+.rac-search-panel > .voice-unsupported-hint {
+    text-align: center;
+}
+
+.voice-field-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.voice-field-row .portal-rac-input,
+.voice-field-row .rac-input {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+}
+
 @keyframes ai-advisor-mic-pulse {
     0%,
     100% {
@@ -963,7 +992,7 @@ section h2 {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
     gap: 6px;
-    align-items: center;
+    align-items: start;
 }
 
 .work-memo-form input[type="date"],
@@ -973,6 +1002,24 @@ section h2 {
     border: 1px solid #d1d5db;
     border-radius: 6px;
     font-size: 11px;
+}
+
+.work-memo-mic-btn {
+    width: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    flex: 0 0 32px;
+}
+
+.work-memo-mic-btn .ai-advisor-mic-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.work-memo-mic-status {
+    margin: 2px 0 0;
+    font-size: 0.7rem;
+    line-height: 1.35;
 }
 
 .work-memo-status {
@@ -1128,6 +1175,10 @@ section h2 {
     text-align: center;
     font-size: 0.85em;
     color: #6c757d;
+}
+
+.portal-rac-search-panel > .voice-field .ai-advisor-mic-status {
+    margin-bottom: 0;
 }
 
 .portal-rac-search-desc {

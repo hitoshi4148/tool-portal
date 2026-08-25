@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20260825v151">
+    <link rel="stylesheet" href="/portal/portal.css?v=20260825v157">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -68,7 +68,7 @@
                     <div class="ai-advisor-input-wrap">
                         <textarea id="ai-advisor-input" rows="1" placeholder="芝管理に関する質問を入力..." aria-label="AIへの質問"></textarea>
                     </div>
-                    <button type="button" id="ai-advisor-mic" class="ai-advisor-mic-btn" aria-label="音声入力を開始" aria-pressed="false">
+                    <button type="button" id="ai-advisor-mic" class="ai-advisor-mic-btn" aria-label="音声入力を開始" data-mic-label="音声入力を開始" aria-pressed="false">
                         <svg class="ai-advisor-mic-icon" viewBox="0 0 24 24" aria-hidden="true">
                             <path
                                 fill="currentColor"
@@ -79,6 +79,7 @@
                     <button type="button" id="ai-advisor-send" class="btn-primary ai-advisor-send-btn">AIに質問</button>
                 </div>
                 <p id="ai-advisor-mic-status" class="ai-advisor-mic-status" hidden></p>
+                <p class="voice-unsupported-hint" hidden>音声入力は PC または Android の Chrome / Edge で使えます</p>
                 <p class="ai-advisor-notice-line">
                     <span class="ai-advisor-notice-left">
                         <span class="ai-advisor-notice-anchor">
@@ -136,10 +137,37 @@
                 <div class="portal-rac-search-col">
                     <form id="portal-rac-search-form" class="portal-rac-search-panel" action="/portal/rac/" method="get" novalidate>
                         <h3 class="portal-rac-search-title">農薬検索</h3>
-                        <input type="text" id="portal-rac-pesticide" name="pesticide" class="portal-rac-input" placeholder="農薬名・メーカー名" autocomplete="off">
+                        <div class="voice-field">
+                            <div class="voice-field-row">
+                                <input type="text" id="portal-rac-pesticide" name="pesticide" class="portal-rac-input" placeholder="農薬名・メーカー名" autocomplete="off">
+                                <button type="button" id="portal-rac-pesticide-mic" class="ai-advisor-mic-btn" aria-label="農薬名・メーカー名を音声入力" data-mic-label="農薬名・メーカー名を音声入力" aria-pressed="false">
+                                    <svg class="ai-advisor-mic-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            fill="currentColor"
+                                            d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p id="portal-rac-pesticide-mic-status" class="ai-advisor-mic-status" hidden></p>
+                        </div>
                         <p class="portal-rac-and-label">かつ</p>
-                        <input type="text" id="portal-rac-target" name="target" class="portal-rac-input" placeholder="病害名・害虫名・雑草名" autocomplete="off">
+                        <div class="voice-field">
+                            <div class="voice-field-row">
+                                <input type="text" id="portal-rac-target" name="target" class="portal-rac-input" placeholder="病害名・害虫名・雑草名" autocomplete="off">
+                                <button type="button" id="portal-rac-target-mic" class="ai-advisor-mic-btn" aria-label="病害名・害虫名・雑草名を音声入力" data-mic-label="病害名・害虫名・雑草名を音声入力" aria-pressed="false">
+                                    <svg class="ai-advisor-mic-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path
+                                            fill="currentColor"
+                                            d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p id="portal-rac-target-mic-status" class="ai-advisor-mic-status" hidden></p>
+                        </div>
                         <button type="submit" class="btn-primary portal-rac-search-btn">検索</button>
+                        <p class="voice-unsupported-hint" hidden>音声入力は PC または Android の Chrome / Edge で使えます</p>
                         <p class="portal-rac-search-desc">農薬名や病害虫・雑草名の一部から必要な芝生用農薬を探し、 RACコードをもとに耐性を避けたローテーション候補を確認できます。</p>
                         <p id="portal-rac-search-error" class="portal-rac-search-error hidden" role="alert"></p>
                     </form>
@@ -283,7 +311,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.5.3</p>
+            <p class="footer-version">v1.5.6</p>
         </footer>
     </div>
 
@@ -389,9 +417,10 @@
         </div>
     </div>
 
-    <script src="/portal/work-memo-ui.js?v=20250806v138"></script>
+    <script src="/portal/voice-input.js?v=20260825v157"></script>
+    <script src="/portal/work-memo-ui.js?v=20260825v157"></script>
     <script src="/portal/disease-risk-ui.js?v=20250731v128"></script>
     <script src="/portal/cbi-ui.js?v=20250806v129"></script>
-    <script src="/portal/portal.js?v=20260825v154"></script>
+    <script src="/portal/portal.js?v=20260825v156"></script>
 </body>
 </html>

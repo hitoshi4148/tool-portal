@@ -129,15 +129,18 @@ body {
 .rac-search-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 10px 12px;
 }
 
+.rac-voice-field {
+  flex: 1 1 180px;
+  max-width: 320px;
+}
+
 .rac-input {
-  flex: 1 1 160px;
   min-width: 0;
-  max-width: 280px;
   padding: 10px 12px;
   border: 1px solid #ced4da;
   border-radius: 6px;
@@ -155,6 +158,7 @@ body {
   flex: 0 0 auto;
   font-size: 0.75rem;
   color: #6c757d;
+  padding-top: 12px;
 }
 
 .rac-search-row .btn-primary.rac-search-btn {
@@ -162,6 +166,8 @@ body {
   width: auto;
   padding: 8px 20px;
   font-size: 0.9em;
+  min-height: 42px;
+  align-self: flex-start;
 }
 
 .rac-results {
@@ -472,6 +478,15 @@ body {
   .rac-search-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .rac-and-label {
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .rac-voice-field {
+    max-width: none;
   }
 
   .rac-input {

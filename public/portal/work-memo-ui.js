@@ -457,6 +457,19 @@ const WorkMemoUI = (() => {
       .join("");
   }
 
+  const MIC_ICON_SVG = `<svg class="ai-advisor-mic-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>`;
+
+  function buildVoiceFieldHtml(inputHtml, micId, statusId, label) {
+    const micLabel = `${label}を音声入力`;
+    return `<div class="voice-field">
+      <div class="voice-field-row">
+        ${inputHtml}
+        <button type="button" id="${micId}" class="ai-advisor-mic-btn work-memo-mic-btn" aria-label="${micLabel}" data-mic-label="${micLabel}" aria-pressed="false">${MIC_ICON_SVG}</button>
+      </div>
+      <p id="${statusId}" class="ai-advisor-mic-status work-memo-mic-status" hidden></p>
+    </div>`;
+  }
+
   function buildFormHtml(today) {
     const editing = selectedSheetRow != null;
     const selectedRow = getSelectedRow();
@@ -469,8 +482,8 @@ const WorkMemoUI = (() => {
     if (editing) {
       return `<form class="work-memo-form work-memo-form--edit" id="work-memo-form">
         <input type="date" id="work-memo-date" value="${escapeHtml(formDate)}" aria-label="日付">
-        <input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア" value="${escapeHtml(formArea)}">
-        <input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ" value="${escapeHtml(formMemo)}">
+        ${buildVoiceFieldHtml(`<input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア" value="${escapeHtml(formArea)}">`, "work-memo-area-mic", "work-memo-area-mic-status", "エリア")}
+        ${buildVoiceFieldHtml(`<input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ" value="${escapeHtml(formMemo)}">`, "work-memo-text-mic", "work-memo-text-mic-status", "メモ")}
         <div class="work-memo-form-actions">
           <button type="submit" class="btn-primary work-memo-save-btn" ${isSaving ? "disabled" : ""}>${isSaving ? savingLabel : submitLabel}</button>
           <button type="button" class="work-memo-cancel-btn" id="work-memo-cancel-btn" ${isSaving ? "disabled" : ""}>キャンセル</button>
@@ -481,8 +494,8 @@ const WorkMemoUI = (() => {
 
     return `<form class="work-memo-form" id="work-memo-form">
       <input type="date" id="work-memo-date" value="${escapeHtml(formDate)}" aria-label="日付">
-      <input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア">
-      <input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ">
+      ${buildVoiceFieldHtml(`<input type="text" id="work-memo-area-input" placeholder="エリア" maxlength="120" aria-label="エリア">`, "work-memo-area-mic", "work-memo-area-mic-status", "エリア")}
+      ${buildVoiceFieldHtml(`<input type="text" id="work-memo-text" placeholder="メモ" maxlength="500" aria-label="メモ">`, "work-memo-text-mic", "work-memo-text-mic-status", "メモ")}
       <button type="submit" class="btn-primary work-memo-add-btn" ${isSaving ? "disabled" : ""}>${isSaving ? savingLabel : submitLabel}</button>
     </form>`;
   }
@@ -520,6 +533,7 @@ const WorkMemoUI = (() => {
         </table>
       </div>
       ${buildFormHtml(today)}
+      <p class="voice-unsupported-hint" hidden>音声入力は PC または Android の Chrome / Edge で使えます</p>
       ${statusMessage ? `<p class="work-memo-status ${statusIsError ? "work-memo-status--error" : ""}">${escapeHtml(statusMessage)}</p>` : ""}
     </div>`;
 
@@ -580,6 +594,7 @@ const WorkMemoUI = (() => {
   async function handleSubmit(event) {
     event.preventDefault();
     if (isSaving) return;
+    if (window.VoiceInput) window.VoiceInput.stopAll();
 
     const { date, area, memo } = readFormValues();
 
@@ -687,6 +702,25 @@ const WorkMemoUI = (() => {
         selectRow(sheetRow);
       });
     });
+
+    bindVoiceFields();
+  }
+
+  function bindVoiceFields() {
+    if (!window.VoiceInput) return;
+    window.VoiceInput.bindVoiceField({
+      input: container.querySelector("#work-memo-area-input"),
+      micBtn: container.querySelector("#work-memo-area-mic"),
+      micStatus: container.querySelector("#work-memo-area-mic-status"),
+      maxLength: 120,
+    });
+    window.VoiceInput.bindVoiceField({
+      input: container.querySelector("#work-memo-text"),
+      micBtn: container.querySelector("#work-memo-text-mic"),
+      micStatus: container.querySelector("#work-memo-text-mic-status"),
+      maxLength: 500,
+    });
+    window.VoiceInput.revealUnsupportedHints(container);
   }
 
   function bindEvents() {
