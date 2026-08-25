@@ -76,81 +76,74 @@ function shouldDisplayHour(jst: JstDateTime): boolean {
   );
 }
 
-function checkPrecipitationToday(
-  timeseries: MetTimeseriesEntry[],
-  currentDt: JstDateTime
-): boolean {
-  for (const entry of timeseries) {
-    const dt = toJst(entry.time);
+/** Limit CPU on Workers free tier: keep roughly the next 3 days of points. */
+const MAX_TIMESERIES = 72;
 
-    if (!isSameJstDay(dt, currentDt)) {
-      continue;
+/**
+ * Precompute same-day forward rain / high-temp flags per index.
+ * Avoids the previous O(n²) full-timeseries scans that triggered Cloudflare error 1102.
+ */
+function buildDayForwardFlags(timeseries: MetTimeseriesEntry[], jsts: JstDateTime[]) {
+  const n = timeseries.length;
+  const rainLaterSameDay = new Array<boolean>(n).fill(false);
+  const highTempDuration = new Array<boolean>(n).fill(false);
+
+  let i = 0;
+  while (i < n) {
+    let j = i + 1;
+    while (j < n && isSameJstDay(jsts[j], jsts[i])) {
+      j += 1;
     }
 
-    if (!isAfterJst(dt, currentDt)) {
-      continue;
+    // rain later: any rain strictly after k on the same day
+    let anyRainAfter = false;
+    for (let k = j - 1; k >= i; k--) {
+      rainLaterSameDay[k] = anyRainAfter;
+      if (getPrecip(timeseries[k]) > MAX_PRECIP_OK) {
+        anyRainAfter = true;
+      }
     }
 
-    if (getPrecip(entry) > MAX_PRECIP_OK) {
-      return true;
+    // high-temp streak looking strictly forward within the day (day length is small)
+    for (let k = i; k < j; k++) {
+      let streak = 0;
+      let maxStreak = 0;
+      for (let t = k + 1; t < j; t++) {
+        const tTemp = timeseries[t].data.instant.details.air_temperature ?? 0;
+        if (tTemp >= HIGH_TEMP_THRESHOLD) {
+          streak += 1;
+          maxStreak = Math.max(maxStreak, streak);
+        } else {
+          streak = 0;
+        }
+      }
+      highTempDuration[k] = maxStreak >= HIGH_TEMP_DURATION_HOURS;
     }
+
+    i = j;
   }
 
-  return false;
-}
-
-function checkHighTempDuration(
-  timeseries: MetTimeseriesEntry[],
-  currentDt: JstDateTime
-): boolean {
-  let maxConsecutive = 0;
-  let currentConsecutive = 0;
-
-  for (const entry of timeseries) {
-    const dt = toJst(entry.time);
-
-    if (!isSameJstDay(dt, currentDt)) {
-      continue;
-    }
-
-    if (!isAfterJst(dt, currentDt)) {
-      continue;
-    }
-
-    const temp = entry.data.instant.details.air_temperature ?? 0;
-
-    if (temp >= HIGH_TEMP_THRESHOLD) {
-      currentConsecutive += 1;
-      maxConsecutive = Math.max(maxConsecutive, currentConsecutive);
-    } else {
-      currentConsecutive = 0;
-    }
-  }
-
-  return maxConsecutive >= HIGH_TEMP_DURATION_HOURS;
+  return { rainLaterSameDay, highTempDuration };
 }
 
 function checkRainWithinHours(
   timeseries: MetTimeseriesEntry[],
-  currentDt: JstDateTime,
+  jsts: JstDateTime[],
+  index: number,
   hours = RAIN_AFTER_HOURS
 ): boolean {
+  const currentDt = jsts[index];
   const timeLimit = addHoursJst(currentDt, -hours);
 
-  for (const entry of timeseries) {
-    const dt = toJst(entry.time);
-
-    if (isAfterJst(dt, currentDt)) {
+  for (let i = index - 1; i >= 0; i--) {
+    const dt = jsts[i];
+    if (isBeforeJst(dt, timeLimit)) {
       break;
     }
 
-    if (isBeforeJst(dt, timeLimit)) {
-      continue;
-    }
-
+    const entry = timeseries[i];
     if (entry.data.next_1_hours) {
-      const precip =
-        entry.data.next_1_hours.details.precipitation_amount ?? 0;
+      const precip = entry.data.next_1_hours.details.precipitation_amount ?? 0;
       const periodEnd = addHoursJst(dt, 1);
 
       if (
@@ -167,10 +160,22 @@ function checkRainWithinHours(
 }
 
 export function judge(timeseries: MetTimeseriesEntry[]): SprayResult[] {
+  const limited =
+    timeseries.length > MAX_TIMESERIES
+      ? timeseries.slice(0, MAX_TIMESERIES)
+      : timeseries;
+
+  const jsts = limited.map((entry) => toJst(entry.time));
+  const { rainLaterSameDay, highTempDuration } = buildDayForwardFlags(
+    limited,
+    jsts
+  );
+
   const results: SprayResult[] = [];
 
-  for (const entry of timeseries) {
-    const dt = toJst(entry.time);
+  for (let idx = 0; idx < limited.length; idx++) {
+    const entry = limited[idx];
+    const dt = jsts[idx];
     const isSprayTime = inTimeWindow(dt);
 
     if (!shouldDisplayHour(dt)) {
@@ -206,19 +211,19 @@ export function judge(timeseries: MetTimeseriesEntry[]): SprayResult[] {
       reason.push("気温注意");
     }
 
-    if (checkPrecipitationToday(timeseries, dt)) {
+    if (rainLaterSameDay[idx]) {
       warnings.push(
         "⚠️ 当日中に雨の予報があります。農薬・葉面散布肥料が流亡する可能性があるため注意してください。"
       );
     }
 
-    if (checkHighTempDuration(timeseries, dt)) {
+    if (highTempDuration[idx]) {
       warnings.push(
         "⚠️ 日中30度以上が3時間以上続く予報です。肥料やけ・農薬やけの注意が必要です。"
       );
     }
 
-    if (checkRainWithinHours(timeseries, dt, RAIN_AFTER_HOURS)) {
+    if (checkRainWithinHours(limited, jsts, idx, RAIN_AFTER_HOURS)) {
       recommendations.push(
         "🌧️ 雨の後6時間以内です。殺虫剤散布に適したタイミングです。"
       );

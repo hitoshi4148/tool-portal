@@ -104,7 +104,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="spray-version">Version 1.1.0 ｜ 2026.08</p>
+            <p class="spray-version">Version 1.1.1 ｜ 2026.08</p>
         </footer>
     </div>
 
@@ -208,6 +208,47 @@
             }
         }
 
+        async function fetchForecastJson(lat, lon, retries = 2) {
+            let lastError = null;
+            for (let attempt = 0; attempt <= retries; attempt++) {
+                try {
+                    const response = await fetch(`${API_BASE}?lat=${lat}&lon=${lon}`, {
+                        headers: { Accept: 'application/json' },
+                    });
+                    const contentType = response.headers.get('content-type') || '';
+                    const text = await response.text();
+
+                    if (!contentType.includes('application/json') || text.trimStart().startsWith('<')) {
+                        throw new Error(
+                            '予報APIが一時的に応答できません（しばらくして再試行してください）'
+                        );
+                    }
+
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch {
+                        throw new Error(
+                            '予報APIの応答形式が不正です（しばらくして再試行してください）'
+                        );
+                    }
+
+                    if (!response.ok && !data?.error) {
+                        throw new Error(`予報APIエラー (HTTP ${response.status})`);
+                    }
+                    return data;
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < retries) {
+                        await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+                    }
+                }
+            }
+            throw lastError instanceof Error
+                ? lastError
+                : new Error('予報の取得に失敗しました');
+        }
+
         async function fetchForecast() {
             const lat = document.getElementById('lat').value;
             const lon = document.getElementById('lon').value;
@@ -224,9 +265,7 @@
             document.getElementById('results').classList.add('hidden');
 
             try {
-                const response = await fetch(`${API_BASE}?lat=${lat}&lon=${lon}`);
-                const data = await response.json();
-
+                const data = await fetchForecastJson(lat, lon);
                 if (data.success) {
                     cacheSprayForecast(lat, lon, data.results);
                     displayResults(data.results);
@@ -234,7 +273,7 @@
                     showError(data.error || '予報の取得に失敗しました');
                 }
             } catch (error) {
-                showError('エラーが発生しました: ' + error.message);
+                showError(error instanceof Error ? error.message : String(error));
             } finally {
                 document.getElementById('loading').classList.add('hidden');
             }
