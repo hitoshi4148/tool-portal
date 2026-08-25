@@ -1,3 +1,8 @@
 name = "tool-portal"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "public"
+
+# 同じアカウントの相談室 Worker。無いときは HELPDESK_CHAT_URL または既定の workers.dev
+[[services]]
+binding = "HELPDESK"
+service = "lawn-helpdesk"

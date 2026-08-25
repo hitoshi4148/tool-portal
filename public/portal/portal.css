@@ -356,7 +356,7 @@ body.modal-open {
 
 .ai-advisor-input-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) 42px auto;
     gap: 8px;
     align-items: stretch;
     width: 100%;
@@ -364,6 +364,58 @@ body.modal-open {
 
 .ai-advisor-input-wrap {
     min-width: 0;
+}
+
+.ai-advisor-mic-btn {
+    width: 42px;
+    min-height: 42px;
+    padding: 0;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #4b5563;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ai-advisor-mic-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.ai-advisor-mic-btn.listening {
+    border-color: #dc2626;
+    background: #dc2626;
+    color: #fff;
+    animation: ai-advisor-mic-pulse 1.2s ease-in-out infinite;
+}
+
+.ai-advisor-mic-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.ai-advisor-mic-status {
+    margin: 6px 0 0;
+    color: #4b5563;
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.ai-advisor-mic-status.error {
+    color: #8a2b2b;
+}
+
+@keyframes ai-advisor-mic-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.72;
+    }
 }
 
 #ai-advisor-input {
@@ -2244,6 +2296,22 @@ footer p {
 
     .settings-btn {
         align-self: flex-end;
+    }
+
+    .ai-advisor-input-row {
+        grid-template-columns: minmax(0, 1fr) 44px;
+    }
+
+    .ai-advisor-input-wrap {
+        grid-column: 1 / -1;
+    }
+
+    .ai-advisor-mic-btn {
+        min-height: 44px;
+    }
+
+    .ai-advisor-input-row .btn-primary.ai-advisor-send-btn {
+        min-height: 44px;
     }
 
     .weather-day-summary {

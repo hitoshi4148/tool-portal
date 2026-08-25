@@ -1,26 +1,15 @@
-import { buildFullPrompt } from "../../../src/advisor/prompt";
-import { generateGeminiResponse, mapGeminiError } from "../../../src/advisor/gemini";
+import {
+  askHelpdesk,
+  mapHelpdeskError,
+  parseSseToText,
+  type HelpdeskEnv,
+} from "../../../src/advisor/helpdesk-chat";
 import type { ChatRequestBody } from "../../../src/advisor/types";
 
-interface Env {
-  GEMINI_API_KEY?: string;
-  GEMINI_MODEL?: string;
-}
+interface Env extends HelpdeskEnv {}
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const apiKey = context.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return Response.json(
-        {
-          success: false,
-          error:
-            "Gemini APIキーが設定されていません。ローカルでは .dev.vars に GEMINI_API_KEY を設定して wrangler を再起動してください。本番では Cloudflare Pages の Environment variables に GEMINI_API_KEY を追加してください。",
-        },
-        { status: 500 }
-      );
-    }
-
     const body = (await context.request.json()) as ChatRequestBody;
     const message = body.message?.trim();
     if (!message) {
@@ -31,21 +20,68 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const settings = body.settings ?? {};
-    const modelName = context.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-    const fullPrompt = buildFullPrompt(message, settings);
-    const text = await generateGeminiResponse(apiKey, modelName, fullPrompt);
+    const upstream = await askHelpdesk(context.env, {
+      messages: [{ role: "user", content: message }],
+      settings,
+      stream: false,
+    });
 
-    return Response.json({ success: true, response: text });
+    const contentType = upstream.headers.get("content-type") || "";
+    const raw = await upstream.text();
+
+    if (contentType.includes("application/json")) {
+      let parsed: {
+        success?: boolean;
+        response?: unknown;
+        error?: { message?: string; code?: string } | string;
+      };
+      try {
+        parsed = JSON.parse(raw) as typeof parsed;
+      } catch {
+        const mapped = mapHelpdeskError(upstream.status, raw);
+        return Response.json(
+          { success: false, error: mapped.message, details: mapped.details },
+          { status: mapped.statusCode }
+        );
+      }
+
+      if (parsed.success === true && typeof parsed.response === "string" && parsed.response.trim()) {
+        return Response.json({ success: true, response: parsed.response.trim() });
+      }
+
+      const errorMessage =
+        typeof parsed.error === "string"
+          ? parsed.error
+          : parsed.error?.message;
+      if (errorMessage) {
+        return Response.json(
+          { success: false, error: errorMessage },
+          { status: upstream.status >= 400 ? upstream.status : 502 }
+        );
+      }
+    }
+
+    if (contentType.includes("text/event-stream") || raw.includes("data:")) {
+      const text = parseSseToText(raw);
+      if (text) {
+        return Response.json({ success: true, response: text });
+      }
+    }
+
+    const mapped = mapHelpdeskError(upstream.status, raw);
+    return Response.json(
+      { success: false, error: mapped.message, details: mapped.details },
+      { status: mapped.statusCode }
+    );
   } catch (error) {
-    const mapped = mapGeminiError(error);
+    const detail = error instanceof Error ? error.message : String(error);
     return Response.json(
       {
         success: false,
-        error: mapped.message,
-        details: mapped.details,
-        statusCode: mapped.statusCode,
+        error: "芝しごとAIへの接続に失敗しました。時間をおいて再試行してください。",
+        details: detail,
       },
-      { status: 500 }
+      { status: 502 }
     );
   }
 };

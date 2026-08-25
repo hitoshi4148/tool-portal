@@ -65,8 +65,17 @@
                     <div class="ai-advisor-input-wrap">
                         <textarea id="ai-advisor-input" rows="1" placeholder="芝管理に関する質問を入力..." aria-label="AIへの質問"></textarea>
                     </div>
+                    <button type="button" id="ai-advisor-mic" class="ai-advisor-mic-btn" aria-label="音声入力を開始" aria-pressed="false">
+                        <svg class="ai-advisor-mic-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                fill="currentColor"
+                                d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+                            />
+                        </svg>
+                    </button>
                     <button type="button" id="ai-advisor-send" class="btn-primary ai-advisor-send-btn">AIに質問</button>
                 </div>
+                <p id="ai-advisor-mic-status" class="ai-advisor-mic-status" hidden></p>
                 <p class="ai-advisor-notice-line">
                     <span class="ai-advisor-notice-anchor">
                         <button type="button" class="ai-advisor-notice-btn" aria-label="AI利用時の注意4カ条を表示">ℹ 注意</button>
@@ -74,11 +83,11 @@
                             <strong>AI利用時の注意4カ条</strong>
                             ① 個人の名前や連絡先は入力しない<br>
                             ② お客様の情報は入力しない<br>
-                            ③ 施設の管理計画や記録は入力しない<br>
-                            ④ 入力した内容は外部に送信されます
+                            ③ 回答は判断の参考です。最終判断は現場で行ってください<br>
+                            ④ 入力は芝しごとAIの回答生成にだけ使い、ほかの利用者への公開やモデル学習には使いません
                         </span>
                     </span>
-                    <span class="ai-advisor-notice-brief">個人情報・顧客情報・管理記録は入力しないでください</span>
+                    <span class="ai-advisor-notice-brief">個人情報・顧客情報は入力しないでください</span>
                 </p>
             </div>
         </section>
@@ -268,7 +277,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.4.7</p>
+            <p class="footer-version">v1.5.0</p>
         </footer>
     </div>
 

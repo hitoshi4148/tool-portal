@@ -1,3 +1,7 @@
+/**
+ * 未使用。AI質問箱は相談室 Worker（Gemma 4）へ中継する。
+ * 本番確認後に削除してよい。
+ */
 export interface GeminiErrorInfo {
   message: string;
   statusCode?: number;

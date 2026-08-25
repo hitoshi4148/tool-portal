@@ -2,7 +2,7 @@
 
 芝管理ツールを集約するポータルサイト（Cloudflare Pages + Functions）。
 
-**現在のバージョン: v1.4.7**
+**現在のバージョン: v1.5.0**
 
 ## 本番 URL
 
@@ -37,7 +37,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | `/portal/api/cbi` | ベント炭素収支（CBI）・体力指数 API（単体・デバッグ用） |
 | `/portal/api/google-config` | 芝しごとノート用 Google OAuth クライアント ID 取得 |
 | `/portal/api/gdd` | 積算温度（GDD）API |
-| `/portal/api/chat` | 芝しごと・AI質問箱 API（Gemini） |
+| `/portal/api/chat` | 芝しごと・AI質問箱 API（Gemma 4／相談室 Worker へ中継） |
 | `/portal/api/geocode` | 逆ジオコーディング API |
 | `/portal/spray/api/forecast` | 散布予報 API |
 
@@ -65,7 +65,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 └─────────────────┴─────────────────┘
 [芝しごとシリーズ（2列カードグリッド）]
 [PR | ブログ | YouTube バナー（3列）]
-[フッター: 気象クレジット / グロウアンドプログレス / v1.4.7]
+[フッター: 気象クレジット / グロウアンドプログレス / v1.5.0]
 ```
 
 | 機能 | 説明 |
@@ -74,7 +74,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | ブランドメッセージ | ロゴ下に「スポーツターフ管理を、もっとシンプルに。」。右の **ℹ** でサイト説明（PC: ホバー、スマホ: タップ） |
 | タイトルアニメ | PNG ロゴにきらんと光る CSS アニメーション（`prefers-reduced-motion` 時は停止） |
 | 設定 | 施設名・緯度経度・芝種・AI回答モードなど（Cookie `portalSettings` に保存） |
-| AI質問箱 | タイトル下の入力欄から Gemini による芝管理 Q&A（Cloudflare Functions） |
+| AI質問箱 | タイトル下の入力欄から Gemma 4 による芝管理 Q&A（相談室 Worker へ中継） |
 | 天気予報 | 48h 横スクロールウィジェット。「もっと詳しく」から `/portal/spray/` へ（予報データはキャッシュ利用） |
 | 病害リスク予測 | 翌日・明後日 朝6:00 時点の5病害リスク（%）。各病害名横に「判定ロジック」モーダル。パネル内右上に **他地域を見る** → `/portal/risk/` |
 | ベント炭素収支（CBI） | 1パネルに炭素収支予測（明日/明後日）と体力指数（過去7日）を統合。各項目に **判定ロジック** モーダル |
@@ -84,7 +84,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | 農薬検索 | 農薬名・病害虫名で検索し `/portal/rac/` へ遷移して結果一覧を自動表示（URL クエリ `pesticide` / `target`） |
 | 芝しごとシリーズ | 外部アプリへのリンクカード（2列）。各カード名横の **ℹ** で説明文を表示（PC: ホバー、スマホ: タップ） |
 | 関連バナー | PR・ブログ・YouTube を 3 列 1 行（最大幅 720px）でフッター上に表示 |
-| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.4.7** |
+| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.5.0** |
 
 ### PGR適時・発芽予測（積算温度 GDD）
 
@@ -112,17 +112,17 @@ API: `/portal/api/gdd`（NASA POWER daily）。dashboard とは独立して散�
 
 [turf_advisor](https://github.com/hitoshi4148/turf_advisor) のチャット機能を Cloudflare Pages Functions に移植しています（Render のコールドスタートなし）。
 
-- UI: タイトル下に注意4カ条（ℹ ボタンでホバー/フォーカス表示）・入力欄・「AIに質問」ボタン。初回送信でチャット欄が縦に展開
+- UI: タイトル下に注意4カ条（ℹ ボタンでホバー/フォーカス表示）・入力欄・マイク（音声入力）・「AIに質問」ボタン。初回送信でチャット欄が縦に展開。音声は Web Speech API（Chrome / Edge。iPhone は非対応が多い）
 - 設定: ポータル設定（緯度経度・芝種等）＋ AI回答モード（デフォルト「慎重に回答」）をプロンプトに反映
 - 履歴: ページを開いている間のみ（リロードで消える）
-- API: `POST /portal/api/chat` → Gemini（`GEMINI_API_KEY` 必須）
+- API: `POST /portal/api/chat` → 相談室 Worker の Gemma 4（`lawn-helpdesk`）
 
 #### 環境変数
 
 | 変数 | 必須 | 説明 |
 |------|------|------|
-| `GEMINI_API_KEY` | はい | [Google AI Studio](https://aistudio.google.com/) の API キー |
-| `GEMINI_MODEL` | いいえ | デフォルト `gemini-2.5-flash` |
+| Service Binding `HELPDESK` | 本番で推奨 | Worker `lawn-helpdesk` への binding |
+| `HELPDESK_CHAT_URL` | いいえ | Binding が無いときの相談室 `POST /api/chat` URL。未設定なら `https://lawn-helpdesk.hitoshi-yoshinobu.workers.dev/api/chat` |
 | `GOOGLE_OAUTH_CLIENT_ID` | 芝しごとノート利用時 | Google Cloud OAuth 2.0 Web クライアント ID |
 
 **ローカル**: `.dev.vars.example` を `.dev.vars` にコピーしてキーを設定（`wrangler pages dev` が自動読み込み）
@@ -253,6 +253,14 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 デスクトップ: 3 列 1 行（最大幅 720px・高さ 76px）。スマホ: 1 列縦積み（最大幅 280px）。
 
 ## 変更履歴
+
+### ポータル TOP v1.5.0（2026-08）
+
+**芝しごと・AI質問箱**
+
+- 回答生成を Gemini から相談室 Worker（Gemma 4 / `lawn-helpdesk`）へ切替
+- 注意4カ条を相談室と揃えた（個人・顧客情報は入力しない／最終判断は現場／入力は回答生成のみ）
+- 音声入力を追加（入力欄横のマイク。話して文字にしたあと送信）
 
 ### ポータル TOP v1.4.7（2026-08）
 
@@ -521,7 +529,7 @@ npm run dev
 - http://127.0.0.1:8788/portal/rac/
 - http://127.0.0.1:8788/portal/risk/
 
-AI質問箱をローカルで試す場合は `.dev.vars` に `GEMINI_API_KEY` が必要です。
+AI質問箱をローカルで試す場合、相談室 Worker が公開されていれば追加キーは不要です。Service Binding が使えないときは `.dev.vars` に `HELPDESK_CHAT_URL` を書きます。
 
 ### wrangler レジストリエラー（Windows）
 
@@ -544,7 +552,7 @@ GitHub リポジトリ: https://github.com/hitoshi4148/tool-portal
    - **Framework preset**: None
    - **Build command**: （空欄）
    - **Build output directory**: `public`
-3. Production 環境変数に `GEMINI_API_KEY` を設定
+3. 本番では Worker `lawn-helpdesk` への Service Binding `HELPDESK` を付ける（`wrangler.toml` の `[[services]]`）
 
 ## 本番ドメイン接続（`turf-tools.jp/portal/`）
 
@@ -640,7 +648,7 @@ Met Norway / NASA POWER への重複アクセスを避けるため、サーバ�
 | サービス | 利用箇所 | 備考 |
 |----------|----------|------|
 | Nominatim (OSM) | `/portal/api/geocode` | 設定保存時・現在地取得時のみ |
-| Google Gemini | `/portal/api/chat` | AI質問箱（`GEMINI_API_KEY` 必須） |
+| Workers AI Gemma 4 | `/portal/api/chat` | 相談室 Worker `lawn-helpdesk` へ中継 |
 
 ### データフロー（ポータル TOP）
 

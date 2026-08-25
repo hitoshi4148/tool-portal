@@ -1,5 +1,5 @@
 # ローカル開発用（wrangler pages dev が自動読み込み）
 # コピー: copy .dev.vars.example .dev.vars
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash
+# チャットは相談室 Worker（Gemma 4）。Gemini キーは不要。
+HELPDESK_CHAT_URL=https://lawn-helpdesk.hitoshi-yoshinobu.workers.dev/api/chat
 GOOGLE_OAUTH_CLIENT_ID=
