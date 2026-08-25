@@ -260,6 +260,7 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 
 - 芝しごとシリーズのカード名を **AI相談室** に短縮
 - 質問入力欄の上右に、天気欄と同じピル型の **AI相談室** リンクを追加（`/aihelpdesk/`）
+- 未使用の Gemini 呼び出しコードを削除。Pages 本番の `GEMINI_API_KEY` を削除（`GOOGLE_OAUTH_CLIENT_ID` は残す）
 
 ### ポータル TOP v1.5.1（2026-08）
 
@@ -709,7 +710,7 @@ tool-portal/
 │   └── spray/api/forecast.ts
 ├── src/
 │   ├── portal/fetch-dashboard.ts
-│   ├── advisor/                  # AI質問箱（Gemini）
+│   ├── advisor/                  # AI質問箱（相談室 Worker へ中継）
 │   ├── weather/
 │   ├── disease/
 │   ├── growth-potential/
