@@ -261,6 +261,16 @@ body.modal-open {
     margin: 0;
 }
 
+.ai-advisor-more-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 6px;
+}
+
+a.weather-more-link.ai-advisor-more-link {
+    position: static;
+}
+
 .ai-advisor-messages {
     overflow-y: auto;
     margin-bottom: 10px;

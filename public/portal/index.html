@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20260825v150">
+    <link rel="stylesheet" href="/portal/portal.css?v=20260825v151">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -61,6 +61,9 @@
         <section class="ai-advisor-section" id="ai-advisor-section" aria-label="AI質問">
             <div class="ai-advisor-chat" id="ai-advisor-chat">
                 <div class="ai-advisor-messages collapsed" id="ai-advisor-messages" aria-live="polite"></div>
+                <div class="ai-advisor-more-row">
+                    <a href="/aihelpdesk/" class="weather-more-link ai-advisor-more-link" title="資料フォルダと音声入力がある相談室へ">AI相談室</a>
+                </div>
                 <div class="ai-advisor-input-row">
                     <div class="ai-advisor-input-wrap">
                         <textarea id="ai-advisor-input" rows="1" placeholder="芝管理に関する質問を入力..." aria-label="AIへの質問"></textarea>
@@ -194,9 +197,9 @@
                 <a class="series-card" href="/aihelpdesk/">
                     <span class="series-card-category">AI</span>
                     <span class="series-card-name-row">
-                        <span class="series-card-name">芝しごと・AI相談室</span>
+                        <span class="series-card-name">AI相談室</span>
                         <span class="series-info-anchor">
-                            <button type="button" class="series-info-btn" aria-label="芝しごと・AI相談室の説明">i</button>
+                            <button type="button" class="series-info-btn" aria-label="AI相談室の説明">i</button>
                             <span class="series-info-popover" role="tooltip">ポータルと同じ施設設定で、資料フォルダと音声入力に対応した芝管理のAI相談。Gemma 4。同じ www.turf-tools.jp 上です。</span>
                         </span>
                     </span>
@@ -280,7 +283,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.5.1</p>
+            <p class="footer-version">v1.5.2</p>
         </footer>
     </div>
 
