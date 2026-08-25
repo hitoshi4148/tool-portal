@@ -4,7 +4,6 @@ const SPRAY_CACHE_TTL_MS = 60 * 60 * 1000;
 const DASHBOARD_API = "/portal/api/dashboard";
 const CBI_API = "/portal/api/cbi";
 const GDD_API = "/portal/api/gdd";
-const CHAT_API = "/portal/api/chat";
 const GEOCODE_API = "/portal/api/geocode";
 const GDD_MAX = 400;
 const AGROMAP_COOKIE_DAYS = 365;
@@ -1490,6 +1489,24 @@ function addAdvisorMessage(content, isUser = false) {
   });
 }
 
+function advisorChatUrl() {
+  const host = location.hostname;
+  if (host === "www.turf-tools.jp" || host === "turf-tools.jp") {
+    return "/aihelpdesk/api/chat";
+  }
+  return "/portal/api/chat";
+}
+
+function advisorErrorMessage(data) {
+  if (typeof data.error === "string" && data.error.trim()) {
+    return data.error;
+  }
+  if (data.error && typeof data.error.message === "string" && data.error.message.trim()) {
+    return data.error.message;
+  }
+  return "エラーが発生しました";
+}
+
 async function sendAdvisorMessage() {
   const input = document.getElementById("ai-advisor-input");
   const sendButton = document.getElementById("ai-advisor-send");
@@ -1511,17 +1528,21 @@ async function sendAdvisorMessage() {
     sendButton.innerHTML = '<span class="ai-advisor-loading"></span> 処理中...';
 
   try {
-    const data = await fetchApiJson(CHAT_API, {
+    const data = await fetchApiJson(advisorChatUrl(), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
       body: JSON.stringify({
         message,
         settings: getAdvisorSettingsPayload(),
+        stream: false,
       }),
     });
 
     if (!data.success) {
-      let errorMessage = data.error || "エラーが発生しました";
+      let errorMessage = advisorErrorMessage(data);
       if (data.details) {
         errorMessage += `\n\n詳細: ${data.details}`;
       }

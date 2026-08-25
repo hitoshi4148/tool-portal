@@ -1,26 +1,19 @@
-const DEFAULT_CHAT_URL = "https://lawn-helpdesk.hitoshi-yoshinobu.workers.dev/api/chat";
+const DEFAULT_CHAT_URL = "https://www.turf-tools.jp/aihelpdesk/api/chat";
 
 export type HelpdeskEnv = {
-  HELPDESK?: Fetcher;
   HELPDESK_CHAT_URL?: string;
 };
 
 export async function askHelpdesk(env: HelpdeskEnv, body: unknown): Promise<Response> {
-  const init: RequestInit = {
+  const url = env.HELPDESK_CHAT_URL?.trim() || DEFAULT_CHAT_URL;
+  return fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
     body: JSON.stringify(body),
-  };
-
-  if (env.HELPDESK) {
-    return env.HELPDESK.fetch(new Request("https://helpdesk/api/chat", init));
-  }
-
-  const url = env.HELPDESK_CHAT_URL?.trim() || DEFAULT_CHAT_URL;
-  return fetch(url, init);
+  });
 }
 
 export function parseSseToText(raw: string): string {

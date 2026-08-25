@@ -12,7 +12,7 @@
 | https://www.turf-tools.jp/portal/spray/ | ピンポイント天気で芝しごと（本番） |
 | https://www.turf-tools.jp/portal/rac/ | 楽RAC農薬ローテ（本番） |
 | https://www.turf-tools.jp/portal/risk/ | 病害リスク予報（本番） |
-| https://www.turf-tools.jp/portal/diagnosis/ | 病害画像診断AI（本番・ブラウザ内推論） |
+| https://www.turf-tools.jp/aihelpdesk/ | 芝しごと・AI相談室（別 Worker・同一ホスト） |
 | https://tool-portal-9y2.pages.dev/portal/ | Pages 直接 URL（検証・フォールバック用） |
 
 > `tool-portal-9y2` の `-9y2` は Cloudflare が付与した一意サフィックスで削除できません。  
@@ -37,7 +37,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | `/portal/api/cbi` | ベント炭素収支（CBI）・体力指数 API（単体・デバッグ用） |
 | `/portal/api/google-config` | 芝しごとノート用 Google OAuth クライアント ID 取得 |
 | `/portal/api/gdd` | 積算温度（GDD）API |
-| `/portal/api/chat` | 芝しごと・AI質問箱 API（Gemma 4／相談室 Worker へ中継） |
+| `/portal/api/chat` | ローカル用。本番ブラウザは `/aihelpdesk/api/chat` を直接呼ぶ |
 | `/portal/api/geocode` | 逆ジオコーディング API |
 | `/portal/spray/api/forecast` | 散布予報 API |
 
@@ -74,7 +74,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | ブランドメッセージ | ロゴ下に「スポーツターフ管理を、もっとシンプルに。」。右の **ℹ** でサイト説明（PC: ホバー、スマホ: タップ） |
 | タイトルアニメ | PNG ロゴにきらんと光る CSS アニメーション（`prefers-reduced-motion` 時は停止） |
 | 設定 | 施設名・緯度経度・芝種・AI回答モードなど（Cookie `portalSettings` に保存） |
-| AI質問箱 | タイトル下の入力欄から Gemma 4 による芝管理 Q&A（相談室 Worker へ中継）。入力欄上右に **AI相談室**（`/aihelpdesk/`）。入力欄下左に注意、右端に **AIモデル: Gemma 4 26B** |
+| AI質問箱 | タイトル下の入力欄から Gemma 4 による芝管理 Q&A（本番は同一オリジンの `/aihelpdesk/api/chat`）。入力欄上右に **AI相談室**（`/aihelpdesk/`）。入力欄下左に注意、右端に **AIモデル: Gemma 4 26B** |
 | 天気予報 | 48h 横スクロールウィジェット。「もっと詳しく」から `/portal/spray/` へ（予報データはキャッシュ利用） |
 | 病害リスク予測 | 翌日・明後日 朝6:00 時点の5病害リスク（%）。各病害名横に「判定ロジック」モーダル。パネル内右上に **他地域を見る** → `/portal/risk/` |
 | ベント炭素収支（CBI） | 1パネルに炭素収支予測（明日/明後日）と体力指数（過去7日）を統合。各項目に **判定ロジック** モーダル |
@@ -117,15 +117,14 @@ API: `/portal/api/gdd`（NASA POWER daily）。dashboard とは独立して散�
 - 入力欄上右: **AI相談室**（天気欄の「もっと詳しく」と同じピル型。`/aihelpdesk/` へ）
 - 設定: ポータル設定（緯度経度・芝種等）＋ AI回答モード（デフォルト「慎重に回答」）をプロンプトに反映
 - 履歴: ページを開いている間のみ（リロードで消える）
-- API: `POST /portal/api/chat` → 相談室 Worker の Gemma 4（`lawn-helpdesk`）
+- API: 本番は同一オリジンの `POST /aihelpdesk/api/chat`（Gemma 4）。ローカルは `POST /portal/api/chat` が相談室へ中継
 
 #### 環境変数
 
 | 変数 | 必須 | 説明 |
 |------|------|------|
-| Service Binding `HELPDESK` | 本番で推奨 | Worker `lawn-helpdesk` への binding |
-| `HELPDESK_CHAT_URL` | いいえ | Binding が無いときの相談室 `POST /api/chat` URL。未設定なら `https://lawn-helpdesk.hitoshi-yoshinobu.workers.dev/api/chat` |
 | `GOOGLE_OAUTH_CLIENT_ID` | 芝しごとノート利用時 | Google Cloud OAuth 2.0 Web クライアント ID |
+| `HELPDESK_CHAT_URL` | ローカルのみ | Pages Function `/portal/api/chat` が中継する相談室 URL。未設定なら `https://www.turf-tools.jp/aihelpdesk/api/chat` |
 
 **ローカル**: `.dev.vars.example` を `.dev.vars` にコピーしてキーを設定（`wrangler pages dev` が自動読み込み）
 
@@ -261,6 +260,7 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 - 芝しごとシリーズのカード名を **AI相談室** に短縮
 - 質問入力欄の上右に、天気欄と同じピル型の **AI相談室** リンクを追加（`/aihelpdesk/`）
 - 未使用の Gemini 呼び出しコードを削除。Pages 本番の `GEMINI_API_KEY` を削除（`GOOGLE_OAUTH_CLIENT_ID` は残す）
+- 本番の AI質問箱は同一オリジンの `/aihelpdesk/api/chat` を直接呼ぶ（Service Binding / workers.dev 中継をやめる）
 
 ### ポータル TOP v1.5.1（2026-08）
 
@@ -543,7 +543,7 @@ npm run dev
 - http://127.0.0.1:8788/portal/rac/
 - http://127.0.0.1:8788/portal/risk/
 
-AI質問箱をローカルで試す場合、相談室 Worker が公開されていれば追加キーは不要です。Service Binding が使えないときは `.dev.vars` に `HELPDESK_CHAT_URL` を書きます。
+AI質問箱をローカルで試す場合、`.dev.vars` の `HELPDESK_CHAT_URL`（未設定なら本番の `/aihelpdesk/api/chat`）へ Pages Function が中継します。
 
 ### wrangler レジストリエラー（Windows）
 
@@ -566,7 +566,7 @@ GitHub リポジトリ: https://github.com/hitoshi4148/tool-portal
    - **Framework preset**: None
    - **Build command**: （空欄）
    - **Build output directory**: `public`
-3. 本番では Worker `lawn-helpdesk` への Service Binding `HELPDESK` を付ける（`wrangler.toml` の `[[services]]`）
+3. 芝しごとノートを使う場合だけ `GOOGLE_OAUTH_CLIENT_ID` を Pages の本番変数に入れる
 
 ## 本番ドメイン接続（`turf-tools.jp/portal/`）
 
@@ -662,7 +662,7 @@ Met Norway / NASA POWER への重複アクセスを避けるため、サーバ�
 | サービス | 利用箇所 | 備考 |
 |----------|----------|------|
 | Nominatim (OSM) | `/portal/api/geocode` | 設定保存時・現在地取得時のみ |
-| Workers AI Gemma 4 | `/portal/api/chat` | 相談室 Worker `lawn-helpdesk` へ中継 |
+| Workers AI Gemma 4 | 本番 `/aihelpdesk/api/chat`（同一オリジン）。ローカルは `/portal/api/chat` が中継 |
 
 ### データフロー（ポータル TOP）
 

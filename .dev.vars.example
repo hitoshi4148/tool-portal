@@ -1,5 +1,6 @@
 # ローカル開発用（wrangler pages dev が自動読み込み）
 # コピー: copy .dev.vars.example .dev.vars
-# チャットは相談室 Worker（Gemma 4）。Gemini キーは不要。
-HELPDESK_CHAT_URL=https://lawn-helpdesk.hitoshi-yoshinobu.workers.dev/api/chat
+# 本番ブラウザは /aihelpdesk/api/chat を同一オリジンで呼ぶ。
+# ローカルの Pages Function だけ、下の URL 経由で相談室へ中継する。
+HELPDESK_CHAT_URL=https://www.turf-tools.jp/aihelpdesk/api/chat
 GOOGLE_OAUTH_CLIENT_ID=
