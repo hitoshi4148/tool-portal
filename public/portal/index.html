@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20250806v132">
+    <link rel="stylesheet" href="/portal/portal.css?v=20260825v150">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -77,17 +77,20 @@
                 </div>
                 <p id="ai-advisor-mic-status" class="ai-advisor-mic-status" hidden></p>
                 <p class="ai-advisor-notice-line">
-                    <span class="ai-advisor-notice-anchor">
-                        <button type="button" class="ai-advisor-notice-btn" aria-label="AI利用時の注意4カ条を表示">ℹ 注意</button>
-                        <span class="ai-advisor-notice-popover" role="tooltip">
-                            <strong>AI利用時の注意4カ条</strong>
-                            ① 個人の名前や連絡先は入力しない<br>
-                            ② お客様の情報は入力しない<br>
-                            ③ 回答は判断の参考です。最終判断は現場で行ってください<br>
-                            ④ 入力は芝しごとAIの回答生成にだけ使い、ほかの利用者への公開やモデル学習には使いません
+                    <span class="ai-advisor-notice-left">
+                        <span class="ai-advisor-notice-anchor">
+                            <button type="button" class="ai-advisor-notice-btn" aria-label="AI利用時の注意4カ条を表示">ℹ 注意</button>
+                            <span class="ai-advisor-notice-popover" role="tooltip">
+                                <strong>AI利用時の注意4カ条</strong>
+                                ① 個人の名前や連絡先は入力しない<br>
+                                ② お客様の情報は入力しない<br>
+                                ③ 回答は判断の参考です。最終判断は現場で行ってください<br>
+                                ④ 入力は芝しごとAIの回答生成にだけ使い、ほかの利用者への公開やモデル学習には使いません
+                            </span>
                         </span>
+                        <span class="ai-advisor-notice-brief">個人情報・顧客情報は入力しないでください</span>
                     </span>
-                    <span class="ai-advisor-notice-brief">個人情報・顧客情報は入力しないでください</span>
+                    <span class="ai-advisor-notice-model">AIモデル: Gemma 4 26B</span>
                 </p>
             </div>
         </section>

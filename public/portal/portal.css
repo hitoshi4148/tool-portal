@@ -454,6 +454,14 @@ body.modal-open {
     line-height: 1.4;
 }
 
+.ai-advisor-notice-left {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    min-width: 0;
+}
+
 .ai-advisor-notice-anchor {
     position: relative;
     display: inline-flex;
@@ -507,8 +515,13 @@ body.modal-open {
 }
 
 .ai-advisor-notice-brief {
-    flex: 1 1 auto;
     min-width: 0;
+}
+
+.ai-advisor-notice-model {
+    margin-left: auto;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .ai-advisor-loading {
