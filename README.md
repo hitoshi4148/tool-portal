@@ -12,6 +12,7 @@
 | https://www.turf-tools.jp/portal/spray/ | ピンポイント天気で芝しごと（本番） |
 | https://www.turf-tools.jp/portal/rac/ | 楽RAC農薬ローテ（本番） |
 | https://www.turf-tools.jp/portal/risk/ | 病害リスク予報（本番） |
+| https://www.turf-tools.jp/portal/turfpool/ | 芝しごと・ターフプール（本番） |
 | https://www.turf-tools.jp/aihelpdesk/ | 芝しごと・AI相談室（別 Worker・同一ホスト） |
 | https://tool-portal-9y2.pages.dev/portal/ | Pages 直接 URL（検証・フォールバック用） |
 
@@ -29,6 +30,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | `/portal/rac/` | 楽RAC農薬ローテ（クライアント完結・FAMIC JSON） |
 | `/portal/risk/` | 病害リスク予報（Leaflet 地図・最大4施設） |
 | `/portal/diagnosis/` | 病害画像診断AI（ONNX Runtime Web・端末内推論） |
+| `/portal/turfpool/` | 芝しごと・ターフプール（5地点撮影・3Dプールビュー・手動ビルド配置） |
 | `/portal/api/risk-map` | 病害リスク一括取得 API（地図用） |
 | `/portal/api/dashboard` | ポータル TOP 用まとめ取得 API |
 | `/portal/api/weather` | 天気予報 API（単体・デバッグ用） |
