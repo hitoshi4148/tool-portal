@@ -27,6 +27,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       {
         messages: [{ role: "user", content: message }],
         settings,
+        ...(Array.isArray(body.sources) ? { sources: body.sources } : {}),
         ...(wantsStream ? {} : { stream: false }),
       },
       { accept: wantsStream ? "text/event-stream" : "application/json" },

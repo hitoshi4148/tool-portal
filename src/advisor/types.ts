@@ -13,4 +13,5 @@ export interface PortalAdvisorSettings {
 export interface ChatRequestBody {
   message: string;
   settings: PortalAdvisorSettings;
+  sources?: Array<{ file: string; page?: number; text: string }>;
 }

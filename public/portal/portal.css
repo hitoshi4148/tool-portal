@@ -433,6 +433,77 @@ a.weather-more-link.ai-advisor-more-link {
     text-align: center;
 }
 
+.source-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 0;
+}
+
+.source-pick {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #4b5563;
+    color: #fff;
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.source-pick:hover:not(:disabled) {
+    opacity: 0.92;
+}
+
+.source-pick:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.source-status {
+    flex: 1 1 220px;
+    color: #4b5563;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.source-unsupported {
+    margin: 6px 0 0;
+    color: #8a5a12;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.source-list {
+    margin: 8px 0 0;
+    max-height: 140px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.source-list .fail {
+    color: #8a2b2b;
+}
+
+.source-bar .ghost {
+    background: #fff;
+    color: #6c757d;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+}
+
 .voice-field-row {
     display: flex;
     gap: 8px;

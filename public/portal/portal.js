@@ -1634,6 +1634,10 @@ async function sendAdvisorMessage() {
       body: JSON.stringify({
         message,
         settings: getAdvisorSettingsPayload(),
+        sources:
+          window.SourceLibrary && typeof window.SourceLibrary.search === "function"
+            ? window.SourceLibrary.search(message)
+            : [],
       }),
     });
 
@@ -1711,6 +1715,9 @@ function initAdvisorChat() {
   }
 
   initAdvisorVoice();
+  if (window.SourceLibrary && typeof window.SourceLibrary.bindBar === "function") {
+    window.SourceLibrary.bindBar();
+  }
   sendButton.addEventListener("click", sendAdvisorMessage);
   input.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
