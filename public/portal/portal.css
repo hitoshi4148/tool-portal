@@ -1137,17 +1137,23 @@ section h2 {
 
 .cbi-item .disease-risk-item-values {
     gap: 8px;
+    grid-template-columns: 72px 72px;
+}
+
+.cbi-panel .disease-risk-table-header {
+    grid-template-columns: 1fr 72px 72px;
 }
 
 .cbi-value-cell {
-    width: 56px;
-    min-height: 52px;
-    padding: 4px 2px;
+    width: 72px;
+    min-height: 58px;
+    height: auto;
+    padding: 6px 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
+    gap: 3px;
     line-height: 1.15;
     white-space: normal;
 }
@@ -1166,28 +1172,21 @@ section h2 {
 }
 
 .cbi-cell-stars {
-    font-size: 10px;
+    font-size: 14px;
     letter-spacing: 0;
     line-height: 1;
 }
 
-.cbi-cell-label {
-    font-size: 9px;
+.cbi-cell-meta {
+    font-size: 12px;
     font-weight: 700;
     line-height: 1.1;
 }
 
-.cbi-cell-meta,
 .cbi-cell-percent {
-    font-size: 9px;
-    font-weight: 600;
-    line-height: 1.1;
-    opacity: 0.95;
-}
-
-.cbi-cell-percent {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
+    line-height: 1.1;
 }
 
 .portal-gp-row {

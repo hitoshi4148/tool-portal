@@ -226,10 +226,9 @@ const CbiUI = (() => {
     }
 
     const color = getStarColor(forecast.stars);
-    return `<div class="disease-risk-item-value cbi-value-cell" style="background-color: ${color}" aria-label="${forecast.starLabel}">
+    return `<div class="disease-risk-item-value cbi-value-cell" style="background-color: ${color}" aria-label="${forecast.starLabel}、CBI ${forecast.cbi.toFixed(2)}">
       <span class="cbi-cell-stars">${renderStarRating(forecast.stars)}</span>
-      <span class="cbi-cell-label">${forecast.starLabel}</span>
-      <span class="cbi-cell-meta">CBI ${forecast.cbi.toFixed(2)}</span>
+      <span class="cbi-cell-meta">${forecast.cbi.toFixed(2)}</span>
     </div>`;
   }
 
@@ -292,9 +291,8 @@ const CbiUI = (() => {
               <span class="disease-risk-item-label">指数</span>
             </div>
             <div class="disease-risk-item-values cbi-energy-values">
-              <div class="disease-risk-item-value cbi-value-cell cbi-value-cell--energy" style="background-color: ${energyColor}" aria-label="${energy.label}">
+              <div class="disease-risk-item-value cbi-value-cell cbi-value-cell--energy" style="background-color: ${energyColor}" aria-label="${energy.label}、${energy.percent}%">
                 <span class="cbi-cell-percent">${energy.percent}%</span>
-                <span class="cbi-cell-label">${energy.label}</span>
               </div>
             </div>
           </div>
