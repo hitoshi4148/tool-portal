@@ -1146,6 +1146,7 @@ section h2 {
 
 .cbi-value-cell {
     width: 72px;
+    max-width: 72px;
     min-height: 58px;
     height: auto;
     padding: 6px 4px;
@@ -1156,6 +1157,8 @@ section h2 {
     gap: 3px;
     line-height: 1.15;
     white-space: normal;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .cbi-value-cell--empty {
@@ -1164,6 +1167,7 @@ section h2 {
 
 .cbi-value-cell--energy {
     width: 72px;
+    max-width: 72px;
     min-height: 52px;
 }
 
@@ -1173,8 +1177,11 @@ section h2 {
 
 .cbi-cell-stars {
     font-size: 14px;
-    letter-spacing: 0;
+    letter-spacing: -1.5px;
     line-height: 1;
+    max-width: 100%;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .cbi-cell-meta {
@@ -1926,6 +1933,18 @@ section h2 {
     justify-content: center;
     border-radius: 6px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.disease-risk-item-value.cbi-value-cell {
+    width: 72px;
+    max-width: 72px;
+    height: auto;
+    min-height: 58px;
+    box-sizing: border-box;
+}
+
+.disease-risk-item-value.cbi-value-cell--energy {
+    min-height: 52px;
 }
 
 .disease-risk-footer {
