@@ -892,6 +892,13 @@ section h2 {
     color: #374151;
 }
 
+.cbi-intro {
+    margin: 0 0 12px 0;
+    font-size: 0.78em;
+    line-height: 1.55;
+    color: #4b5563;
+}
+
 .work-memo-panel {
     height: 100%;
     display: flex;

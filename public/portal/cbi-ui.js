@@ -5,6 +5,8 @@ const CbiUI = (() => {
   const CBI_STAR_LABELS = ["非常に良好", "良好", "注意", "かなり危険", "危険"];
   const CBI_HISTORY_WEIGHTS = [0.3, 0.25, 0.2, 0.1, 0.07, 0.05, 0.03];
   const CBI_ENERGY_RANGE = { highCbi: 2.0, lowCbi: 0.4, highPercent: 100, lowPercent: 20 };
+  const CBI_CONCEPT_URL =
+    "https://www.turf-tools.jp/post/%E3%83%99%E3%83%B3%E3%83%88%E3%82%B0%E3%83%A9%E3%82%B9%E3%81%AE%E3%80%8C%E5%A4%9C%E3%81%AE%E6%9A%91%E3%81%95%E3%80%8D%E3%81%8C%E8%87%B4%E5%91%BD%E7%9A%84%E3%81%AA%E7%90%86%E7%94%B1%EF%BC%9Aq10%E5%89%87%E3%81%8B%E3%82%89%E8%AA%AD%E3%81%BF%E8%A7%A3%E3%81%8F%E7%82%AD%E7%B4%A0%E5%8F%8E%E6%94%AF%E3%81%AE%E7%A7%91%E5%AD%A6";
 
   let currentReport = null;
 
@@ -250,7 +252,11 @@ const CbiUI = (() => {
     ].filter(Boolean);
 
     return `<div class="disease-risk-panel disease-risk-panel--combined cbi-panel cbi-panel--combined">
-      <h3 class="disease-risk-title">ベント炭素収支・体力指数</h3>
+      <div class="disease-risk-title-row">
+        <h3 class="disease-risk-title">ベント炭素収支・体力指数</h3>
+        <a href="${CBI_CONCEPT_URL}" class="weather-more-link disease-risk-more-link" target="_blank" rel="noopener noreferrer" title="炭素収支の考え方（ブログ記事）">炭素収支とは</a>
+      </div>
+      <p class="cbi-intro">芝は昼に作った糖を、夜の呼吸で消費します。夜が暑いほど支出が増え、貯まった体力が減ります。CBI はその「収支」の良し悪しを数値化したものです。</p>
       <div class="cbi-section">
         <div class="cbi-section-head">
           <span class="cbi-section-label">炭素収支予測</span>
