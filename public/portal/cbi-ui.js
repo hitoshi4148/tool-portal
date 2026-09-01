@@ -270,7 +270,7 @@ const CbiUI = (() => {
           <div class="disease-risk-list">
             <div class="disease-risk-item cbi-item">
               <div class="disease-risk-item-name">
-                <span class="disease-risk-item-label">炭素収支</span>
+                <span class="disease-risk-item-label">炭素収支(CBI)</span>
               </div>
               <div class="disease-risk-item-values">
                 ${buildCbiValueCell(tomorrow)}
