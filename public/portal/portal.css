@@ -126,6 +126,35 @@ body.modal-open {
     font-weight: 500;
 }
 
+.portal-brand-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 12px;
+    margin: 6px 0 0;
+}
+
+.portal-brand-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #667eea;
+    background: #fff;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.portal-brand-link:hover {
+    color: #fff;
+    background: #667eea;
+    border-color: #667eea;
+}
+
 .portal-brand-info-anchor {
     position: relative;
     display: inline-flex;
