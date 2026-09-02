@@ -91,6 +91,10 @@ header h1 {
     margin-top: 5px;
 }
 
+header .portal-brand-links {
+    margin: 10px 0 0;
+}
+
 .location-input {
     background: #f8f9fa;
     padding: 15px;
