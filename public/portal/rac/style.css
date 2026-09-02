@@ -60,11 +60,15 @@ body {
 }
 
 .rac-lead {
-  margin: 0 auto;
+  margin: 0 auto 8px;
   max-width: 40rem;
   font-size: 0.95rem;
   color: #374151;
   line-height: 1.55;
+}
+
+.rac-header .portal-brand-links {
+  margin-bottom: 4px;
 }
 
 .rac-message {
