@@ -80,6 +80,10 @@ body {
   margin: 0 0 8px;
 }
 
+.diag-header .portal-brand-links {
+  margin: 0 0 12px;
+}
+
 .diag-notice {
   display: inline-block;
   margin: 0;
