@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20250902v133">
+    <link rel="stylesheet" href="/portal/portal.css?v=20261015v170">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -30,11 +30,11 @@
                     <span id="portal-title-prefix" class="portal-title-prefix hidden"></span>
                     <span class="portal-title-logo-track">
                         <img
-                            src="/portal/portal-title-logo.png?v=20250630v110"
+                            src="/portal/portal-title-logo.png?v=20261015v170"
                             alt="芝しごと"
                             class="portal-title-logo"
-                            width="380"
-                            height="64"
+                            width="777"
+                            height="256"
                         >
                     </span>
                 </h1>
@@ -43,17 +43,26 @@
                     <span class="portal-brand-info-anchor">
                         <button type="button" class="portal-brand-info-btn" aria-label="芝しごとについて">i</button>
                         <span class="portal-brand-info-popover" role="tooltip">
-                            芝しごとは、スポーツターフ管理に役立つ気象・病害・農薬・AI・データを、一か所にまとめたWebサイトです。<br>
-                            現場で役立つことを第一に考え、すべて無料で公開しています。<br>
-                            個人情報は取得しません。施設名・位置情報などの設定は、お使いの端末のCookieに保存されます。<br>
-                            Cookieをオフにしている、またはサードパーティ Cookie をブロックしている場合、設定が保存できず、気象データの取得が完了しないことがあります。ブラウザの設定で Cookie を許可してください。<br>
-                            無料でサービスを継続するため、一部のアプリでは起動まで少し時間がかかる場合があります。ご理解・ご協力をお願いいたします。<br>
-                            皆さまからのご意見・ご要望をもとに、より使いやすいサービスを目指して改善を続けています。<br>
-                            <br>
-                            グロウアンドプログレス代表　吉信仁司
+                            <span class="portal-brand-info-heading">芝しごとについて</span>
+                            <span class="portal-brand-info-para">芝しごとは、スポーツターフ管理に役立つ気象・病害・農薬・AI・データを一か所にまとめたWebサイトです。</span>
+                            <strong class="portal-brand-info-para portal-brand-info-strong">すべて無料。会員登録なしで、すぐに利用できます。</strong>
+                            <span class="portal-brand-info-para">現場で役立つことを第一に考え、スポーツターフ管理を支援するWebアプリを公開しています。</span>
+
+                            <span class="portal-brand-info-heading">設定情報とCookieについて</span>
+                            <span class="portal-brand-info-para">使いやすさのため、施設名・施設の種類・芝種・位置情報など、利用者が設定した情報をブラウザのCookieに保存し、次回の利用や各アプリの機能に活用しています。</span>
+                            <span class="portal-brand-info-para">通常の利用では、会員登録や氏名・メールアドレスの入力は必要ありません。</span>
+                            <span class="portal-brand-info-para">ただし、「芝しごとノート」のGoogle Drive連携など、一部の試験運用では別途情報の提供をお願いする場合があります。</span>
+                            <span class="portal-brand-info-para">Cookieが無効になっている場合や、ブラウザの設定によっては、設定の保存や一部機能が正常に動作しないことがあります。必要に応じてブラウザのCookie設定をご確認ください。</span>
+
+                            <span class="portal-brand-info-heading">無料サービスの継続について</span>
+                            <span class="portal-brand-info-para">無料でサービスを継続するため、一部のアプリでは起動まで少し時間がかかる場合があります。ご理解・ご協力をお願いいたします。</span>
+                            <span class="portal-brand-info-para">皆さまからのご意見・ご要望をもとに、より使いやすいサービスを目指して改善を続けています。</span>
+
+                            <span class="portal-brand-info-sign">グロウアンドプログレス代表　吉信仁司</span>
                         </span>
                     </span>
                 </p>
+                <p class="portal-brand-free">無料・会員登録不要ですぐ使える</p>
                 <p class="portal-brand-links">
                     <a href="https://www.turf-tools.jp/%E8%A7%A3%E8%AA%AC-%E8%8A%9D%E3%81%97%E3%81%94%E3%81%A8%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB" class="portal-brand-link" target="_blank" rel="noopener noreferrer">公式解説</a>
                     <a href="https://www.turf-tools.jp/post/%E3%80%8C%E6%95%B0%E5%AD%97%E3%81%AE%E6%84%8F%E5%91%B3%E3%80%8D%E3%81%BE%E3%81%A7%E5%88%86%E3%81%8B%E3%82%8B%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB%E3%81%B8" class="portal-brand-link" target="_blank" rel="noopener noreferrer">🆕 新しい解説</a>
@@ -194,6 +203,15 @@
 
         <section class="series-section" id="series-section">
             <h2 class="series-section-title">芝しごとシリーズ</h2>
+            <div class="series-intro">
+                <p class="series-intro-lead">スポーツターフ管理に役立つ無料Webアプリをまとめました。</p>
+                <p class="series-intro-badges">
+                    <span class="series-intro-badge">🆓無料</span>
+                    <span class="series-intro-badge">📝会員登録不要</span>
+                    <span class="series-intro-badge">🚀すぐ使える</span>
+                </p>
+                <p class="series-intro-note">※一部の試験運用を除き、通常の利用に会員登録は必要ありません。</p>
+            </div>
             <div class="series-grid">
                 <a class="series-card" href="/portal/turfpool/">
                     <span class="series-card-category">データ分析</span>
@@ -327,7 +345,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.6.5</p>
+            <p class="footer-version">v1.7.0</p>
         </footer>
     </div>
 
