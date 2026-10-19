@@ -2,7 +2,7 @@
 
 芝管理ツールを集約するポータルサイト（Cloudflare Pages + Functions）。
 
-**現在のバージョン: v1.7.0**
+**現在のバージョン: v1.8.0**
 
 ## 本番 URL
 
@@ -27,7 +27,8 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 |------|------|
 | `/portal/` | 芝しごとポータル TOP |
 | `/portal/spray/` | ピンポイント天気で芝しごと |
-| `/portal/rac/` | 楽RAC農薬ローテ（クライアント完結・FAMIC JSON） |
+| `/portal/rac/` | 楽RAC農薬ローテ（D1 農薬検索 API・案A UI） |
+| `/portal/api/pesticides/*` | 農薬検索 API（presets / search / 詳細 / ローテ） |
 | `/portal/risk/` | 病害リスク予報（Leaflet 地図・最大4施設） |
 | `/portal/diagnosis/` | 病害画像診断AI（ONNX Runtime Web・端末内推論） |
 | `/portal/turfpool/` | 芝しごと・ターフプール（5地点撮影・3Dプールビュー・手動ビルド配置） |
@@ -63,12 +64,12 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 │ ・体力指数       │ （Google連携）   │
 └─────────────────┴─────────────────┘
 ┌─────────────────┬─────────────────┐
-│ 成長能(Growth   │ 農薬検索         │
+│ 成長能(Growth   │ 芝生向け農薬検索 │
 │  Potential)     │ → /portal/rac/  │
 └─────────────────┴─────────────────┘
 [芝しごとシリーズ（2列カードグリッド）]
 [PR | ブログ | YouTube バナー（3列）]
-[フッター: 気象クレジット / グロウアンドプログレス / v1.7.0]
+[フッター: 気象クレジット / グロウアンドプログレス / v1.8.0]
 ```
 
 | 機能 | 説明 |
@@ -83,11 +84,11 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | ベント炭素収支（CBI） | 1パネルに炭素収支予測（明日/明後日）と体力指数（過去7日）を統合。**炭素収支とは**（ブログ）リンク・導入文・各項目の **判定ロジック** モーダル。予測セルは色・星・CBI 数値のみのコンパクト表示（行ラベル **炭素収支(CBI)**） |
 | 芝しごとノート | 右隣パネル。**Googleで連携** した利用者のみ、マイドライブに `{施設名}作業履歴` スプレッドシート（日付・エリア・メモ）を保存。エリア・メモはマイクで音声入力可（対応ブラウザは下記） |
 | PGR適時・発芽予測 | 除草剤（トリネキサパックエチル / フルルプリミドール）の散布日から昨日までの GDD ゲージ、および設定芝種の発芽積算温度ゲージ。各 PGR 名横の **ℹ** でリバウンド説明（GDD 表）を表示 |
-| 成長能(Growth Potential) | 昨年の月平均気温から算出した GP 曲線（暖地型・寒地型・未指定）。右隣に農薬検索パネル |
-| 農薬検索 | 農薬名・病害虫名で検索し `/portal/rac/` へ遷移して結果一覧を自動表示（URL クエリ `pesticide` / `target`）。各入力欄にマイク（音声入力。対応ブラウザは下記） |
+| 成長能(Growth Potential) | 昨年の月平均気温から算出した GP 曲線（暖地型・寒地型・未指定）。右隣に芝生向け農薬検索パネル |
+| 芝生向け農薬検索 | 芝／その他（ゴルフ場樹木など・自由記述）を選び、農薬名・病害虫名で検索して `/portal/rac/` へ遷移（`category` / `crop` / `cropText` / `pesticide` / `target`）。見出し右に **全農薬検索** → `/portal/rac/`。各入力欄にマイク（音声入力。対応ブラウザは下記） |
 | 芝しごとシリーズ | 見出し下に「スポーツターフ管理に役立つ無料Webアプリをまとめました。」と **🆓無料・📝会員登録不要・🚀すぐ使える** のバッジ、注記「※一部の試験運用を除き、通常の利用に会員登録は必要ありません。」。その下に外部アプリへのリンクカード（2列）。各カード名横の **ℹ** で説明文を表示（PC: ホバー、スマホ: タップ） |
 | 関連バナー | PR・ブログ・YouTube を 3 列 1 行（最大幅 720px）でフッター上に表示 |
-| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.7.0** |
+| フッター | 気象データクレジット・グロウアンドプログレスリンク・**v1.8.0** |
 
 ### 音声入力（マイク）
 
@@ -98,7 +99,7 @@ Wix ホームページ（https://www.turf-tools.jp/）は DNS 経由で従来ど
 | 場所 | 案内の出し方 |
 |------|----------------|
 | ポータル TOP・AI質問箱 | 入力欄の直下に1行 |
-| ポータル TOP・農薬検索 | 2入力欄まとめて1行（検索ボタンの下） |
+| ポータル TOP・芝生向け農薬検索 | 2入力欄まとめて1行（検索ボタンの下） |
 | ポータル TOP・芝しごとノート | Google 連携後のフォーム直下に1行（エリア・メモまとめて） |
 | 楽RAC（`/portal/rac/`） | 検索行の下に1行 |
 
@@ -250,7 +251,7 @@ Google Cloud Console で OAuth 同意画面を **Testing** のまま運用し、
 | アプリ | カテゴリ | 説明 |
 |--------|----------|------|
 | ターフプール | データ | 5か所のスマホ写真から緑の被覆率、芝緑度、芝活力度、色均一性、刈込品質を測定し、ピッチのプールビューを3D表示 |
-| 楽RAC農薬ローテ | 管理 | 同一サイト `/portal/rac/` へリンク。RACコードでローテーション候補を提案（Render 不要） |
+| 楽RAC農薬ローテ | 管理 | 同一サイト `/portal/rac/` へリンク。D1 全農薬検索・案A UI。RACコードでローテーション候補を提案 |
 | 施肥設計ナビ | 管理 | 施設の管理方針、気象情報をもとにした成長能、土壌分析値などをもとに、月毎のNPK施肥量計算を支援（起動に30秒必要） |
 | 病害リスク予報 | 予報 | 同一サイト `/portal/risk/` へリンク。地図上に翌日・明後日 朝6:00 の5病害リスク（最大4施設） |
 | AI相談室 | AI | 同一サイト `/aihelpdesk/` へリンク。資料フォルダと音声入力。ポータルと同じ施設 Cookie |
@@ -287,6 +288,19 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 デスクトップ: 3 列 1 行（最大幅 720px・高さ 76px）。スマホ: 1 列縦積み（最大幅 280px）。
 
 ## 変更履歴
+
+### ポータル TOP v1.8.0（2026-10）
+
+**芝生向け農薬検索・楽RAC の D1 連携**
+
+- 農薬検索パネルを **芝生向け農薬検索** に改称。芝／その他のラジオ、その他時のみ樹木などの作物名入力、見出し右の **全農薬検索**（`/portal/rac/`）を追加
+- 楽RAC（`/portal/rac/`）を **v2.1.0** に更新（下記）
+
+### 楽RAC農薬ローテ（`/portal/rac/`） v2.1.0（2026-10）
+
+- 検索見出しを **全農薬検索** に変更
+- 大分類（芝／果樹／野菜・その他）案A UI。芝では作物行を非表示、果樹ではみかん〜その他、野菜・その他と果樹のその他のみ自由記述
+- 静的 JSON から D1 農薬検索 API（`/portal/api/pesticides/*`）へ移行。RAC は CropLife 製品名順を登録番号で付与
 
 ### ポータル TOP v1.7.0（2026-10）
 
@@ -843,7 +857,7 @@ tool-portal/
 │       ├── portal-title-logo.png # タイトル PNG ロゴ
 │       ├── banner_*.png / bloglink.png / youtubelink.png
 │       ├── spray/                # ピンポイント天気 UI
-│       ├── rac/                  # 楽RAC農薬ローテ（クライアント完結）
+│       ├── rac/                  # 楽RAC農薬ローテ（D1 API・案A UI）
 │       ├── risk/                 # 病害リスク予報（Leaflet 地図）
 │       └── disease-risk-ui.js    # 病害リスク表示・判定ロジック（TOP/risk 共有）
 ├── functions/portal/
@@ -857,10 +871,15 @@ tool-portal/
 │   │   ├── google-config.ts
 │   │   ├── gdd.ts
 │   │   ├── chat.ts
-│   │   └── geocode.ts
+│   │   ├── geocode.ts
+│   │   └── pesticides/           # 農薬検索 API（D1）
+│   │       ├── search.ts
+│   │       ├── presets.ts
+│   │       └── [regNo]/...
 │   └── spray/api/forecast.ts
 ├── src/
 │   ├── portal/fetch-dashboard.ts
+│   ├── pesticides/               # 作物ルール・検索ロジック
 │   ├── advisor/                  # AI質問箱（相談室 Worker へ中継）
 │   ├── weather/
 │   ├── disease/
@@ -872,17 +891,47 @@ tool-portal/
 ├── workers/turf-tools-router/    # turf-tools.jp/portal* 用 Worker
 │   ├── src/index.ts
 │   └── wrangler.toml
-├── wrangler.toml                 # Pages 設定
+├── migrations/
+│   └── 0001_pesticides.sql       # 農薬検索 D1 スキーマ（FAMIC + CropLife RAC）
+├── scripts/pesticides/
+│   ├── import_to_d1.py           # FAMIC xls + CropLife xlsx → SQLite / D1 取込
+│   ├── requirements.txt
+│   └── README.md
+├── data/pesticides/              # 取込生成物（gitignore。local.sqlite 等）
+├── wrangler.toml                 # Pages 設定 + PESTICIDES_DB (D1)
 ├── .dev.vars.example
 └── package.json
 ```
+
+### 農薬データ取込（作業範囲B）
+
+FAMIC の登録基本部・適用部一・二と CropLife の RAC 製品名順表を、ローカル SQLite（および任意で D1）へ投入できます。詳細は `scripts/pesticides/README.md`。
+
+```bash
+pip install -r scripts/pesticides/requirements.txt
+npm run pesticides:import -- --input-dir "（FAMIC/CropLife を置いたフォルダ）"
+```
+
+### 農薬検索 API（作業範囲C）
+
+ローカル D1 投入後、`npm run dev` で Pages Functions から参照します。
+
+| エンドポイント | 内容 |
+|---|---|
+| `GET /portal/api/pesticides/presets` | 作物プリセット |
+| `GET /portal/api/pesticides/search?category=turf&crop=shiba&pesticide=&target=` | 検索（作物ルール適用） |
+| `GET /portal/api/pesticides/:regNo` | 詳細 |
+| `GET /portal/api/pesticides/:regNo/rotation?category=&crop=` | 同一 RAC / ローテ候補 |
+
+楽RAC（`/portal/rac/`）は案A UI（大分類→作物）から上記 API を呼び出します。
+
 
 ## 元アプリ・関連リポジトリ
 
 | リポジトリ | 関係 |
 |------------|------|
 | [spray-forecast](https://github.com/hitoshi4148/spray-forecast) | `/portal/spray/` の元。リポジトリ自体は未変更 |
-| [racrac](https://github.com/hitoshi4148/racrac) | `/portal/rac/` の元。Render 版からクライアント完結に移植 |
+| [racrac](https://github.com/hitoshi4148/racrac) | `/portal/rac/` の元。Render 版から移植後、D1 検索 API 連携に拡張 |
 | [ai_forecast](https://github.com/hitoshi4148/ai_forecast) | `/portal/risk/` の元。Render 版から Cloudflare に移植 |
 | [turf_advisor](https://github.com/hitoshi4148/turf_advisor) | ポータル入力欄の移植元。本番では未使用 |
 | [agromap](https://github.com/hitoshi4148/agromap) | 散布日・播種日 Cookie 名を共有 |

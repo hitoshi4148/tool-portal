@@ -71,6 +71,73 @@ body {
   margin-bottom: 4px;
 }
 
+.rac-fieldset {
+  border: none;
+  margin: 0 0 14px;
+  padding: 0;
+}
+
+.rac-legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.rac-radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+}
+
+.rac-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.92rem;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.rac-radio-option input {
+  margin: 0;
+}
+
+/* display:flex / inline-flex が hidden 属性を上書きしないようにする */
+.rac-fieldset[hidden],
+.rac-radio-row[hidden],
+.rac-radio-option[hidden],
+.rac-crop-text-wrap[hidden],
+.rac-crop-hint[hidden] {
+  display: none !important;
+}
+
+.rac-crop-text-wrap {
+  margin-top: 10px;
+}
+
+.rac-crop-text-label {
+  display: block;
+  font-size: 0.82rem;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.rac-crop-hint,
+.rac-crop-note {
+  margin: 8px 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.45;
+}
+
+.rac-matched-crops {
+  font-size: 0.82rem;
+  max-width: 9rem;
+}
+
 .rac-message {
   margin-bottom: 16px;
   padding: 12px 16px;

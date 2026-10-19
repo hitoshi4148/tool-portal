@@ -1302,6 +1302,25 @@ function initPortalRacSearch() {
     return;
   }
 
+  const cropTextWrap = document.getElementById("portal-rac-crop-text-wrap");
+  const cropTextInput = document.getElementById("portal-rac-crop-text");
+
+  function syncPortalCropUi() {
+    const mode = form.querySelector('input[name="portalCrop"]:checked')?.value || "shiba";
+    const isOther = mode === "other";
+    if (cropTextWrap) {
+      cropTextWrap.hidden = !isOther;
+    }
+    if (!isOther && cropTextInput) {
+      cropTextInput.value = "";
+    }
+  }
+
+  form.querySelectorAll('input[name="portalCrop"]').forEach((radio) => {
+    radio.addEventListener("change", syncPortalCropUi);
+  });
+  syncPortalCropUi();
+
   if (window.VoiceInput) {
     window.VoiceInput.bindVoiceField({
       input: document.getElementById("portal-rac-pesticide"),
@@ -1322,6 +1341,15 @@ function initPortalRacSearch() {
 
     const pesticideInput = document.getElementById("portal-rac-pesticide");
     const targetInput = document.getElementById("portal-rac-target");
+    const mode = form.querySelector('input[name="portalCrop"]:checked')?.value || "shiba";
+    const cropText = (cropTextInput?.value ?? "").trim();
+
+    if (mode === "other" && cropText.length < 2) {
+      errorEl.textContent = "対象作物を2文字以上入力してください（例: まつ、さかき）";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
     const result = validatePortalRacSearch(
       pesticideInput?.value ?? "",
       targetInput?.value ?? ""
@@ -1337,6 +1365,14 @@ function initPortalRacSearch() {
     errorEl.textContent = "";
 
     const params = new URLSearchParams();
+    if (mode === "other") {
+      params.set("category", "other");
+      params.set("crop", "other");
+      params.set("cropText", cropText);
+    } else {
+      params.set("category", "turf");
+      params.set("crop", "shiba");
+    }
     if (result.pesticide) {
       params.set("pesticide", result.pesticide);
     }
@@ -1344,8 +1380,7 @@ function initPortalRacSearch() {
       params.set("target", result.target);
     }
 
-    const query = params.toString();
-    window.location.href = query ? `/portal/rac/?${query}` : "/portal/rac/";
+    window.location.href = `/portal/rac/?${params.toString()}`;
   });
 }
 

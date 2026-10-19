@@ -1,3 +1,10 @@
 name = "tool-portal"
 compatibility_date = "2024-09-23"
 pages_build_output_dir = "public"
+
+# 農薬検索 / 楽RAC 用。本番 D1: tool-portal-pesticides
+[[d1_databases]]
+binding = "PESTICIDES_DB"
+database_name = "tool-portal-pesticides"
+database_id = "08b172aa-aed5-4b6c-b025-11ad972c77d3"
+preview_database_id = "08b172aa-aed5-4b6c-b025-11ad972c77d3"

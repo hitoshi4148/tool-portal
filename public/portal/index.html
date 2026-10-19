@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20261015v170">
+    <link rel="stylesheet" href="/portal/portal.css?v=20261019v180">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -30,7 +30,7 @@
                     <span id="portal-title-prefix" class="portal-title-prefix hidden"></span>
                     <span class="portal-title-logo-track">
                         <img
-                            src="/portal/portal-title-logo.png?v=20261015v170"
+                            src="/portal/portal-title-logo.png?v=20261019v180"
                             alt="芝しごと"
                             class="portal-title-logo"
                             width="777"
@@ -162,7 +162,19 @@
                 </div>
                 <div class="portal-rac-search-col">
                     <form id="portal-rac-search-form" class="portal-rac-search-panel" action="/portal/rac/" method="get" novalidate>
-                        <h3 class="portal-rac-search-title">農薬検索</h3>
+                        <div class="portal-rac-search-heading">
+                            <h3 class="portal-rac-search-title">芝生向け農薬検索</h3>
+                            <a href="/portal/rac/" class="weather-more-link disease-risk-more-link portal-rac-all-search-btn" title="楽RAC農薬ローテ">全農薬検索</a>
+                        </div>
+                        <div class="portal-rac-radio-row" role="radiogroup" aria-label="検索対象">
+                            <label class="portal-rac-radio"><input type="radio" name="portalCrop" value="shiba" checked> 芝</label>
+                            <label class="portal-rac-radio"><input type="radio" name="portalCrop" value="other"> その他</label>
+                        </div>
+                        <div id="portal-rac-crop-text-wrap" class="portal-rac-crop-text-wrap" hidden>
+                            <label class="portal-rac-crop-text-label" for="portal-rac-crop-text">対象作物（樹木など）</label>
+                            <input type="text" id="portal-rac-crop-text" class="portal-rac-input" placeholder="例：まつ、さかき" autocomplete="off" maxlength="40">
+                            <p class="portal-rac-crop-examples-label">例：まつ、さかき、つばき、もみじ、いちょう、けやき、さくら、つつじ</p>
+                        </div>
                         <div class="voice-field">
                             <div class="voice-field-row">
                                 <input type="text" id="portal-rac-pesticide" name="pesticide" class="portal-rac-input" placeholder="農薬名・メーカー名" autocomplete="off">
@@ -194,7 +206,7 @@
                         </div>
                         <button type="submit" class="btn-primary portal-rac-search-btn">検索</button>
                         <p class="voice-unsupported-hint" hidden>音声入力は PC または Android の Chrome / Edge で使えます</p>
-                        <p class="portal-rac-search-desc">農薬名や病害虫・雑草名の一部から必要な芝生用農薬を探し、 RACコードをもとに耐性を避けたローテーション候補を確認できます。</p>
+                        <p class="portal-rac-search-desc">芝、またはゴルフ場の樹木などを対象に農薬・病害虫から検索し、RACコードでローテーション候補を確認できます（詳細は楽RACへ）。</p>
                         <p id="portal-rac-search-error" class="portal-rac-search-error hidden" role="alert"></p>
                     </form>
                 </div>
@@ -345,7 +357,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.7.0</p>
+            <p class="footer-version">v1.8.0</p>
         </footer>
     </div>
 
@@ -456,6 +468,6 @@
     <script src="/portal/work-memo-ui.js?v=20260825v157"></script>
     <script src="/portal/disease-risk-ui.js?v=20250731v128"></script>
     <script src="/portal/cbi-ui.js?v=20250901v133"></script>
-    <script src="/portal/portal.js?v=20260829v158"></script>
+    <script src="/portal/portal.js?v=20261019v180"></script>
 </body>
 </html>
