@@ -366,7 +366,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderRacTables(racList) {
-    if (!racList || racList.length === 0) return '<p class="rac-muted">RAC未収載（CropLife 製品名順表に無し）</p>';
+    if (!racList || racList.length === 0) return '<p class="rac-muted">RAC未収載</p>';
     let html = "";
     [...racList]
       .sort((a, b) => a.slot - b.slot)
@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       html += '<h3 class="rac-subsection-title">適用情報</h3>';
       html += renderDetailTable(product.applications || []);
       html += '<hr class="rac-divider">';
-      html += '<h3 class="rac-subsection-title">RAC情報（CropLife）</h3>';
+      html += '<h3 class="rac-subsection-title">RAC情報</h3>';
       html += renderRacTables(product.rac || []);
       html += '<div id="racAndRotationArea"></div>';
       html += "</div>";

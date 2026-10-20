@@ -289,6 +289,10 @@ spray ページは `portalSettings` Cookie の緯度経度を優先して読み�
 
 ## 変更履歴
 
+### 楽RAC農薬ローテ（`/portal/rac/`） v2.1.2（2026-10）
+
+- 詳細画面の「RAC情報（CropLife）」を **RAC情報** に変更。未収載文言・meta description からも第三者名称を削除
+
 ### 楽RAC農薬ローテ（`/portal/rac/`） v2.1.1（2026-10）
 
 - サブタイトルから「CropLife の」表記を外し、「RACコードをもとに…」と簡潔化
