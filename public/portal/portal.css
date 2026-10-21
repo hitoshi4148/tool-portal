@@ -500,6 +500,94 @@ a.weather-more-link.ai-advisor-more-link {
     color: #8a2b2b;
 }
 
+.advisor-speech {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.advisor-speech-play,
+.advisor-speech-voice {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.advisor-speech-play:hover,
+.advisor-speech-voice:hover,
+.advisor-speech-voice[aria-expanded="true"] {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.advisor-speech-play.is-playing {
+    border-color: #667eea;
+    background: #667eea;
+    color: #fff;
+}
+
+.advisor-speech-list {
+    width: min(280px, 100%);
+    margin-top: 8px;
+    margin-left: auto;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.advisor-speech-list[hidden],
+.advisor-speech-status[hidden] {
+    display: none !important;
+}
+
+.advisor-speech-list p,
+.advisor-speech-status {
+    margin: 0 8px 6px;
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.advisor-speech-status {
+    margin: 6px 0 0;
+    text-align: right;
+}
+
+.advisor-speech-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13px;
+    color: #1f2937;
+}
+
+.advisor-speech-option:hover,
+.advisor-speech-option.is-selected {
+    background: #eef2ff;
+}
+
+.advisor-speech-option .mark {
+    width: 16px;
+    color: #667eea;
+    font-weight: 700;
+}
+
 .voice-unsupported-hint {
     margin: 6px 0 0;
     color: #6b7280;
@@ -924,6 +1012,18 @@ section h2 {
     flex: 1;
     min-width: 0;
     overflow: visible;
+    display: flex;
+    flex-direction: column;
+}
+
+.portal-insights-col > .disease-risk-panel,
+.portal-insights-col > .cbi-panel {
+    flex: 1;
+}
+
+.portal-gdd-row,
+.portal-memo-row {
+    margin-top: 16px;
 }
 
 .portal-cbi-row {
@@ -1420,12 +1520,20 @@ section h2 {
     text-align: center;
 }
 
+.gdd-stack {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 16px;
+}
+
 .gdd-panel {
+    flex: 1;
+    min-width: 0;
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     padding: 12px;
-    height: 100%;
     overflow: visible;
 }
 
@@ -1443,6 +1551,25 @@ section h2 {
     padding-bottom: 6px;
 }
 
+.gdd-title-link {
+    display: inline-block;
+    margin-right: 1px;
+    padding: 0 5px;
+    color: #1e3a8a;
+    background: #dbeafe;
+    border-radius: 4px;
+    text-decoration: none;
+    line-height: 1.35;
+    vertical-align: baseline;
+}
+
+.gdd-title-link:hover,
+.gdd-title-link:focus-visible {
+    color: #1e3a8a;
+    background: #bfdbfe;
+    outline: none;
+}
+
 .gdd-subtitle {
     margin: 0 0 10px 0;
     font-size: 11px;
@@ -1451,22 +1578,6 @@ section h2 {
 
 .gdd-block:last-child {
     margin-bottom: 0;
-}
-
-.gdd-section-divider {
-    border-top: 1px solid #E5E7EB;
-    margin: 12px 0 10px;
-}
-
-.gdd-section-title {
-    margin: 0 0 4px 0;
-    font-size: 12px;
-    font-weight: bold;
-    color: #374151;
-}
-
-.gdd-subtitle--germination {
-    margin-bottom: 8px;
 }
 
 .gdd-name {
@@ -1599,6 +1710,83 @@ section h2 {
     font-size: 12px;
     border: 1px solid #D1D5DB;
     border-radius: 6px;
+}
+
+.gdd-pgr-note {
+    margin: 2px 0 8px;
+    font-size: 10px;
+    line-height: 1.45;
+    color: #6b7280;
+}
+
+.pgr-outlook {
+    margin-top: 8px;
+}
+
+.pgr-outlook-hero {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pgr-outlook-kicker {
+    font-size: 11px;
+    color: #6b7280;
+}
+
+.pgr-outlook-date {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e3a8a;
+    line-height: 1.2;
+}
+
+.pgr-outlook-date.is-muted {
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.pgr-outlook-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 1.2em;
+    margin: 2px 0 6px;
+    font-size: 12px;
+    color: #374151;
+}
+
+.pgr-outlook-countdown {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.pgr-outlook-fade {
+    color: #6b7280;
+    font-size: 11px;
+    text-align: right;
+}
+
+.pgr-outlook-track {
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.pgr-outlook-fill {
+    height: 100%;
+    background: #81c784;
+    border-radius: 999px;
+}
+
+.pgr-outlook-nums {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #4b5563;
+    text-align: right;
 }
 
 .gdd-gauge-wrap {
@@ -2668,7 +2856,8 @@ footer p {
         flex-basis: 64px;
     }
 
-    .portal-insights-row {
+    .portal-insights-row,
+    .gdd-stack {
         flex-direction: column;
     }
 

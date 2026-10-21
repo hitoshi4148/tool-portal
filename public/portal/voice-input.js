@@ -164,6 +164,7 @@
       baseText = input.value.trimEnd();
       wantListen = true;
       setListeningUi(true);
+      if (typeof options.onListenStart === "function") options.onListenStart();
       setMicStatus("聞いています… もう一度マイクを押すと終了します。音声はブラウザが文字にします。");
       try {
         recognition.start();

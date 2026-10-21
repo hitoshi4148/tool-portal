@@ -5,7 +5,6 @@ const DASHBOARD_API = "/portal/api/dashboard";
 const CBI_API = "/portal/api/cbi";
 const GDD_API = "/portal/api/gdd";
 const GEOCODE_API = "/portal/api/geocode";
-const GDD_MAX = 400;
 const AGROMAP_COOKIE_DAYS = 365;
 const LOCATION_NOT_SET_MESSAGE =
   "施設の場所が未設定です。右上の「⚙ 設定」から緯度・経度を入力してください";
@@ -841,100 +840,122 @@ function renderGpChart(data) {
   </div>`;
 }
 
-function pctOfGddMax(gdd) {
-  return Math.min(100, Math.max(0, (gdd / GDD_MAX) * 100));
+const PGR_PRODUCTS = {
+  primomax: { target: 200, secondary: null },
+  greenfield: { target: 300, secondary: 350 },
+};
+
+function formatPgrMonthDay(dateStr) {
+  const [, month, day] = dateStr.split("-").map(Number);
+  return `${month}月${day}日ごろ`;
 }
 
-function renderGddGaugeScale(scaleEl, mode) {
-  if (!scaleEl) {
+function formatPgrDaysUntil(days) {
+  if (days <= 0) {
+    return "きょう";
+  }
+  if (days === 1) {
+    return "あす";
+  }
+  return `あと${days}日`;
+}
+
+function formatPgrObserved(observed, target, exceeded) {
+  if (exceeded) {
+    return "";
+  }
+  const rounded = Math.round(observed);
+  if (rounded >= target && observed < target) {
+    return observed.toFixed(1);
+  }
+  return String(rounded);
+}
+
+function renderPgrOutlook(container, outlook, target, copy) {
+  container.replaceChildren();
+  if (!outlook) {
     return;
   }
 
-  const ticks =
-    mode === "primomax"
-      ? [
-          { value: 0, label: "0", edge: "start" },
-          { value: 200, label: "200" },
-          { value: 400, label: "400", edge: "end" },
-        ]
-      : [
-          { value: 0, label: "0", edge: "start" },
-          { value: 300, label: "300" },
-          { value: 350, label: "350" },
-          { value: 400, label: "400", edge: "end" },
-        ];
+  const labels = copy || {
+    pending: "散布後に積算を開始します",
+    exceeded: "リバウンドの時期に入っています",
+    kicker: "リバウンド予測",
+    unit: "℃",
+  };
+  const exceeded = outlook.status === "exceeded";
+  const pending = outlook.status === "pending";
+  const unknown = outlook.status === "unknown";
+  const observed = Number(outlook.observedGdd) || 0;
+  const pct = exceeded
+    ? 100
+    : Math.min(100, Math.max(0, Math.round((observed / target) * 100)));
 
-  scaleEl.innerHTML = "";
-  ticks.forEach((tick) => {
-    const span = document.createElement("span");
-    span.textContent = tick.label;
-    span.style.left = `${pctOfGddMax(tick.value)}%`;
-    if (tick.edge === "start") {
-      span.className = "scale-start";
-    } else if (tick.edge === "end") {
-      span.className = "scale-end";
-    }
-    scaleEl.appendChild(span);
-  });
-}
+  const hero = document.createElement("div");
+  hero.className = "pgr-outlook-hero";
+  const kicker = document.createElement("span");
+  kicker.className = "pgr-outlook-kicker";
+  const date = document.createElement("span");
+  date.className = "pgr-outlook-date";
 
-function renderGddGauge(trackEl, gdd, mode) {
-  trackEl.innerHTML = "";
-  const scaleEl = trackEl.parentElement.querySelector(".gdd-gauge-scale");
-  renderGddGaugeScale(scaleEl, mode);
-  const totalPct = pctOfGddMax(gdd);
-
-  function addSeg(cls, leftPct, widthPct) {
-    if (widthPct <= 0) {
-      return;
-    }
-    const el = document.createElement("div");
-    el.className = `gdd-gauge-seg ${cls}`;
-    el.style.left = `${leftPct}%`;
-    el.style.width = `${widthPct}%`;
-    trackEl.appendChild(el);
-  }
-
-  function addMark(value) {
-    const mark = document.createElement("div");
-    mark.className = "gdd-gauge-mark";
-    mark.style.left = `${pctOfGddMax(value)}%`;
-    trackEl.appendChild(mark);
-  }
-
-  if (mode === "primomax") {
-    addMark(200);
-    const end = totalPct;
-    const t200 = pctOfGddMax(200);
-    if (gdd <= 200) {
-      addSeg("gdd-seg-normal", 0, end);
-    } else {
-      addSeg("gdd-seg-normal", 0, t200);
-      addSeg("gdd-seg-over", t200, end - t200);
-    }
+  if (pending) {
+    kicker.textContent = labels.pending;
+    hero.append(kicker);
+    container.append(hero);
+    return;
+  } else if (exceeded) {
+    kicker.textContent = labels.exceeded;
+    date.textContent = "";
+  } else if (unknown || !outlook.reboundDate) {
+    kicker.textContent = labels.kicker;
+    date.textContent = "この先180日では届きません";
+    date.classList.add("is-muted");
   } else {
-    addMark(300);
-    addMark(350);
-    const p300 = pctOfGddMax(300);
-    const p350 = pctOfGddMax(350);
-    const end = totalPct;
-    if (gdd <= 300) {
-      addSeg("gdd-seg-normal", 0, end);
-    } else if (gdd <= 350) {
-      addSeg("gdd-seg-normal", 0, p300);
-      addSeg("gdd-seg-window", p300, end - p300);
-    } else {
-      addSeg("gdd-seg-normal", 0, p300);
-      addSeg("gdd-seg-window", p300, p350 - p300);
-      addSeg("gdd-seg-over", p350, end - p350);
-    }
+    kicker.textContent = labels.kicker;
+    date.textContent = formatPgrMonthDay(outlook.reboundDate);
+  }
+  hero.append(kicker, date);
+
+  const meta = document.createElement("div");
+  meta.className = "pgr-outlook-meta";
+  const countdown = document.createElement("span");
+  countdown.className = "pgr-outlook-countdown";
+  if (!pending && !exceeded && outlook.reboundDate) {
+    countdown.textContent = formatPgrDaysUntil(Number(outlook.reboundDays) || 0);
+  }
+  const fade = document.createElement("span");
+  fade.className = "pgr-outlook-fade";
+  if (!pending && !exceeded && outlook.fadeDate) {
+    fade.textContent = `効果の弱まり ${formatPgrMonthDay(outlook.fadeDate)}`;
+  }
+  meta.append(countdown, fade);
+
+  const track = document.createElement("div");
+  track.className = "pgr-outlook-track";
+  const fill = document.createElement("div");
+  fill.className = "pgr-outlook-fill";
+  fill.style.width = `${pct}%`;
+  track.append(fill);
+
+  const nums = document.createElement("div");
+  nums.className = "pgr-outlook-nums";
+  if (exceeded) {
+    nums.textContent = `${target}${labels.unit}を超過`;
+  } else if (!pending) {
+    nums.textContent = `${formatPgrObserved(observed, target, false)} / ${target}${labels.unit}（${pct}%）`;
+  }
+
+  if (countdown.textContent || fade.textContent) {
+    container.append(hero, meta, track, nums);
+  } else {
+    container.append(hero, track, nums);
   }
 }
 
 function buildGddPanelHtml() {
-  return `<div class="gdd-panel">
-    <h3 class="gdd-title">PGR適時・発芽予測</h3>
-    <p class="gdd-subtitle">散布日から昨日まで（基準温度 0℃）</p>
+  return `<div class="gdd-stack">
+    <div class="gdd-panel" id="gdd-panel-pgr">
+    <h3 class="gdd-title"><a class="gdd-title-link" href="https://ja.wikipedia.org/wiki/%E6%A4%8D%E7%89%A9%E6%88%90%E9%95%B7%E8%AA%BF%E6%95%B4%E5%89%A4" target="_blank" rel="noopener noreferrer" title="植物成長調整剤（Wikipedia）">PGR</a>適時</h3>
     <div class="gdd-block" id="gdd-block-primomax">
       <div class="gdd-name">
         <span class="gdd-name-text">プリモマックス（トリネキサパックエチル　200℃リバウンド）</span>
@@ -964,11 +985,8 @@ function buildGddPanelHtml() {
       <div class="gdd-controls">
         <label for="date-primomax" class="gdd-date-label">散布日</label>
         <input type="date" id="date-primomax" aria-label="プリモマックスの散布日">
-        <div class="gdd-gauge-wrap">
-          <div class="gdd-gauge-track" id="gauge-primomax"></div>
-          <div class="gdd-gauge-scale" id="scale-primomax"></div>
-        </div>
       </div>
+      <div class="pgr-outlook" id="outlook-primomax"></div>
     </div>
     <div class="gdd-block" id="gdd-block-greenfield">
       <div class="gdd-name">
@@ -997,36 +1015,30 @@ function buildGddPanelHtml() {
       <div class="gdd-controls">
         <label for="date-greenfield" class="gdd-date-label">散布日</label>
         <input type="date" id="date-greenfield" aria-label="グリーンフィールドの散布日">
-        <div class="gdd-gauge-wrap">
-          <div class="gdd-gauge-track" id="gauge-greenfield"></div>
-          <div class="gdd-gauge-scale" id="scale-greenfield"></div>
-        </div>
       </div>
+      <div class="pgr-outlook" id="outlook-greenfield"></div>
     </div>
-    <div class="gdd-section-divider"></div>
-    <h4 class="gdd-section-title">発芽積算温度</h4>
-    <p class="gdd-subtitle gdd-subtitle--germination">播種日から昨日まで</p>
+    <p class="gdd-pgr-note">昨日までは実績気温。先は天気予報、予報期間を超える分は昨年同日の気温で積算した目安です。</p>
+    </div>
+    <div class="gdd-panel" id="gdd-panel-germ">
+    <h3 class="gdd-title">発芽予測</h3>
     <div class="gdd-block" id="gdd-block-germ-warm">
       <div class="gdd-name" id="germ-warm-name"></div>
       <div class="gdd-controls">
         <label for="date-germ-warm" class="gdd-date-label">播種日</label>
         <input type="date" id="date-germ-warm" aria-label="暖地型芝種の播種日">
-        <div class="gdd-gauge-wrap">
-          <div class="gdd-gauge-track" id="gauge-germ-warm"></div>
-          <div class="gdd-gauge-scale" id="scale-germ-warm"></div>
-        </div>
       </div>
+      <div class="pgr-outlook" id="outlook-germ-warm"></div>
     </div>
     <div class="gdd-block" id="gdd-block-germ-cool">
       <div class="gdd-name" id="germ-cool-name"></div>
       <div class="gdd-controls">
         <label for="date-germ-cool" class="gdd-date-label">播種日</label>
         <input type="date" id="date-germ-cool" aria-label="寒地型芝種の播種日">
-        <div class="gdd-gauge-wrap">
-          <div class="gdd-gauge-track" id="gauge-germ-cool"></div>
-          <div class="gdd-gauge-scale" id="scale-germ-cool"></div>
-        </div>
       </div>
+      <div class="pgr-outlook" id="outlook-germ-cool"></div>
+    </div>
+    <p class="gdd-pgr-note">昨日までは実績気温。先は天気予報、予報期間を超える分は昨年同日の気温で積算した目安です。</p>
     </div>
   </div>`;
 }
@@ -1049,55 +1061,6 @@ function updateGerminationGrassLabels(settings) {
   }
 }
 
-function pctOfGerminationTarget(gdd, targetGdd) {
-  if (!targetGdd) {
-    return 0;
-  }
-  return Math.min(100, Math.max(0, (gdd / targetGdd) * 100));
-}
-
-function renderGerminationGaugeScale(scaleEl, targetGdd) {
-  if (!scaleEl) {
-    return;
-  }
-
-  scaleEl.innerHTML = "";
-  [
-    { value: 0, label: "0", edge: "start" },
-    { value: targetGdd, label: String(targetGdd), edge: "end" },
-  ].forEach((tick) => {
-    const span = document.createElement("span");
-    span.textContent = tick.label;
-    span.style.left = `${pctOfGerminationTarget(tick.value, targetGdd)}%`;
-    if (tick.edge === "start") {
-      span.className = "scale-start";
-    } else if (tick.edge === "end") {
-      span.className = "scale-end";
-    }
-    scaleEl.appendChild(span);
-  });
-}
-
-function renderGerminationGauge(trackEl, gdd, targetGdd) {
-  trackEl.innerHTML = "";
-  const scaleEl = trackEl.parentElement.querySelector(".gdd-gauge-scale");
-  renderGerminationGaugeScale(scaleEl, targetGdd);
-
-  const widthPct = pctOfGerminationTarget(gdd, targetGdd);
-  if (widthPct > 0) {
-    const el = document.createElement("div");
-    el.className = "gdd-gauge-seg gdd-seg-normal";
-    el.style.left = "0%";
-    el.style.width = `${widthPct}%`;
-    trackEl.appendChild(el);
-  }
-
-  const mark = document.createElement("div");
-  mark.className = "gdd-gauge-mark";
-  mark.style.left = "100%";
-  trackEl.appendChild(mark);
-}
-
 function renderGddPlaceholder(message) {
   const area = document.getElementById("gdd-area");
   if (message) {
@@ -1105,7 +1068,7 @@ function renderGddPlaceholder(message) {
     return;
   }
 
-  if (!area.querySelector(".gdd-panel") || !area.querySelector("#gdd-block-germ-warm")) {
+  if (!area.querySelector("#gdd-panel-pgr") || !area.querySelector("#gdd-panel-germ")) {
     area.innerHTML = buildGddPanelHtml();
     initGddPanelEvents();
   }
@@ -1122,7 +1085,6 @@ function initGddPanelEvents() {
   const greenInput = document.getElementById("date-greenfield");
   const warmSeedInput = document.getElementById("date-germ-warm");
   const coolSeedInput = document.getElementById("date-germ-cool");
-  const settings = loadSettings();
 
   if (primoDate) {
     primoInput.value = primoDate;
@@ -1136,17 +1098,6 @@ function initGddPanelEvents() {
   if (coolSeedDate) {
     coolSeedInput.value = coolSeedDate;
   }
-
-  renderGddGaugeScale(document.getElementById("scale-primomax"), "primomax");
-  renderGddGaugeScale(document.getElementById("scale-greenfield"), "greenfield");
-  renderGerminationGaugeScale(
-    document.getElementById("scale-germ-warm"),
-    getGerminationGddConfig(settings.warmGrass).targetGdd
-  );
-  renderGerminationGaugeScale(
-    document.getElementById("scale-germ-cool"),
-    getGerminationGddConfig(settings.coolGrass).targetGdd
-  );
 
   primoInput.addEventListener("change", () => {
     if (primoInput.value) {
@@ -1177,34 +1128,38 @@ function initGddPanelEvents() {
   });
 }
 
-async function fetchProductGdd(lat, lon, startDate, baseTemp = 0) {
+async function fetchPgrOutlook(lat, lon, startDate, target, secondary, baseTemp = 0) {
   const params = new URLSearchParams({
     lat,
     lon,
     start_date: startDate,
+    outlook: "pgr",
+    target: String(target),
     base_temp: String(baseTemp),
   });
+  if (secondary) {
+    params.set("secondary", String(secondary));
+  }
   const data = await fetchApiJson(`${GDD_API}?${params.toString()}`);
   if (!data.success) {
     throw new Error(data.error || "GDD取得に失敗しました");
   }
-  return data.gdd;
+  return data;
 }
 
 async function updateProductGdd(product, settings) {
   const dateEl = document.getElementById(`date-${product}`);
-  const gaugeEl = document.getElementById(`gauge-${product}`);
-  const scaleEl = document.getElementById(`scale-${product}`);
+  const outlookEl = document.getElementById(`outlook-${product}`);
   const gddError = document.getElementById("gdd-error");
   const startDate = dateEl?.value;
+  const config = PGR_PRODUCTS[product];
 
-  if (!dateEl || !gaugeEl) {
+  if (!dateEl || !outlookEl || !config) {
     return;
   }
 
   if (!startDate) {
-    gaugeEl.innerHTML = "";
-    renderGddGaugeScale(scaleEl, product === "primomax" ? "primomax" : "greenfield");
+    renderPgrOutlook(outlookEl, null, config.target);
     return;
   }
 
@@ -1213,33 +1168,43 @@ async function updateProductGdd(product, settings) {
   }
 
   try {
-    const gdd = await fetchProductGdd(settings.lat, settings.lon, startDate);
-    renderGddGauge(gaugeEl, gdd, product === "primomax" ? "primomax" : "greenfield");
+    const outlook = await fetchPgrOutlook(
+      settings.lat,
+      settings.lon,
+      startDate,
+      config.target,
+      config.secondary
+    );
+    renderPgrOutlook(outlookEl, outlook, config.target);
     gddError.classList.add("hidden");
   } catch (err) {
-    gaugeEl.innerHTML = "";
-    renderGddGaugeScale(scaleEl, product === "primomax" ? "primomax" : "greenfield");
+    renderPgrOutlook(outlookEl, null, config.target);
     gddError.textContent = err.message;
     gddError.classList.remove("hidden");
   }
 }
 
+const GERM_OUTLOOK_COPY = {
+  pending: "播種後に積算を開始します",
+  exceeded: "発芽の目安に達しています",
+  kicker: "発芽予測",
+  unit: "℃日",
+};
+
 async function updateGerminationGdd(type, settings) {
   const dateEl = document.getElementById(`date-germ-${type}`);
-  const gaugeEl = document.getElementById(`gauge-germ-${type}`);
-  const scaleEl = document.getElementById(`scale-germ-${type}`);
+  const outlookEl = document.getElementById(`outlook-germ-${type}`);
   const gddError = document.getElementById("gdd-error");
   const startDate = dateEl?.value;
   const grassName = type === "warm" ? settings.warmGrass : settings.coolGrass;
   const config = getGerminationGddConfig(grassName);
 
-  if (!dateEl || !gaugeEl) {
+  if (!dateEl || !outlookEl) {
     return;
   }
 
   if (!startDate) {
-    gaugeEl.innerHTML = "";
-    renderGerminationGaugeScale(scaleEl, config.targetGdd);
+    renderPgrOutlook(outlookEl, null, config.targetGdd, GERM_OUTLOOK_COPY);
     return;
   }
 
@@ -1248,17 +1213,18 @@ async function updateGerminationGdd(type, settings) {
   }
 
   try {
-    const gdd = await fetchProductGdd(
+    const outlook = await fetchPgrOutlook(
       settings.lat,
       settings.lon,
       startDate,
+      config.targetGdd,
+      null,
       config.baseTemp
     );
-    renderGerminationGauge(gaugeEl, gdd, config.targetGdd);
+    renderPgrOutlook(outlookEl, outlook, config.targetGdd, GERM_OUTLOOK_COPY);
     gddError.classList.add("hidden");
   } catch (err) {
-    gaugeEl.innerHTML = "";
-    renderGerminationGaugeScale(scaleEl, config.targetGdd);
+    renderPgrOutlook(outlookEl, null, config.targetGdd, GERM_OUTLOOK_COPY);
     gddError.textContent = err.message;
     gddError.classList.remove("hidden");
   }
@@ -1509,6 +1475,298 @@ function scrollAdvisorMessageToStart(container, messageEl) {
   container.scrollTop = Math.max(0, messageEl.offsetTop - paddingTop);
 }
 
+const ADVISOR_VOICE_KEY = "portalAdvisorVoiceUri";
+const advisorSpeechSource = new WeakMap();
+let advisorSpeechSession = null;
+let advisorSpeechListSeq = 0;
+
+function advisorSpeechSupported() {
+  return typeof window.speechSynthesis !== "undefined" && typeof SpeechSynthesisUtterance === "function";
+}
+
+function advisorJapaneseVoices() {
+  if (!advisorSpeechSupported()) return [];
+  return window.speechSynthesis.getVoices().filter((voice) => /^ja([-_]|$)/i.test(voice.lang || ""));
+}
+
+function advisorShortVoiceName(voice) {
+  const name = String(voice.name || "")
+    .replace(/^Microsoft\s+/i, "")
+    .replace(/\s+(Online|Desktop)$/i, "")
+    .replace(/\s*[-–]\s*.+$/, "")
+    .trim();
+  return name || "日本語";
+}
+
+function advisorSavedVoice() {
+  const voices = advisorJapaneseVoices();
+  let saved = "";
+  try {
+    saved = localStorage.getItem(ADVISOR_VOICE_KEY) || "";
+  } catch {
+    saved = "";
+  }
+  return voices.find((voice) => voice.voiceURI === saved) || voices[0] || null;
+}
+
+function advisorRememberVoice(voice) {
+  if (voice) {
+    try {
+      localStorage.setItem(ADVISOR_VOICE_KEY, voice.voiceURI);
+    } catch {
+      /* storage unavailable */
+    }
+  }
+  const label = voice ? `声：${advisorShortVoiceName(voice)}` : "声：日本語";
+  document.querySelectorAll(".advisor-speech-voice").forEach((button) => {
+    button.textContent = label;
+  });
+}
+
+function advisorPlainSpeech(markdown) {
+  return String(markdown || "")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "")
+    .replace(/^\s*\d+[.)]\s+/gm, "")
+    .replace(/[*_~]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function advisorSpeechChunks(text) {
+  const pieces = text.split(/(?<=[。！？!?])/);
+  const chunks = [];
+  let buffer = "";
+  for (const piece of pieces) {
+    if ((buffer + piece).length > 180 && buffer.trim()) {
+      chunks.push(buffer.trim());
+      buffer = piece;
+    } else {
+      buffer += piece;
+    }
+  }
+  if (buffer.trim()) chunks.push(buffer.trim());
+  return chunks;
+}
+
+function advisorSpeechStatus(messageEl, message) {
+  const status = messageEl.querySelector(".advisor-speech-status");
+  if (!status) return;
+  status.hidden = !message;
+  status.textContent = message || "";
+}
+
+function advisorResetPlayButton(button) {
+  if (!button) return;
+  button.classList.remove("is-playing");
+  button.textContent = "▶ 再生";
+  button.setAttribute("aria-pressed", "false");
+}
+
+function advisorCloseVoiceLists() {
+  document.querySelectorAll(".advisor-speech-list").forEach((list) => {
+    list.hidden = true;
+  });
+  document.querySelectorAll(".advisor-speech-voice").forEach((button) => {
+    button.setAttribute("aria-expanded", "false");
+  });
+}
+
+function stopAdvisorSpeech() {
+  advisorSpeechSession = null;
+  if (advisorSpeechSupported()) window.speechSynthesis.cancel();
+  document.querySelectorAll(".advisor-speech-play").forEach(advisorResetPlayButton);
+}
+
+function advisorMarkPlaying(messageEl) {
+  document.querySelectorAll(".advisor-speech-play").forEach((button) => {
+    if (button.closest(".ai-advisor-message") === messageEl) {
+      button.classList.add("is-playing");
+      button.textContent = "❚❚ 一時停止";
+      button.setAttribute("aria-pressed", "true");
+    } else {
+      advisorResetPlayButton(button);
+    }
+  });
+}
+
+function advisorSpeakChunk(session) {
+  if (advisorSpeechSession !== session) return;
+  if (session.index >= session.chunks.length) {
+    advisorSpeechSession = null;
+    advisorResetPlayButton(session.messageEl.querySelector(".advisor-speech-play"));
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(session.chunks[session.index]);
+  utterance.lang = "ja-JP";
+  const voice = advisorSavedVoice();
+  if (voice) utterance.voice = voice;
+  utterance.onend = () => {
+    if (advisorSpeechSession !== session || session.paused) return;
+    session.index += 1;
+    advisorSpeakChunk(session);
+  };
+  utterance.onerror = (event) => {
+    if (advisorSpeechSession !== session) return;
+    const reason = event.error || "";
+    if (reason === "interrupted" || reason === "canceled" || reason === "cancelled") return;
+    advisorSpeechSession = null;
+    advisorResetPlayButton(session.messageEl.querySelector(".advisor-speech-play"));
+    advisorSpeechStatus(session.messageEl, "読み上げを開始できませんでした。");
+  };
+  window.speechSynthesis.speak(utterance);
+}
+
+function advisorStartSpeech(messageEl, fromIndex) {
+  const chunks = advisorSpeechChunks(advisorPlainSpeech(advisorSpeechSource.get(messageEl) || ""));
+  advisorCloseVoiceLists();
+  if (!advisorSpeechSupported()) {
+    advisorSpeechStatus(messageEl, "このブラウザでは読み上げできません");
+    return;
+  }
+  if (!chunks.length) {
+    advisorSpeechStatus(messageEl, "読み上げる文章がありません。");
+    return;
+  }
+  advisorSpeechStatus(messageEl, "");
+  window.speechSynthesis.cancel();
+  const session = { messageEl, chunks, index: fromIndex, paused: false };
+  advisorSpeechSession = session;
+  advisorMarkPlaying(messageEl);
+  advisorSpeakChunk(session);
+}
+
+function advisorToggleSpeech(messageEl) {
+  const session = advisorSpeechSession;
+  const synth = window.speechSynthesis;
+  if (session && session.messageEl === messageEl && !session.paused && (synth.speaking || synth.pending)) {
+    session.paused = true;
+    synth.pause();
+    advisorResetPlayButton(messageEl.querySelector(".advisor-speech-play"));
+    window.setTimeout(() => {
+      if (advisorSpeechSession !== session || !session.paused) return;
+      if (!synth.paused && (synth.speaking || synth.pending)) synth.cancel();
+    }, 80);
+    return;
+  }
+  if (session && session.messageEl === messageEl && session.paused) {
+    session.paused = false;
+    advisorMarkPlaying(messageEl);
+    if (synth.paused) {
+      synth.resume();
+      return;
+    }
+    advisorSpeakChunk(session);
+    return;
+  }
+  advisorStartSpeech(messageEl, 0);
+}
+
+function advisorFillVoiceList(list) {
+  const voices = advisorJapaneseVoices();
+  const current = advisorSavedVoice();
+  list.replaceChildren();
+  const caption = document.createElement("p");
+  caption.textContent = "この端末の日本語の声";
+  list.appendChild(caption);
+  if (!voices.length) {
+    const empty = document.createElement("p");
+    empty.textContent = "この端末には日本語の声がありません";
+    list.appendChild(empty);
+    return;
+  }
+  voices.forEach((voice) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "advisor-speech-option";
+    const selected = Boolean(current && voice.voiceURI === current.voiceURI);
+    if (selected) button.classList.add("is-selected");
+    const mark = document.createElement("span");
+    mark.className = "mark";
+    mark.textContent = selected ? "●" : "";
+    const label = document.createElement("span");
+    label.textContent = voice.name;
+    button.append(mark, label);
+    button.addEventListener("click", () => {
+      advisorRememberVoice(voice);
+      list.hidden = true;
+      const opener = document.querySelector(`[aria-controls="${list.id}"]`);
+      if (opener) opener.setAttribute("aria-expanded", "false");
+      const session = advisorSpeechSession;
+      if (session && !session.paused) advisorStartSpeech(session.messageEl, session.index);
+    });
+    list.appendChild(button);
+  });
+}
+
+function attachAdvisorSpeech(messageEl, sourceText) {
+  if (!messageEl || messageEl.querySelector(".advisor-speech")) return;
+  advisorSpeechSource.set(messageEl, sourceText);
+  const actions = document.createElement("div");
+  actions.className = "advisor-speech";
+  const play = document.createElement("button");
+  play.type = "button";
+  play.className = "advisor-speech-play";
+  play.textContent = "▶ 再生";
+  play.setAttribute("aria-pressed", "false");
+  const voiceBtn = document.createElement("button");
+  voiceBtn.type = "button";
+  voiceBtn.className = "advisor-speech-voice";
+  const saved = advisorSavedVoice();
+  voiceBtn.textContent = saved ? `声：${advisorShortVoiceName(saved)}` : "声：日本語";
+  voiceBtn.setAttribute("aria-expanded", "false");
+  const listId = `advisor-voice-list-${++advisorSpeechListSeq}`;
+  voiceBtn.setAttribute("aria-controls", listId);
+  const list = document.createElement("div");
+  list.className = "advisor-speech-list";
+  list.id = listId;
+  list.hidden = true;
+  const status = document.createElement("p");
+  status.className = "advisor-speech-status";
+  status.hidden = true;
+  actions.append(play, voiceBtn);
+  messageEl.append(actions, list, status);
+  play.addEventListener("click", () => {
+    if (!advisorSpeechSupported()) {
+      advisorSpeechStatus(messageEl, "このブラウザでは読み上げできません");
+      return;
+    }
+    advisorToggleSpeech(messageEl);
+  });
+  voiceBtn.addEventListener("click", () => {
+    if (!advisorSpeechSupported()) {
+      advisorSpeechStatus(messageEl, "このブラウザでは読み上げできません");
+      return;
+    }
+    const open = voiceBtn.getAttribute("aria-expanded") === "true";
+    advisorCloseVoiceLists();
+    if (open) return;
+    advisorFillVoiceList(list);
+    list.hidden = false;
+    voiceBtn.setAttribute("aria-expanded", "true");
+  });
+}
+
+function initAdvisorSpeech() {
+  window.stopAdvisorSpeech = stopAdvisorSpeech;
+  if (!advisorSpeechSupported()) return;
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    advisorRememberVoice(advisorSavedVoice());
+    document.querySelectorAll(".advisor-speech-list").forEach((list) => {
+      if (!list.hidden) advisorFillVoiceList(list);
+    });
+  });
+  document.addEventListener("click", (event) => {
+    if (event.target.closest(".advisor-speech-voice, .advisor-speech-list")) return;
+    advisorCloseVoiceLists();
+  });
+}
+
 function setAdvisorBotContent(contentDiv, text) {
   if (typeof marked !== "undefined" && typeof DOMPurify !== "undefined") {
     contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(text));
@@ -1533,6 +1791,7 @@ function addAdvisorMessage(content, isUser = false) {
 
   messageDiv.appendChild(contentDiv);
   messagesEl.appendChild(messageDiv);
+  if (!isUser) attachAdvisorSpeech(messageDiv, content);
 
   if (isUser) {
     messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -1650,6 +1909,9 @@ async function sendAdvisorMessage() {
   if (typeof window.stopAdvisorVoice === "function") {
     window.stopAdvisorVoice();
   }
+  if (typeof window.stopAdvisorSpeech === "function") {
+    window.stopAdvisorSpeech();
+  }
 
   expandAdvisorChat();
   addAdvisorMessage(message, true);
@@ -1698,6 +1960,7 @@ async function sendAdvisorMessage() {
         ? `${text}\n\n応答が長さの上限で切れました。「続きを書いて」と送ると続きが出ます。`
         : text;
       setAdvisorBotContent(draft.contentDiv, display);
+      attachAdvisorSpeech(draft.messageDiv, display);
     } else {
       const data = await parseAdvisorJsonResponse(response);
       if (!data.success) {
@@ -1716,6 +1979,7 @@ async function sendAdvisorMessage() {
     }
     if (draft) {
       draft.contentDiv.textContent = errorMsg;
+      attachAdvisorSpeech(draft.messageDiv, errorMsg);
     } else {
       addAdvisorMessage(errorMsg, false);
     }
@@ -1737,6 +2001,9 @@ function initAdvisorVoice() {
     micBtn,
     micStatus,
     maxLength: 16000,
+    onListenStart() {
+      if (typeof window.stopAdvisorSpeech === "function") window.stopAdvisorSpeech();
+    },
   });
   window.stopAdvisorVoice = window.VoiceInput.stopAll;
 }
@@ -1749,6 +2016,7 @@ function initAdvisorChat() {
     return;
   }
 
+  initAdvisorSpeech();
   initAdvisorVoice();
   if (window.SourceLibrary && typeof window.SourceLibrary.bindBar === "function") {
     window.SourceLibrary.bindBar();
