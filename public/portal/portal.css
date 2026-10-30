@@ -30,8 +30,8 @@ body.modal-open {
     justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom: 2px solid #f0f0f0;
 }
 
@@ -98,7 +98,7 @@ body.modal-open {
 .portal-title-logo {
     display: block;
     width: auto;
-    height: 72px;
+    height: 56px;
     max-width: min(100%, 380px);
     object-fit: contain;
     margin: 0;
@@ -107,7 +107,7 @@ body.modal-open {
 }
 
 .portal-title-prefix.hidden + .portal-title-logo-track .portal-title-logo {
-    height: 84px;
+    height: 64px;
     max-width: min(100%, 420px);
 }
 
@@ -128,7 +128,7 @@ body.modal-open {
 }
 
 .portal-brand-free {
-    margin: 2px 0 0;
+    margin: 0;
     font-size: 0.95rem;
     font-weight: 700;
     color: #15803d;
@@ -142,7 +142,7 @@ body.modal-open {
     align-items: center;
     justify-content: center;
     gap: 8px 12px;
-    margin: 6px 0 0;
+    margin: 2px 0 0;
 }
 
 .portal-brand-link {
@@ -334,7 +334,7 @@ body.modal-open {
 }
 
 .ai-advisor-section {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .ai-advisor-chat {
@@ -448,7 +448,7 @@ a.weather-more-link.ai-advisor-more-link {
 
 .ai-advisor-input-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 42px auto;
+    grid-template-columns: minmax(0, 1fr) 36px auto;
     gap: 8px;
     align-items: stretch;
     width: 100%;
@@ -459,8 +459,8 @@ a.weather-more-link.ai-advisor-more-link {
 }
 
 .ai-advisor-mic-btn {
-    width: 42px;
-    min-height: 42px;
+    width: 36px;
+    min-height: 36px;
     padding: 0;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
@@ -703,13 +703,13 @@ a.weather-more-link.ai-advisor-more-link {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    padding: 10px 12px;
+    padding: 6px 12px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     resize: vertical;
-    min-height: 42px;
+    min-height: 36px;
     max-height: 120px;
 }
 
@@ -829,8 +829,8 @@ section h2 {
     position: relative;
     background: #f8f9fa;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
 }
 
 .weather-more-link {
@@ -912,7 +912,7 @@ section h2 {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 16px 12px;
+    padding: 8px 16px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     min-width: 280px;
@@ -949,12 +949,12 @@ section h2 {
 
 .weather-hour-row {
     display: flex;
-    min-height: 150px;
+    min-height: 120px;
 }
 
 .weather-hour-cell {
     flex: 0 0 72px;
-    padding: 10px 6px;
+    padding: 6px;
     text-align: center;
     border-right: 1px solid #eee;
     background: white;
@@ -999,7 +999,7 @@ section h2 {
 .disease-risk-section {
     background: #f8f9fa;
     border-radius: 12px;
-    padding: 16px;
+    padding: 12px;
 }
 
 .portal-insights-row {
@@ -1021,7 +1021,10 @@ section h2 {
     flex: 1;
 }
 
-.portal-gdd-row,
+.portal-gdd-row {
+    margin-top: 8px;
+}
+
 .portal-memo-row {
     margin-top: 16px;
 }
@@ -1075,9 +1078,9 @@ section h2 {
 }
 
 .cbi-intro {
-    margin: 0 0 12px 0;
-    font-size: 0.78em;
-    line-height: 1.55;
+    margin: 0 0 6px 0;
+    font-size: 0.68em;
+    line-height: 1.25;
     color: #4b5563;
 }
 
@@ -1379,7 +1382,7 @@ section h2 {
 }
 
 .portal-gp-row {
-    margin-top: 16px;
+    margin-top: 8px;
 }
 
 .portal-gp-rac-row {
@@ -1408,7 +1411,7 @@ section h2 {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    padding: 12px;
+    padding: 8px;
     height: 100%;
 }
 
@@ -1419,13 +1422,13 @@ section h2 {
   gap: 8px;
   margin: 0 0 4px 0;
   border-bottom: 2px solid #E5E7EB;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
 }
 
 .portal-rac-search-title {
     margin: 0;
     color: #1E40AF;
-    font-size: 1.05em;
+    font-size: 0.95em;
     font-weight: bold;
     border-bottom: none;
     padding-bottom: 0;
@@ -1533,7 +1536,7 @@ section h2 {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    padding: 12px;
+    padding: 8px;
     overflow: visible;
 }
 
@@ -1545,10 +1548,10 @@ section h2 {
 .gdd-title {
     margin: 0 0 4px 0;
     color: #1E40AF;
-    font-size: 1.05em;
+    font-size: 0.95em;
     font-weight: bold;
     border-bottom: 2px solid #E5E7EB;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .gdd-title-link {
@@ -1860,7 +1863,7 @@ section h2 {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    padding: 12px;
+    padding: 8px;
     height: 100%;
 }
 
@@ -1873,7 +1876,7 @@ section h2 {
     background: white;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    padding: 12px;
+    padding: 8px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -1882,10 +1885,10 @@ section h2 {
 .gp-chart-title {
     margin: 0 0 4px 0;
     color: #1E40AF;
-    font-size: 1.05em;
+    font-size: 0.95em;
     font-weight: bold;
     border-bottom: 2px solid #E5E7EB;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .gp-chart-subtitle {
@@ -2073,12 +2076,12 @@ section h2 {
 }
 
 .disease-risk-title {
-    margin: 0 0 10px 0;
+    margin: 0 0 6px 0;
     color: #1E40AF;
-    font-size: 1.05em;
+    font-size: 0.95em;
     font-weight: bold;
     border-bottom: 2px solid #E5E7EB;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .disease-risk-title-row {
@@ -2086,9 +2089,9 @@ section h2 {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin: 0 0 10px 0;
+    margin: 0 0 6px 0;
     border-bottom: 2px solid #E5E7EB;
-    padding-bottom: 6px;
+    padding-bottom: 4px;
 }
 
 .disease-risk-title-row .disease-risk-title {
@@ -2361,7 +2364,7 @@ section h2 {
 }
 
 .series-section-title {
-    margin: 0 0 12px 0;
+    margin: 0 0 6px 0;
     color: #1E40AF;
     font-size: 1.05em;
     font-weight: bold;
@@ -2370,12 +2373,12 @@ section h2 {
 }
 
 .series-intro {
-    margin: 0 0 12px;
+    margin: 0 0 6px;
     text-align: center;
 }
 
 .series-intro-lead {
-    margin: 0 0 8px;
+    margin: 0 0 4px;
     font-size: 0.95rem;
     font-weight: 600;
     color: #1f2937;
@@ -2386,7 +2389,7 @@ section h2 {
     flex-wrap: wrap;
     justify-content: center;
     gap: 6px 8px;
-    margin: 0 0 6px;
+    margin: 0 0 3px;
 }
 
 .series-intro-badge {
@@ -2410,7 +2413,7 @@ section h2 {
 .series-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 6px;
 }
 
 .series-card {
@@ -2418,8 +2421,8 @@ section h2 {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-height: 64px;
-    padding: 12px 36px 12px 14px;
+    min-height: 52px;
+    padding: 8px 36px 8px 14px;
     background: white;
     border: 2px solid transparent;
     border-radius: 10px;
@@ -2560,7 +2563,7 @@ section h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 76px;
+    min-height: 64px;
     padding: 4px;
     line-height: 0;
     border-radius: 8px;
@@ -2575,7 +2578,7 @@ section h2 {
     display: block;
     width: 100%;
     max-width: 240px;
-    height: 76px;
+    height: 64px;
     object-fit: contain;
     vertical-align: bottom;
 }
@@ -2848,7 +2851,7 @@ footer p {
 
     .weather-day-summary {
         min-width: 260px;
-        padding: 12px;
+        padding: 8px 12px;
         gap: 10px;
     }
 
@@ -2881,5 +2884,320 @@ footer p {
     .portal-banners {
         grid-template-columns: 1fr;
         max-width: 280px;
+    }
+}
+
+.portal-news-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: stretch;
+    height: calc(352px * 4 / 5);
+}
+
+.portal-news-panel,
+.portal-sns-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.portal-news-panel .disease-risk-title,
+.portal-sns-panel .disease-risk-title {
+    flex-shrink: 0;
+}
+
+.portal-sns-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px 0;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.portal-sns-title-row .disease-risk-title {
+    margin: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+    white-space: nowrap;
+}
+
+.portal-sns-title-row .portal-sns-alias-form {
+    flex: 1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+}
+
+#portal-news-root {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.portal-sns-body {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.portal-sns-compose {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.portal-sns-links-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.portal-sns-facility,
+.portal-sns-empty {
+    margin: 0;
+    font-size: 0.78em;
+    line-height: 1.4;
+    color: #1f2937;
+}
+
+.portal-sns-empty {
+    color: #6b7280;
+}
+
+.portal-sns-alias-form {
+    display: flex;
+    gap: 4px;
+}
+
+.portal-sns-alias-form input {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    padding: 4px 8px;
+    font-size: 0.75em;
+    color: #1f2937;
+}
+
+.portal-sns-alias-form button,
+.portal-sns-alias button {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.72em;
+    line-height: 1.3;
+    cursor: pointer;
+}
+
+.portal-sns-aliases {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    list-style: none;
+}
+
+.portal-sns-alias {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 999px;
+    padding: 1px 4px 1px 8px;
+    font-size: 0.68em;
+    line-height: 1.3;
+    color: #1f2937;
+}
+
+.portal-sns-alias button {
+    border: none;
+    background: transparent;
+    padding: 0 4px;
+    font-size: 1em;
+    line-height: 1.2;
+}
+
+.portal-sns-list {
+    list-style: none;
+    min-width: 0;
+}
+
+.portal-sns-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 5px 2px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    text-decoration: none;
+    font-size: 0.82em;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.portal-sns-row:hover {
+    background: #fff;
+}
+
+.portal-sns-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: #fff;
+}
+
+.portal-sns-logo svg {
+    width: 16px;
+    height: 16px;
+}
+
+.portal-sns-logo--x {
+    background: #111827;
+}
+
+.portal-sns-logo--instagram {
+    background: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 52%, #6228d7 100%);
+}
+
+.portal-sns-logo--youtube {
+    background: #e11d1d;
+}
+
+.portal-sns-row-text {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.portal-news-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.portal-news-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.portal-news-tab {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.72em;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.portal-news-tab[aria-selected="true"] {
+    background: #1E40AF;
+    border-color: #1E40AF;
+    color: #fff;
+}
+
+.portal-news-bucket-label,
+.portal-news-empty {
+    margin: 6px 0 2px;
+    font-size: 0.72em;
+    line-height: 1.3;
+    color: #6b7280;
+}
+
+.portal-news-recent {
+    overflow: visible;
+}
+
+.portal-news-list {
+    list-style: none;
+}
+
+.portal-news-link {
+    display: block;
+    padding: 6px 2px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    text-decoration: none;
+}
+
+.portal-news-meta {
+    display: block;
+    font-size: 0.68em;
+    line-height: 1.3;
+    color: #6b7280;
+}
+
+.portal-news-titleline {
+    display: block;
+    margin-top: 1px;
+    font-size: 0.82em;
+    line-height: 1.35;
+    font-weight: 600;
+}
+
+.portal-news-badge {
+    display: inline-block;
+    margin-right: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 0.85em;
+    font-weight: 600;
+    vertical-align: 1px;
+}
+
+.portal-news-summary {
+    display: none;
+    margin-top: 4px;
+    font-size: 0.75em;
+    line-height: 1.4;
+    font-weight: 400;
+    color: #374151;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .portal-news-item:hover .portal-news-summary,
+    .portal-news-item:focus-within .portal-news-summary {
+        display: block;
+    }
+}
+
+@media (hover: none), (pointer: coarse) {
+    .portal-news-item.is-open .portal-news-summary {
+        display: block;
     }
 }

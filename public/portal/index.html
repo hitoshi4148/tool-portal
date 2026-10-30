@@ -18,7 +18,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>芝しごとポータル</title>
     <link rel="icon" type="image/png" href="/portal/grow-and-progress-logo.png?v=2">
-    <link rel="stylesheet" href="/portal/portal.css?v=20261021v189">
+    <link rel="stylesheet" href="/portal/portal.css?v=20261030v209">
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 </head>
@@ -61,8 +61,8 @@
                             <span class="portal-brand-info-sign">グロウアンドプログレス代表　吉信仁司</span>
                         </span>
                     </span>
+                    <span class="portal-brand-free">無料・会員登録不要ですぐ使える</span>
                 </p>
-                <p class="portal-brand-free">無料・会員登録不要ですぐ使える</p>
                 <p class="portal-brand-links">
                     <a href="https://www.turf-tools.jp/%E8%A7%A3%E8%AA%AC-%E8%8A%9D%E3%81%97%E3%81%94%E3%81%A8%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB" class="portal-brand-link" target="_blank" rel="noopener noreferrer">公式解説</a>
                     <a href="https://www.turf-tools.jp/post/%E3%80%8C%E6%95%B0%E5%AD%97%E3%81%AE%E6%84%8F%E5%91%B3%E3%80%8D%E3%81%BE%E3%81%A7%E5%88%86%E3%81%8B%E3%82%8B%E3%83%9D%E3%83%BC%E3%82%BF%E3%83%AB%E3%81%B8" class="portal-brand-link" target="_blank" rel="noopener noreferrer">🆕 新しい解説</a>
@@ -136,6 +136,23 @@
                 <p class="weather-placeholder">読み込み中...</p>
             </div>
         </section>
+
+        <div class="portal-news-row">
+            <section class="portal-news-panel" aria-labelledby="portal-news-heading">
+                <h2 id="portal-news-heading" class="disease-risk-title">芝しごとニュース</h2>
+                <div id="portal-news-root">読み込み中...</div>
+            </section>
+            <section class="portal-sns-panel" aria-labelledby="portal-sns-heading">
+                <div class="portal-sns-title-row">
+                    <h2 id="portal-sns-heading" class="disease-risk-title">施設の評判</h2>
+                    <form id="portal-sns-alias-form" class="portal-sns-alias-form">
+                        <input id="portal-sns-alias-input" type="text" name="alias" maxlength="80" placeholder="施設名の略称" aria-label="施設名の略称">
+                        <button type="submit">追加</button>
+                    </form>
+                </div>
+                <div id="portal-sns-body" class="portal-sns-body"></div>
+            </section>
+        </div>
 
         <section class="disease-risk-section" id="disease-risk-section">
             <div id="disease-risk-loading" class="loading hidden">
@@ -355,7 +372,7 @@
                     <span class="footer-gp-name">グロウアンドプログレス</span>
                 </a>
             </p>
-            <p class="footer-version">v1.9.0</p>
+            <p class="footer-version">v1.10.0</p>
         </footer>
     </div>
 
@@ -466,6 +483,8 @@
     <script src="/portal/work-memo-ui.js?v=20260825v157"></script>
     <script src="/portal/disease-risk-ui.js?v=20250731v128"></script>
     <script src="/portal/cbi-ui.js?v=20250901v133"></script>
-    <script src="/portal/portal.js?v=20261021v191"></script>
+    <script src="/portal/portal.js?v=20261030v204"></script>
+    <script src="/portal/news-ui.js?v=20261029v203"></script>
+    <script src="/portal/sns-ui.js?v=20261030v208"></script>
 </body>
 </html>

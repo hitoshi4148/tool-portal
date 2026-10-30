@@ -380,7 +380,6 @@ function renderWeatherWidget(hourly, days) {
         </div>
         <div class="weather-day-stats">
           <span class="weather-day-stat">平均気温 ${day.avgTemp.toFixed(1)}°C</span>
-          <span class="weather-day-stat">平均湿度 ${Math.round(day.avgHumidity)}%</span>
           <span class="weather-day-stat">平均風速 ${day.avgWind.toFixed(1)}m/s</span>
         </div>
       </div>
@@ -392,7 +391,6 @@ function renderWeatherWidget(hourly, days) {
         <div class="weather-hour-time">${formatHourLabel(row.hour)}</div>
         <div class="weather-hour-icon">${hourIcon}</div>
         <div class="weather-hour-temp">${row.temp.toFixed(0)}°</div>
-        <div class="weather-hour-meta">${Math.round(row.humidity)}%</div>
         <div class="weather-hour-meta">${row.wind.toFixed(1)}m/s</div>
         <div class="weather-hour-precip">${row.precip.toFixed(1)}mm</div>
       </div>`;
@@ -601,6 +599,7 @@ async function handleSaveSettings() {
   saveSettings(settings);
   updatePortalTitle(settings);
   WorkMemoUI.updateFacilityName(settings.facilityName);
+  if (window.SnsCheckUI) SnsCheckUI.refresh();
   showLocationStatus(
     settings.locationName
       ? `端末のCookieに保存しました（${settings.locationName}）`
