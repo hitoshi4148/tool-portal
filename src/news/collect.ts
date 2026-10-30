@@ -407,6 +407,9 @@ async function runSource(
     return { sourceKey, drafts: await load() };
   } catch (error) {
     console.error(sourceKey, error);
+    // Google News often answers 503 from Cloudflare. Remember the attempt so
+    // later visits the same day do not wait on it again.
+    if (sourceKey === "google-news") return { sourceKey, drafts: [] };
     return null;
   }
 }
