@@ -28,19 +28,17 @@ export interface MetResponse {
   };
 }
 
-import { fetchWithTimeout } from "../shared/fetch-with-timeout";
+import { fetchJsonWithRetry } from "../shared/fetch-json-with-retry";
 
 export async function fetchMet(lat: number, lon: number): Promise<MetResponse> {
   const url = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
-  const response = await fetchWithTimeout(url, {
-    headers: {
-      "User-Agent": "tool-portal/0.1 (contact: hitoshi.yoshinobu@gmail.com)",
+  return fetchJsonWithRetry<MetResponse>(
+    url,
+    {
+      headers: {
+        "User-Agent": "tool-portal/0.1 (contact: hitoshi.yoshinobu@gmail.com)",
+      },
     },
-  });
-
-  if (!response.ok) {
-    throw new Error(`MET API error: ${response.status}`);
-  }
-
-  return response.json() as Promise<MetResponse>;
+    { label: "MET" }
+  );
 }

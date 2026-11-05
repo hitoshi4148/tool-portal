@@ -1,5 +1,6 @@
 import { fetchGdd } from "../../../src/gdd/fetch-gdd";
 import { fetchPgrOutlook } from "../../../src/gdd/pgr-outlook";
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 
 export const onRequestGet: PagesFunction = async (context) => {
   try {
@@ -78,7 +79,7 @@ export const onRequestGet: PagesFunction = async (context) => {
       lon: result.lon,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = toPublicWeatherError(error);
     const status = message.includes("取得できません") ? 503 : 500;
     return Response.json({ success: false, error: message }, { status });
   }

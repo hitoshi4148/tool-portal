@@ -1,3 +1,4 @@
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 import { fetchMet } from "../../../src/spray/met";
 import { extractHourlyWeather } from "../../../src/weather/hourly";
 
@@ -24,7 +25,9 @@ export const onRequestGet: PagesFunction = async (context) => {
       location: { lat, lon },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ success: false, error: message }, { status: 500 });
+    return Response.json(
+      { success: false, error: toPublicWeatherError(error) },
+      { status: 500 }
+    );
   }
 };

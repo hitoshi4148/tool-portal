@@ -46,6 +46,21 @@ function buildApiJsonError(status, text) {
   );
 }
 
+const WEATHER_FETCH_USER_ERROR =
+  "気象データの取得に失敗しました。再読み込みしてください。";
+
+function toPublicDashboardError(message) {
+  const text = String(message || "");
+  if (
+    /Invalid JSON|Unterminated|Unexpected end|Unexpected token|JSON at position|Incomplete response|Empty response|timed out|Fetch timed out|MET API error|NASA POWER API error|API 応答の解析に失敗|network/i.test(
+      text
+    )
+  ) {
+    return WEATHER_FETCH_USER_ERROR;
+  }
+  return text || WEATHER_FETCH_USER_ERROR;
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -511,7 +526,9 @@ async function loadPortalData() {
     const data = await fetchApiJson(`${DASHBOARD_API}?${params.toString()}`);
 
     if (!data.success) {
-      throw new Error(data.error || "データの取得に失敗しました");
+      throw new Error(
+        toPublicDashboardError(data.error || "データの取得に失敗しました")
+      );
     }
 
     renderWeatherWidget(data.weather.hourly, data.weather.days);
@@ -529,13 +546,14 @@ async function loadPortalData() {
       cacheSprayForecast(settings.lat, settings.lon, data.sprayForecast);
     }
   } catch (err) {
-    weatherError.textContent = err.message;
-    diseaseError.textContent = err.message;
-    gpError.textContent = err.message;
+    const publicMessage = toPublicDashboardError(err.message);
+    weatherError.textContent = publicMessage;
+    diseaseError.textContent = publicMessage;
+    gpError.textContent = publicMessage;
     weatherError.classList.remove("hidden");
     diseaseError.classList.remove("hidden");
     gpError.classList.remove("hidden");
-    cbiError.textContent = err.message;
+    cbiError.textContent = publicMessage;
     cbiError.classList.remove("hidden");
     renderWeatherPlaceholder("天気予報を表示できませんでした。");
     renderDiseaseRiskPlaceholder("病害リスクを表示できませんでした。");

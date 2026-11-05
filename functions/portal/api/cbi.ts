@@ -4,6 +4,7 @@ import {
   jstTodayString,
 } from "../../../src/disease/met-norway-forecast";
 import { fetchNasaPowerHourly } from "../../../src/disease/nasa-power";
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 import { fetchMet } from "../../../src/spray/met";
 
 export const onRequestGet: PagesFunction = async (context) => {
@@ -42,7 +43,9 @@ export const onRequestGet: PagesFunction = async (context) => {
       ...report,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ success: false, error: message }, { status: 500 });
+    return Response.json(
+      { success: false, error: toPublicWeatherError(error) },
+      { status: 500 }
+    );
   }
 };

@@ -1,4 +1,5 @@
 import { fetchPortalDashboard } from "../../../src/portal/fetch-dashboard";
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 
 const DASHBOARD_CACHE_TTL_SECONDS = 30 * 60;
 const DASHBOARD_FETCH_TIMEOUT_MS = 45_000;
@@ -156,8 +157,10 @@ async function buildDashboardResponse(request: Request): Promise<Response> {
     await cache.put(cacheKey, response.clone());
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return jsonResponse({ success: false, error: message }, 500);
+    return jsonResponse(
+      { success: false, error: toPublicWeatherError(error) },
+      500
+    );
   } finally {
     await cache.delete(lockKey);
   }
@@ -185,8 +188,10 @@ async function runDashboardRequest(request: Request): Promise<Response> {
       }),
     ]);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return jsonResponse({ success: false, error: message }, 500);
+    return jsonResponse(
+      { success: false, error: toPublicWeatherError(error) },
+      500
+    );
   } finally {
     if (timeoutId) {
       clearTimeout(timeoutId);

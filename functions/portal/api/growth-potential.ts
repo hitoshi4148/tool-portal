@@ -1,5 +1,6 @@
 import { buildGpSeriesList } from "../../../src/growth-potential/gp-calculator";
 import { fetchLastYearMonthlyAverageTemperatures } from "../../../src/growth-potential/monthly-temperature";
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 
 export const onRequestGet: PagesFunction = async (context) => {
   try {
@@ -27,7 +28,9 @@ export const onRequestGet: PagesFunction = async (context) => {
       series,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ success: false, error: message }, { status: 500 });
+    return Response.json(
+      { success: false, error: toPublicWeatherError(error) },
+      { status: 500 }
+    );
   }
 };

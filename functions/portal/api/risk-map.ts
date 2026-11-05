@@ -1,4 +1,5 @@
 import { fetchDiseaseRiskForecast } from "../../../src/disease/prepare-data";
+import { toPublicWeatherError } from "../../../src/shared/public-weather-error";
 
 interface RiskMapFacilityInput {
   id: string;
@@ -53,14 +54,13 @@ export const onRequestPost: PagesFunction = async (context) => {
             dayAfterTomorrow: forecast.dayAfterTomorrow,
           };
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
           return {
             id: facility.id,
             name: facility.name,
             latitude: lat,
             longitude: lon,
             success: false,
-            error: message,
+            error: toPublicWeatherError(error),
           };
         }
       })
@@ -68,7 +68,9 @@ export const onRequestPost: PagesFunction = async (context) => {
 
     return Response.json({ success: true, results });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return Response.json({ success: false, error: message }, { status: 500 });
+    return Response.json(
+      { success: false, error: toPublicWeatherError(error) },
+      { status: 500 }
+    );
   }
 };

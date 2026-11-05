@@ -97,16 +97,14 @@ export function filterDailyByDateRange(
   return daily.filter((row) => row.date >= startDate && row.date <= endDate);
 }
 
-import { fetchWithTimeout } from "../shared/fetch-with-timeout";
+import { fetchJsonWithRetry } from "../shared/fetch-json-with-retry";
 
 async function fetchRaw(url: string) {
-  const response = await fetchWithTimeout(url);
-  if (!response.ok) {
-    throw new Error(`NASA POWER API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const messages = data.messages as Array<{ severity: string; message: string }> | undefined;
+  const data = await fetchJsonWithRetry<{
+    messages?: Array<{ severity: string; message: string }>;
+    properties?: { parameter?: Record<string, Record<string, number>> };
+  }>(url, {}, { label: "NASA POWER" });
+  const messages = data.messages;
   const errors = messages?.filter((msg) => msg.severity === "ERROR") ?? [];
   if (errors.length > 0) {
     throw new Error(`NASA POWER API error: ${errors.map((m) => m.message).join(", ")}`);
