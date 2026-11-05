@@ -31,7 +31,7 @@ function looksLikeCompleteJsonObject(text: string): boolean {
 }
 
 export async function fetchJsonWithRetry<T>(
-  input: string,
+  input: string | ((attempt: number) => string),
   init: RequestInit = {},
   options: {
     timeoutMs?: number;
@@ -45,8 +45,9 @@ export async function fetchJsonWithRetry<T>(
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
+      const url = typeof input === "function" ? input(attempt) : input;
       const response = await fetchWithTimeout(
-        input,
+        url,
         init,
         options.timeoutMs
       );

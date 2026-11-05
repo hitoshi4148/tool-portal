@@ -30,15 +30,36 @@ export interface MetResponse {
 
 import { fetchJsonWithRetry } from "../shared/fetch-json-with-retry";
 
+/** Tiny offsets so retries miss a poisoned CDN/cache entry for a popular lat/lon. */
+const MET_RETRY_OFFSETS: ReadonlyArray<readonly [number, number]> = [
+  [0, 0],
+  [0.0001, 0.0001],
+  [-0.0001, -0.0001],
+];
+
+function metForecastUrl(lat: number, lon: number): string {
+  return `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
+}
+
 export async function fetchMet(lat: number, lon: number): Promise<MetResponse> {
-  const url = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
   return fetchJsonWithRetry<MetResponse>(
-    url,
+    (attempt) => {
+      const [dLat, dLon] =
+        MET_RETRY_OFFSETS[Math.min(attempt, MET_RETRY_OFFSETS.length - 1)];
+      return metForecastUrl(lat + dLat, lon + dLon);
+    },
     {
       headers: {
         "User-Agent": "tool-portal/0.1 (contact: hitoshi.yoshinobu@gmail.com)",
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
       },
-    },
-    { label: "MET" }
+      // Avoid Cloudflare caching a truncated MET body for the subrequest.
+      cf: {
+        cacheTtl: 0,
+        cacheEverything: false,
+      },
+    } as RequestInit,
+    { label: "MET", attempts: MET_RETRY_OFFSETS.length }
   );
 }
