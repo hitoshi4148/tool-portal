@@ -5,12 +5,14 @@
     "dev": "wrangler pages dev public",
     "deploy": "wrangler pages deploy public",
     "deploy:router": "wrangler deploy --config workers/turf-tools-router/wrangler.toml",
+    "test:router": "tsx --test workers/turf-tools-router/routing-policy.test.ts",
     "pesticides:import": "python scripts/pesticides/import_to_d1.py",
     "pesticides:d1:migrate:local": "wrangler d1 execute tool-portal-pesticides --local --file=migrations/0001_pesticides.sql"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250204.0",
     "typescript": "^5.7.3",
+    "tsx": "^4.19.2",
     "wrangler": "^3.109.2"
   }
 }

@@ -1,7 +1,12 @@
-const PORTAL_ORIGIN = "https://tool-portal-9y2.pages.dev";
+import {
+  ORCHARD_PAGES_ORIGIN,
+  TURF_PORTAL_ORIGIN,
+  resolveUpstreamOrigin,
+} from "../routing-policy";
 
 function portalTargetUrl(requestUrl: URL): URL {
-  const target = new URL(requestUrl.pathname + requestUrl.search, PORTAL_ORIGIN);
+  const origin = resolveUpstreamOrigin(requestUrl.pathname);
+  const target = new URL(requestUrl.pathname + requestUrl.search, origin);
   if (target.pathname === "/portal") {
     target.pathname = "/portal/";
   }
@@ -11,11 +16,13 @@ function portalTargetUrl(requestUrl: URL): URL {
 function rewriteLocationHeader(location: string, requestUrl: URL): string {
   try {
     const parsed = new URL(location, requestUrl.origin);
-    const pagesHost = new URL(PORTAL_ORIGIN).host;
-    if (parsed.host === pagesHost) {
-      parsed.host = requestUrl.host;
-      parsed.protocol = requestUrl.protocol;
-      return parsed.toString();
+    for (const origin of [ORCHARD_PAGES_ORIGIN, TURF_PORTAL_ORIGIN]) {
+      const pagesHost = new URL(origin).host;
+      if (parsed.host === pagesHost) {
+        parsed.host = requestUrl.host;
+        parsed.protocol = requestUrl.protocol;
+        return parsed.toString();
+      }
     }
   } catch {
     /* keep original */
@@ -27,7 +34,7 @@ export default {
   async fetch(request: Request): Promise<Response> {
     const requestUrl = new URL(request.url);
     const target = portalTargetUrl(requestUrl);
-    const originHost = new URL(PORTAL_ORIGIN).host;
+    const originHost = target.host;
 
     const headers = new Headers(request.headers);
     headers.set("Host", originHost);
